@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>TV LIVE JADWAL</title>
+    <title>JADWAL PENGIRIMAN</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -46,90 +46,19 @@
             z-index: 100;
         }
         
-        .header h1 { 
-            margin: 0; 
-            font-size: 26px; 
-            letter-spacing: 2px; 
-            color: var(--text-white-soft); 
-            font-weight: 800;
-        }
+        .header h1 { margin: 0; font-size: 26px; letter-spacing: 2px; color: var(--text-white-soft); font-weight: 800; }
+        #targetDate { font-size: 18px; color: var(--text-gold-soft); font-weight: 700; }
         
-        #targetDate { 
-            font-size: 18px; 
-            color: var(--text-gold-soft); 
-            font-weight: 700; 
-        }
+        .header-right { display: flex; align-items: center; gap: 25px; }
+        .clock-container { text-align: right; display: flex; flex-direction: column; justify-content: center; }
+        #clock { font-size: 24px; font-weight: 800; color: var(--text-white-soft); line-height: 1; }
         
-        .header-right { 
-            display: flex;
-            align-items: center;
-            gap: 25px;
-        }
+        .cloud-status { font-size: 12px; display: flex; align-items: center; justify-content: flex-end; gap: 5px; color: var(--color-proses); margin-top: 4px; }
+        .dot { height: 8px; width: 8px; background-color: var(--color-proses); border-radius: 50%; animation: pulse 2s infinite; }
 
-        .clock-container { 
-            text-align: right; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center;
-        }
-
-        #clock { 
-            font-size: 24px; 
-            font-weight: 800; 
-            color: var(--text-white-soft); 
-            line-height: 1;
-        }
-        
-        .cloud-status {
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 5px;
-            color: var(--color-proses);
-            margin-top: 4px;
-        }
-        
-        .dot {
-            height: 8px;
-            width: 8px;
-            background-color: var(--color-proses);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        .audio-controls {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 8px 12px;
-            border-radius: 12px;
-            border: 1px solid rgba(229, 192, 123, 0.2);
-        }
-
-        #audio-status {
-            font-size: 10px;
-            color: var(--text-gold-soft);
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .play-btn {
-            background: var(--text-gold-soft);
-            color: #000;
-            border: none;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
+        .audio-controls { display: flex; flex-direction: column; align-items: center; gap: 4px; background: rgba(255, 255, 255, 0.05); padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(229, 192, 123, 0.2); }
+        #audio-status { font-size: 10px; color: var(--text-gold-soft); font-weight: bold; text-transform: uppercase; }
+        .play-btn { background: var(--text-gold-soft); color: #000; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
 
         .main-content { 
             flex: 1; 
@@ -140,108 +69,48 @@
         }
         
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        
-        th {
-            background: var(--header-bg);
-            color: var(--text-gold-soft);
-            text-align: left;
-            padding: 16px 10px;
-            font-size: 14px;
-            border-bottom: 1px solid var(--border-blue);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
+        th { background: var(--header-bg); color: var(--text-gold-soft); text-align: left; padding: 16px 10px; font-size: 14px; border-bottom: 1px solid var(--border-blue); position: sticky; top: 0; z-index: 10; }
+        td { padding: 15px 10px; font-size: 15px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
 
-        td { 
-            padding: 15px 10px; 
-            font-size: 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
-            vertical-align: middle;
-        }
-
-        /* OVERLAY QUOTE */
+        /* OVERLAY KUTIPAN */
         #quoteOverlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-airport);
-            display: none;
+            display: none; /* Muncul lewat JS */
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 40px;
-            z-index: 50;
+            padding: 50px;
+            z-index: 200;
         }
 
-        .quote-text {
-            font-size: 28px;
-            color: var(--text-white-soft);
-            font-weight: 600;
-            font-style: italic;
-            max-width: 800px;
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-
-        .quote-source {
-            font-size: 18px;
-            color: var(--text-gold-soft);
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
+        .quote-text { font-size: 32px; color: var(--text-white-soft); font-weight: 600; font-style: italic; max-width: 900px; line-height: 1.5; margin-bottom: 30px; }
+        .quote-source { font-size: 20px; color: var(--text-gold-soft); font-weight: 700; text-transform: uppercase; letter-spacing: 3px; }
 
         /* ANIMASI HURUF */
-        .letter {
-            display: inline-block;
-            opacity: 0;
-            transform: translateY(15px);
-            transition: all 0.4s ease;
-        }
+        .letter { display: inline-block; opacity: 0; transform: translateY(15px); transition: all 0.4s ease; }
         .letter.in { opacity: 1; transform: translateY(0); }
         .letter.out { opacity: 0; transform: translateY(-15px); }
 
-        .date-divider {
-            background: rgba(30, 41, 59, 0.9);
-            color: var(--text-gold-soft);
-            text-align: center;
-            font-size: 14px;
-            padding: 12px 0;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
+        .date-divider { background: rgba(30, 41, 59, 0.9); color: var(--text-gold-soft); text-align: center; font-size: 14px; padding: 12px 0; font-weight: bold; text-transform: uppercase; }
         .st-proses { color: var(--color-proses); animation: blink 1.5s infinite; font-weight: bold; }
-        .st-terjadwal { color: var(--color-terjadwal); }
-        .st-tunggu { color: var(--color-tunggu); }
         .st-langsir { color: var(--color-langsir); animation: blink 2s infinite; } 
-        .st-delivered { color: var(--color-delivered); opacity: 0.8; }
         .st-oper { color: var(--color-oper); font-weight: bold; animation: blink 1.8s infinite; }
+        .st-delivered { color: var(--color-delivered); opacity: 0.8; }
+        .st-tunggu { color: var(--color-tunggu); }
+        .st-terjadwal { color: var(--color-terjadwal); }
 
         .flight-cell { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
-        .nopol-block { 
-            background: #e2e8f0; color: #1e293b; 
-            padding: 4px 8px; border-radius: 4px; 
-            font-weight: 800; font-size: 13px; 
-            min-width: 90px; text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-
+        .nopol-block { background: #e2e8f0; color: #1e293b; padding: 4px 8px; border-radius: 4px; font-weight: 800; font-size: 13px; min-width: 90px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
         .sopir-name { color: var(--text-blue-soft); font-weight: 700; font-size: 16px; }
         .destination-container { font-size: 14px; color: var(--text-white-soft); }
 
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
         @keyframes pulse { 0% { transform: scale(0.9); } 50% { transform: scale(1.2); } 100% { transform: scale(0.9); } }
 
-        .footer-marquee {
-            position: fixed; bottom: 0; width: 100%;
-            background: #000; color: var(--text-white-soft);
-            height: 35px; line-height: 35px; font-size: 14px;
-            border-top: 1px solid var(--text-gold-soft);
-            z-index: 100;
-        }
+        .footer-marquee { position: fixed; bottom: 0; width: 100%; background: #000; color: var(--text-white-soft); height: 35px; line-height: 35px; font-size: 14px; border-top: 1px solid var(--text-gold-soft); z-index: 100; }
     </style>
 </head>
 <body>
@@ -266,7 +135,7 @@
     <audio id="murottalAudio" preload="none"></audio>
 
     <div class="main-content" id="scrollContainer">
-        <!-- Quote Layer -->
+        <!-- Overlay Kutipan -->
         <div id="quoteOverlay">
             <div class="quote-text" id="quoteText"></div>
             <div class="quote-source" id="quoteSource"></div>
@@ -295,121 +164,99 @@
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const quotes = [
-            { t: "Bekerjalah seakan-akan kamu hidup selamanya, beribadahlah seakan-akan kamu mati besok.", s: "Hasan Al-Bashri" },
-            { t: "Sebaik-baik manusia adalah yang paling bermanfaat bagi orang lain.", s: "HR. Ahmad" },
             { t: "Sesungguhnya sesudah kesulitan itu ada kemudahan.", s: "QS. Al-Insyirah: 6" },
-            { t: "Barangsiapa yang bertaqwa kepada Allah, niscaya Dia akan membukakan jalan keluar baginya.", s: "QS. At-Talaq: 2" },
-            { t: "Cukuplah Allah menjadi Penolong kami dan Allah adalah sebaik-baik Pelindung.", s: "QS. Ali Imran: 173" },
-            { t: "Harta tidak akan berkurang karena sedekah.", s: "HR. Muslim" },
-            { t: "Senyummu di hadapan saudaramu adalah sedekah.", s: "HR. Tirmidzi" },
-            { t: "Orang yang paling kuat adalah orang yang mampu mengendalikan dirinya ketika marah.", s: "HR. Bukhari" },
-            { t: "Mencari rezeki yang halal adalah wajib bagi setiap muslim.", s: "HR. Thabrani" },
-            { t: "Berbaktilah kepada orang tuamu, niscaya anak-anakmu akan berbakti kepadamu.", s: "Hadits Tabrani" },
-            { t: "Dunia ini adalah perhiasan, dan sebaik-baik perhiasan dunia adalah istri yang shalihah.", s: "HR. Muslim" },
-            { t: "Hendaklah kalian jujur, karena kejujuran membawa kepada kebaikan.", s: "HR. Bukhari" },
-            { t: "Seorang mukmin dengan mukmin lainnya seperti satu bangunan yang saling menguatkan.", s: "HR. Muslim" },
-            { t: "Barangsiapa yang menempuh jalan untuk mencari ilmu, Allah mudahkan baginya jalan menuju surga.", s: "HR. Muslim" },
-            { t: "Bekerja mencari rezeki halal untuk keluarga adalah bagian dari jihad fisabilillah.", s: "Nasehat Ulama" },
-            { t: "Kekayaan sejati bukanlah banyaknya harta, melainkan kekayaan hati.", s: "HR. Bukhari" },
-            { t: "Janganlah kamu berputus asa dari rahmat Allah.", s: "QS. Az-Zumar: 53" },
-            { t: "Ingatlah Allah di waktu luangmu, maka Allah akan ingat padamu di waktu sempitmu.", s: "HR. Hakim" },
-            { t: "Barangsiapa mempermudah urusan orang lain, Allah akan mempermudah urusannya di dunia dan akhirat.", s: "HR. Muslim" },
-            { t: "Tangan di atas lebih baik daripada tangan di bawah.", s: "HR. Bukhari" },
-            { t: "Ridha Allah terletak pada ridha kedua orang tua.", s: "HR. Tirmidzi" },
-            { t: "Tidak beriman seseorang sampai ia mencintai saudaranya seperti mencintai dirinya sendiri.", s: "HR. Bukhari" },
-            { t: "Doa adalah senjata bagi orang mukmin.", s: "HR. Abu Ya’la" },
-            { t: "Keadilan adalah perhiasan kepemimpinan.", s: "Ali bin Abi Thalib" },
-            { t: "Sabar itu ada dua: sabar terhadap apa yang kau benci dan sabar terhadap apa yang kau ingini.", s: "Ali bin Abi Thalib" },
-            { t: "Barangsiapa yang diam, maka dia akan selamat.", s: "HR. Tirmidzi" },
-            { t: "Keindahan seorang wanita terletak pada rasa malunya.", s: "Nasehat Bijak" },
-            { t: "Rumahku adalah Surgaku.", s: "Pepatah Arab" },
-            { t: "Bekerjalah dengan jujur, karena keberkahan ada dalam kejujuran.", s: "Nasehat Kerja" },
-            { t: "Jangan meremehkan kebaikan sekecil apa pun.", s: "HR. Muslim" },
-            { t: "Allah tidak membebani seseorang melainkan sesuai dengan kesanggupannya.", s: "QS. Al-Baqarah: 286" },
-            { t: "Sebaik-baik kalian adalah yang paling baik terhadap istrinya.", s: "HR. Tirmidzi" },
-            { t: "Ilmu tanpa amal bagaikan pohon tanpa buah.", s: "Pepatah Bijak" },
-            { t: "Waktu bagaikan pedang, jika kau tidak menebasnya maka ia yang akan menebasmu.", s: "Imam Syafi'i" },
-            { t: "Sesuatu yang sedikit namun berkah lebih baik daripada banyak namun melalaikan.", s: "Nasehat Bijak" },
-            { t: "Hiduplah di dunia ini seakan-akan kamu adalah orang asing atau pengembara.", s: "HR. Bukhari" },
+            { t: "Bekerjalah untuk duniamu seolah hidup selamanya, beramallah untuk akhiratmu seolah mati besok.", s: "Ali bin Abi Thalib" },
+            { t: "Sebaik-baik manusia adalah yang paling bermanfaat bagi orang lain.", s: "HR. Ahmad" },
+            { t: "Barangsiapa bertaqwa kepada Allah, niscaya Dia akan membukakan jalan keluar baginya.", s: "QS. At-Talaq: 2" },
+            { t: "Tangan di atas lebih baik daripada tangan di bawah.", s: "HR. Bukhari & Muslim" },
+            { t: "Dunia adalah perhiasan, dan sebaik-baik perhiasan dunia adalah istri yang shalihah.", s: "HR. Muslim" },
+            { t: "Mencari rezeki halal adalah wajib setelah ibadah fardhu.", s: "HR. Ath-Thabrani" },
+            { t: "Barangsiapa yang mempermudah urusan orang lain, Allah akan mempermudah urusannya di dunia & akhirat.", s: "HR. Muslim" },
+            { t: "Kekayaan hakiki bukanlah banyaknya harta, namun kekayaan jiwa.", s: "HR. Bukhari" },
+            { t: "Senyummu di depan saudaramu adalah sedekah.", s: "HR. Tirmidzi" },
+            { t: "Allah mencintai seorang hamba yang apabila bekerja, ia bekerja dengan itqan (profesional).", s: "HR. Al-Baihaqi" },
+            { t: "Jaga dirimu dan keluargamu dari api neraka.", s: "QS. At-Tahrim: 6" },
+            { t: "Shalatlah tepat waktu, karena ia adalah amalan yang paling dicintai Allah.", s: "HR. Bukhari" },
             { t: "Barangsiapa bersyukur, niscaya Aku akan menambah nikmat-Ku kepadamu.", s: "QS. Ibrahim: 7" },
-            { t: "Tanda Allah berpaling dari hamba-Nya adalah ketika hamba tersebut sibuk dengan hal yang tidak bermanfaat.", s: "Imam Ghazali" },
-            { t: "Jadilah seperti bunga yang memberikan keharuman bahkan kepada tangan yang menghancurkannya.", s: "Ali bin Abi Thalib" },
-            { t: "Kejujuran adalah pintu dari segala ketenangan.", s: "Nasehat Bijak" },
-            { t: "Siapa yang menanam, dia yang akan menuai.", s: "Pepatah" },
-            { t: "Kesabaran adalah kunci kegembiraan.", s: "Nasehat Bijak" },
-            { t: "Lidahmu jangan biarkan menyebut kekurangan orang lain.", s: "Imam Syafi'i" },
-            { t: "Puncak ibadah adalah diam.", s: "Nasehat Ulama" },
-            { t: "Barangsiapa yang harinya hari ini lebih baik dari kemarin, maka ia beruntung.", s: "Hadits Syarif" },
-            { t: "Menuntut ilmu adalah ibadah.", s: "Nasehat Bijak" },
-            { t: "Niat adalah ruh dari setiap amal perbuatan.", s: "Imam Nawawi" },
-            { t: "Ketahuilah bahwa kemenangan itu datang bersama kesabaran.", s: "HR. Ahmad" },
-            { t: "Shalatlah tepat waktu, itu adalah amalan yang paling dicintai Allah.", s: "HR. Bukhari" },
-            { t: "Istighfar adalah kunci pembuka pintu rezeki yang terkunci.", s: "Nasehat Ulama" }
+            { t: "Ridha Allah terletak pada ridha kedua orang tua.", s: "HR. Tirmidzi" },
+            { t: "Harta tidak akan berkurang karena sedekah.", s: "HR. Muslim" },
+            { t: "Sampaikanlah dariku walau hanya satu ayat.", s: "HR. Bukhari" },
+            { t: "Kejujuran membawa kepada kebaikan, dan kebaikan membawa ke surga.", s: "HR. Bukhari" },
+            { t: "Siapa yang menanam, dia yang akan menuai.", s: "Pepatah Arab" },
+            { t: "Janganlah kamu berputus asa dari rahmat Allah.", s: "QS. Az-Zumar: 53" },
+            { t: "Makanlah dari rezeki yang halal lagi baik.", s: "QS. Al-Baqarah: 168" },
+            { t: "Sebaik-baik kalian adalah yang paling baik terhadap keluarganya.", s: "HR. Tirmidzi" },
+            { t: "Cukuplah Allah sebagai penolong kami.", s: "QS. Ali Imran: 173" },
+            { t: "Berdoalah kepada-Ku, niscaya akan Aku perkenankan bagimu.", s: "QS. Ghafir: 60" },
+            { t: "Ingatlah Allah di waktu luangmu, maka Dia akan ingat padamu di waktu sempitmu.", s: "HR. Hakim" },
+            { t: "Kesabaran adalah kunci keberhasilan.", s: "Nasehat Bijak" },
+            { t: "Bekerja dengan jujur adalah bentuk syukur kepada Sang Pencipta.", s: "Nasehat Dunia Kerja" },
+            { t: "Sesuatu yang sedikit namun berkah lebih baik daripada banyak namun melalaikan.", s: "Nasehat Ulama" },
+            { t: "Niatkan kerjamu sebagai ibadah, maka lelahmu menjadi pahala.", s: "Kata Bijak Muslim" },
+            { t: "Orang yang paling kuat adalah yang mampu menahan amarahnya.", s: "HR. Bukhari" },
+            { t: "Jangan meremehkan kebaikan sekecil apa pun.", s: "HR. Muslim" },
+            { t: "Rumahku adalah surgaku.", s: "Nasehat Rumah Tangga" },
+            { t: "Ketenangan hati hanya didapat dengan mengingat Allah.", s: "QS. Ar-Ra'd: 28" },
+            { t: "Bekerjalah dengan sepenuh hati, Allah melihat setiap usahamu.", s: "Nasehat Kerja" },
+            { t: "Berbaktilah kepada ibumu, kemudian ibumu, kemudian ibumu.", s: "HR. Bukhari" },
+            { t: "Keindahan seorang wanita adalah pada rasa malunya.", s: "Nasehat Bijak" },
+            { t: "Jangan memaksakan kehendak dalam rumah tangga, gunakan musyawarah.", s: "Nasehat Keluarga" },
+            { t: "Pintu rezeki terbuka lebar bagi mereka yang gemar bersilaturahmi.", s: "HR. Bukhari" },
+            { t: "Waktu adalah pedang, jika kau tak menggunakannya, ia akan menebasmu.", s: "Imam Syafi'i" },
+            { t: "Kejujuran dalam berdagang/bekerja mendatangkan keberkahan rezeki.", s: "Nasehat Bisnis" },
+            { t: "Jangan mengeluh atas lelahnya bekerja, banyak orang di luar sana ingin di posisimu.", s: "Motivasi Kerja" },
+            { t: "Istighfar adalah pembuka pintu-pintu langit.", s: "QS. Nuh: 10-12" },
+            { t: "Jagalah lisanmu dari menyakiti perasaan saudaramu.", s: "HR. Muslim" },
+            { t: "Kesuksesan berawal dari ketaatan kepada Sang Khalik.", s: "Nasehat Hidup" },
+            { t: "Sabar itu pahit, tapi buahnya sangat manis.", s: "Kata Mutiara" },
+            { t: "Jangan biarkan HP-mu menjauhkan yang dekat di rumah tanggamu.", s: "Nasehat Modern" },
+            { t: "Didiklah anak-anakmu dengan adab sebelum ilmu.", s: "Imam Malik" },
+            { t: "Rezeki sudah diatur, tugas kita hanyalah menjemputnya dengan cara yang baik.", s: "Nasehat Tauhid" },
+            { t: "Jangan membandingkan hidupmu dengan orang lain di media sosial.", s: "Self Reminder" },
+            { t: "Akhlak yang baik adalah timbangan terberat di hari kiamat.", s: "HR. Abu Dawud" }
         ];
 
         let quoteIndex = 0;
         const audio = document.getElementById('murottalAudio');
         const btn = document.getElementById('playPauseBtn');
         const statusLabel = document.getElementById('audio-status');
-        const streamSources = [
-            "https://live.mp3quran.net/makkah",
-            "https://live.mp3quran.net/madinah",
-            "https://qurango.net/radio/mix"
-        ];
-        let currentSourceIndex = 0;
+        const streamSources = ["https://live.mp3quran.net/makkah", "https://live.mp3quran.net/madinah", "https://qurango.net/radio/mix"];
 
         function toggleAudio() {
             if (audio.paused || audio.src === "") {
-                playSource(currentSourceIndex);
+                audio.src = streamSources[0];
+                audio.play().then(() => { btn.innerText = "⏸"; statusLabel.innerText = "QUR'AN"; });
             } else {
                 audio.pause(); audio.src = "";
                 btn.innerText = "▶"; statusLabel.innerText = "STOP";
             }
         }
 
-        function playSource(index) {
-            if (index >= streamSources.length) { statusLabel.innerText = "Error Link"; return; }
-            statusLabel.innerText = "Connecting...";
-            audio.src = streamSources[index];
-            audio.play().then(() => {
-                btn.innerText = "⏸"; statusLabel.innerText = "QUR'AN";
-            }).catch(() => { currentSourceIndex++; playSource(currentSourceIndex); });
-        }
-
         function wrapText(element) {
-            const nodes = element.childNodes;
-            nodes.forEach(node => {
-                if (node.nodeType === 3 && node.textContent.trim().length > 0) {
-                    const text = node.textContent;
-                    const spanWrap = document.createElement('span');
-                    spanWrap.style.display = 'inline-block';
-                    text.split('').forEach(char => {
-                        const s = document.createElement('span');
-                        s.className = 'letter';
-                        s.innerHTML = char === ' ' ? '&nbsp;' : char;
-                        spanWrap.appendChild(s);
-                    });
-                    node.parentNode.replaceChild(spanWrap, node);
-                } else if (node.nodeType === 1 && !node.classList.contains('nopol-block')) {
-                    wrapText(node);
-                }
+            const text = element.textContent;
+            element.innerHTML = '';
+            text.split('').forEach(char => {
+                const s = document.createElement('span');
+                s.className = 'letter';
+                s.innerHTML = char === ' ' ? '&nbsp;' : char;
+                element.appendChild(s);
             });
         }
 
-        async function animateIn(row) {
-            const letters = row.querySelectorAll('.letter');
+        async function animateIn(container) {
+            const letters = container.querySelectorAll('.letter');
             for (let i = 0; i < letters.length; i++) {
                 letters[i].classList.add('in');
-                if (i % 8 === 0) await new Promise(r => setTimeout(r, 10));
+                if (i % 5 === 0) await new Promise(r => setTimeout(r, 10));
             }
         }
 
-        async function animateOut(row) {
-            const letters = row.querySelectorAll('.letter');
+        async function animateOut(container) {
+            const letters = container.querySelectorAll('.letter');
             for (let i = 0; i < letters.length; i++) {
                 letters[i].classList.remove('in');
                 letters[i].classList.add('out');
-                if (i % 12 === 0) await new Promise(r => setTimeout(r, 5));
+                if (i % 8 === 0) await new Promise(r => setTimeout(r, 5));
             }
         }
 
@@ -418,9 +265,12 @@
             const qTxt = document.getElementById('quoteText');
             const qSrc = document.getElementById('quoteSource');
             
+            // Pilih kutipan acak atau berurutan
             const q = quotes[quoteIndex];
-            qTxt.innerText = `"${q.t}"`;
-            qSrc.innerText = `— ${q.s}`;
+            quoteIndex = (quoteIndex + 1) % quotes.length;
+
+            qTxt.textContent = q.t;
+            qSrc.textContent = q.s;
             
             wrapText(qTxt);
             wrapText(qSrc);
@@ -428,12 +278,10 @@
             overlay.style.display = 'flex';
             await animateIn(overlay);
             
-            await new Promise(r => setTimeout(r, 5000)); // Tampil 5 detik
+            await new Promise(r => setTimeout(r, 7000)); // Tampil 7 detik
             
             await animateOut(overlay);
             overlay.style.display = 'none';
-            
-            quoteIndex = (quoteIndex + 1) % quotes.length;
         }
 
         let scrollInterval;
@@ -449,21 +297,20 @@
                     if (scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight - 1) {
                         clearInterval(scrollInterval);
                         
+                        // Animasi Keluar Tabel
                         const rows = document.querySelectorAll('#tableBody tr');
-                        for (let row of rows) animateOut(row);
+                        for (let row of rows) {
+                            const letters = row.querySelectorAll('.letter');
+                            letters.forEach(l => { l.classList.remove('in'); l.classList.add('out'); });
+                        }
 
                         setTimeout(async () => {
-                            await showQuote(); // Tampilkan Quote di sini
-                            resetScroll();
+                            await showQuote(); // TAMPILKAN KUTIPAN DISINI
+                            loadDashboard(); // Refresh data setelah kutipan
                         }, 1500);
                     }
                 }, 60);
             }, 3000);
-        }
-
-        function resetScroll() {
-            scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
-            setTimeout(loadDashboard, 1000);
         }
 
         function getWIB() { return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Jakarta"})); }
@@ -471,48 +318,31 @@
         async function loadDashboard() {
             try {
                 const hariIni = getWIB();
-                const isoHariIni = hariIni.getFullYear() + '-' + String(hariIni.getMonth() + 1).padStart(2, '0') + '-' + String(hariIni.getDate()).padStart(2, '0');
+                const isoHariIni = hariIni.toISOString().split('T')[0];
                 document.getElementById('targetDate').innerText = hariIni.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
 
                 const { data, error } = await _supabase.from('data_pengiriman').select('*').gte('tanggal', isoHariIni);
                 if (error) throw error;
-
-                if (data) {
-                    const priority = { "PROSES": 1, "OPER": 2, "TERJADWAL": 3, "LANGSIR": 4, "TUNGGU": 5, "DELIVERED": 6 };
-                    data.sort((a, b) => {
-                        if (a.tanggal !== b.tanggal) return new Date(a.tanggal) - new Date(b.tanggal);
-                        let pA = priority[Object.keys(priority).find(k => (a.status||"").toUpperCase().includes(k))] || 99;
-                        let pB = priority[Object.keys(priority).find(k => (b.status||"").toUpperCase().includes(k))] || 99;
-                        return pA - pB;
-                    });
-                    renderData(data, isoHariIni);
-                }
-            } catch (err) { console.error("Error:", err.message); }
+                renderData(data || [], isoHariIni);
+            } catch (err) { console.error("Gagal:", err.message); }
         }
 
         async function renderData(data, isoHariIni) {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
-            let currentGroupDate = isoHariIni;
-            const tempRows = [];
+            
+            const priority = { "PROSES": 1, "OPER": 2, "TERJADWAL": 3, "LANGSIR": 4, "TUNGGU": 5, "DELIVERED": 6 };
+            data.sort((a, b) => (priority[a.status?.toUpperCase()] || 99) - (priority[b.status?.toUpperCase()] || 99));
 
-            data.forEach((row) => {
-                if (row.tanggal > currentGroupDate) {
-                    const fmtDate = new Date(row.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' }).toUpperCase();
-                    const divider = document.createElement('tr');
-                    divider.innerHTML = `<td colspan="4" class="date-divider">${fmtDate}</td>`;
-                    tempRows.push(divider);
-                    currentGroupDate = row.tanggal;
-                }
+            for (let row of data) {
+                const tr = document.createElement('tr');
                 const st = (row.status || "").toUpperCase();
                 let cls = "st-terjadwal";
                 if (st.includes("PROSES")) cls = "st-proses";
                 else if (st.includes("LANGSIR")) cls = "st-langsir";
                 else if (st.includes("OPER")) cls = "st-oper";
-                else if (st.includes("TUNGGU")) cls = "st-tunggu";
                 else if (st.includes("DELIVERED")) cls = "st-delivered";
 
-                const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>
                         <div class="flight-cell"><div class="nopol-block">${row.nopol || '-'}</div><div class="sopir-name">${row.sopir || '-'}</div></div>
@@ -522,25 +352,23 @@
                     <td><span style="font-size:13px; font-weight:600;">${row.supplier || '-'}</span></td>
                     <td class="${cls}" style="text-align:right; font-size:13px; font-weight:bold;">${st}</td>
                 `;
-                tempRows.push(tr);
-            });
-
-            for (let tr of tempRows) {
-                wrapText(tr);
+                
+                // Animasi huruf per baris
+                const cells = tr.querySelectorAll('td, div, span');
+                cells.forEach(c => { if(c.children.length === 0) wrapText(c); });
+                
                 tbody.appendChild(tr);
                 animateIn(tr);
-                await new Promise(r => setTimeout(r, 80));
+                await new Promise(r => setTimeout(r, 100));
             }
             startAutoScroll();
         }
 
-        function updateClock() {
+        setInterval(() => {
             const now = getWIB();
-            document.getElementById('clock').innerText = String(now.getHours()).padStart(2, '0') + ":" + String(now.getMinutes()).padStart(2, '0') + ":" + String(now.getSeconds()).padStart(2, '0');
-        }
+            document.getElementById('clock').innerText = now.toTimeString().split(' ')[0];
+        }, 1000);
 
-        _supabase.channel('any').on('postgres_changes', { event: '*', schema: 'public', table: 'data_pengiriman' }, loadDashboard).subscribe();
-        setInterval(updateClock, 1000);
         loadDashboard();
     </script>
 </body>
