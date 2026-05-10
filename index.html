@@ -35,7 +35,6 @@
             width: 100%;
         }
 
-        /* HEADER: Menyejajarkan Jam, Online Status, dan Quran di Kanan */
         .header {
             background: var(--header-bg);
             padding: 15px 20px;
@@ -49,7 +48,7 @@
         
         .header h1 { 
             margin: 0; 
-            font-size: 26px; /* Diperbesar */
+            font-size: 26px; 
             letter-spacing: 2px; 
             color: var(--text-white-soft); 
             font-weight: 800;
@@ -64,7 +63,7 @@
         .header-right { 
             display: flex;
             align-items: center;
-            gap: 25px; /* Jarak antar elemen kanan */
+            gap: 25px;
         }
 
         .clock-container { 
@@ -75,7 +74,7 @@
         }
 
         #clock { 
-            font-size: 24px; /* Diperbesar */
+            font-size: 24px; 
             font-weight: 800; 
             color: var(--text-white-soft); 
             line-height: 1;
@@ -135,7 +134,7 @@
         /* MAIN CONTENT & TABLE */
         .main-content { 
             flex: 1; 
-            overflow-y: hidden; /* Auto-scroll handle via JS */
+            overflow-y: hidden; 
             width: 100%;
             padding-bottom: 40px; 
         }
@@ -147,7 +146,7 @@
             color: var(--text-gold-soft);
             text-align: left;
             padding: 16px 10px;
-            font-size: 14px; /* Diperbesar */
+            font-size: 14px;
             border-bottom: 1px solid var(--border-blue);
             position: sticky;
             top: 0;
@@ -156,9 +155,27 @@
 
         td { 
             padding: 15px 10px; 
-            font-size: 15px; /* Diperbesar */
+            font-size: 15px;
             border-bottom: 1px solid rgba(255,255,255,0.03);
             vertical-align: middle;
+        }
+
+        /* ANIMASI HURUF MASUK */
+        .letter {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s ease;
+        }
+
+        .letter.in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .letter.out {
+            opacity: 0;
+            transform: translateY(-10px);
         }
 
         .date-divider {
@@ -170,16 +187,6 @@
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 1px;
-        }
-
-        tr.fade-in-row {
-            opacity: 0;
-            transform: translateY(10px);
-            animation: rowAppear 0.5s forwards ease-out;
-        }
-
-        @keyframes rowAppear {
-            to { opacity: 1; transform: translateY(0); }
         }
 
         .st-proses { color: var(--color-proses); animation: blink 1.5s infinite; font-weight: bold; }
@@ -197,7 +204,7 @@
             padding: 4px 8px; 
             border-radius: 4px; 
             font-weight: 800; 
-            font-size: 13px;  /* Diperbesar */
+            font-size: 13px; 
             min-width: 90px;  
             text-align: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
@@ -254,7 +261,7 @@
     </div>
 
     <div class="footer-marquee">
-        <marquee scrollamount="4">NOTE : JADWAL DAPAT BERUBAH SEWAKTU WAKTU HUBUNGI OPERASIONAL SEBELUM BERANGKAT • SAFETY FIRST: PASTIKAN SEGEL TERPASANG SEMPURNA • PERIKSA TEKANAN BAN DAN FUNGSI REM SEBELUM BERANGKAT • GUNAKAN APD LENGKAP (HELM, SEPATU, ROMPI) DI TEMPAT PENGAMBILAN DAN PEMBONGKARAN • PATUHI RAMBU RAMBU LALU LINTAS • PATUHI BATAS KECEPATAN MAX. DALAM DAN LUAR KOTA • DILARANG MENGOPERASIKAN HP SAAT MENGEMUDI • LAPORKAN SEGERA JIKA ADA KENDALA BAIK ARMADA, SAAT LOADING BBM DAN SAAT BONGKAR KE BAGIAN OPERASIONAL..</marquee>
+        <marquee scrollamount="3">NOTE : JADWAL DAPAT BERUBAH SEWAKTU WAKTU HUBUNGI OPERASIONAL SEBELUM BERANGKAT • SAFETY FIRST: PASTIKAN SEGEL TERPASANG SEMPURNA • PERIKSA TEKANAN BAN DAN FUNGSI REM SEBELUM BERANGKAT • GUNAKAN APD LENGKAP (HELM, SEPATU, ROMPI) DI TEMPAT PENGAMBILAN DAN PEMBONGKARAN • PATUHI RAMBU RAMBU LALU LINTAS • PATUHI BATAS KECEPATAN MAX. DALAM DAN LUAR KOTA • DILARANG MENGOPERASIKAN HP SAAT MENGEMUDI • LAPORKAN SEGERA JIKA ADA KENDALA BAIK ARMADA, SAAT LOADING BBM DAN SAAT BONGKAR KE BAGIAN OPERASIONAL..</marquee>
     </div>
 
     <script>
@@ -295,7 +302,45 @@
             });
         }
 
-        // --- AUTO SCROLL LOGIC (SMOOTH LOOP) ---
+        // --- ANIMASI HURUF (TEXT FX) ---
+        function wrapText(element) {
+            const nodes = element.childNodes;
+            nodes.forEach(node => {
+                if (node.nodeType === 3 && node.textContent.trim().length > 0) {
+                    const text = node.textContent;
+                    const spanWrap = document.createElement('span');
+                    spanWrap.style.display = 'inline-block';
+                    text.split('').forEach(char => {
+                        const s = document.createElement('span');
+                        s.className = 'letter';
+                        s.innerHTML = char === ' ' ? '&nbsp;' : char;
+                        spanWrap.appendChild(s);
+                    });
+                    node.parentNode.replaceChild(spanWrap, node);
+                } else if (node.nodeType === 1 && !node.classList.contains('nopol-block')) {
+                    wrapText(node);
+                }
+            });
+        }
+
+        async function animateIn(row) {
+            const letters = row.querySelectorAll('.letter');
+            for (let i = 0; i < letters.length; i++) {
+                letters[i].classList.add('in');
+                if (i % 5 === 0) await new Promise(r => setTimeout(r, 10)); // Masuk cepat tapi bertahap
+            }
+        }
+
+        async function animateOut(row) {
+            const letters = row.querySelectorAll('.letter');
+            for (let i = 0; i < letters.length; i++) {
+                letters[i].classList.remove('in');
+                letters[i].classList.add('out');
+                if (i % 8 === 0) await new Promise(r => setTimeout(r, 5));
+            }
+        }
+
+        // --- AUTO SCROLL LOGIC ---
         let scrollInterval;
         const scrollContainer = document.getElementById('scrollContainer');
         
@@ -304,26 +349,30 @@
             scrollContainer.scrollTop = 0;
 
             setTimeout(() => {
-                scrollInterval = setInterval(() => {
+                scrollInterval = setInterval(async () => {
                     scrollContainer.scrollTop += 1; 
                     
-                    // Cek jika sudah sampai bawah
                     if (scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight - 1) {
                         clearInterval(scrollInterval);
-                        // Tunggu 5 detik di bawah sebelum kembali ke atas
+                        
+                        // Animasi keluar sebelum refresh
+                        const rows = document.querySelectorAll('#tableBody tr');
+                        for (let row of rows) {
+                            animateOut(row);
+                        }
+
                         setTimeout(() => {
                             resetScroll();
-                        }, 5000);
+                        }, 2000);
                     }
-                }, 40); // Kecepatan scroll
+                }, 60); // Kecepatan scroll diperlambat (dari 40 ke 60)
             }, 3000);
         }
 
         function resetScroll() {
-            // Kembali ke atas secara halus
             scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
             setTimeout(() => {
-                loadDashboard(); // Refresh data saat kembali ke atas
+                loadDashboard();
             }, 1000);
         }
 
@@ -362,21 +411,22 @@
             }
         }
 
-        function renderData(data, isoHariIni) {
+        async function renderData(data, isoHariIni) {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
             let currentGroupDate = isoHariIni;
 
-            data.forEach((row, index) => {
+            const tempRows = [];
+
+            data.forEach((row) => {
                 if (row.tanggal > currentGroupDate) {
                     const fmtDate = new Date(row.tanggal).toLocaleDateString('id-ID', { 
                         weekday: 'long', day: 'numeric', month: 'short' 
                     }).toUpperCase();
+                    
                     const divider = document.createElement('tr');
-                    divider.className = "fade-in-row";
-                    divider.style.animationDelay = `${index * 0.05}s`;
                     divider.innerHTML = `<td colspan="4" class="date-divider">${fmtDate}</td>`;
-                    tbody.appendChild(divider);
+                    tempRows.push(divider);
                     currentGroupDate = row.tanggal;
                 }
 
@@ -389,9 +439,6 @@
                 else if (st.includes("DELIVERED")) cls = "st-delivered";
 
                 const tr = document.createElement('tr');
-                tr.className = "fade-in-row";
-                tr.style.animationDelay = `${index * 0.05}s`;
-                
                 tr.innerHTML = `
                     <td>
                         <div class="flight-cell">
@@ -406,8 +453,16 @@
                     <td><span style="font-size:13px; font-weight:600;">${row.supplier || '-'}</span></td>
                     <td class="${cls}" style="text-align:right; font-size:13px; font-weight:bold;">${st}</td>
                 `;
-                tbody.appendChild(tr);
+                tempRows.push(tr);
             });
+
+            // Append all and wrap letters
+            for (let tr of tempRows) {
+                wrapText(tr);
+                tbody.appendChild(tr);
+                animateIn(tr); // Animasi masuk satu-satu
+                await new Promise(r => setTimeout(r, 100)); // Delay antar baris
+            }
 
             startAutoScroll();
         }
