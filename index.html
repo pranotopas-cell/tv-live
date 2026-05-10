@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>JADWAL PENGIRIMAN</title>
+    <title>TV LIVE JADWAL</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -131,12 +131,12 @@
             font-weight: bold;
         }
 
-        /* MAIN CONTENT & TABLE */
         .main-content { 
             flex: 1; 
             overflow-y: hidden; 
             width: 100%;
             padding-bottom: 40px; 
+            position: relative;
         }
         
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
@@ -160,23 +160,47 @@
             vertical-align: middle;
         }
 
-        /* ANIMASI HURUF MASUK */
+        /* OVERLAY QUOTE */
+        #quoteOverlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-airport);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px;
+            z-index: 50;
+        }
+
+        .quote-text {
+            font-size: 28px;
+            color: var(--text-white-soft);
+            font-weight: 600;
+            font-style: italic;
+            max-width: 800px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .quote-source {
+            font-size: 18px;
+            color: var(--text-gold-soft);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* ANIMASI HURUF */
         .letter {
             display: inline-block;
             opacity: 0;
-            transform: translateY(10px);
+            transform: translateY(15px);
             transition: all 0.4s ease;
         }
-
-        .letter.in {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .letter.out {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
+        .letter.in { opacity: 1; transform: translateY(0); }
+        .letter.out { opacity: 0; transform: translateY(-15px); }
 
         .date-divider {
             background: rgba(30, 41, 59, 0.9);
@@ -197,16 +221,11 @@
         .st-oper { color: var(--color-oper); font-weight: bold; animation: blink 1.8s infinite; }
 
         .flight-cell { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
-        
         .nopol-block { 
-            background: #e2e8f0; 
-            color: #1e293b; 
-            padding: 4px 8px; 
-            border-radius: 4px; 
-            font-weight: 800; 
-            font-size: 13px; 
-            min-width: 90px;  
-            text-align: center;
+            background: #e2e8f0; color: #1e293b; 
+            padding: 4px 8px; border-radius: 4px; 
+            font-weight: 800; font-size: 13px; 
+            min-width: 90px; text-align: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
@@ -247,6 +266,12 @@
     <audio id="murottalAudio" preload="none"></audio>
 
     <div class="main-content" id="scrollContainer">
+        <!-- Quote Layer -->
+        <div id="quoteOverlay">
+            <div class="quote-text" id="quoteText"></div>
+            <div class="quote-source" id="quoteSource"></div>
+        </div>
+
         <table id="deliveryTable">
             <thead>
                 <tr>
@@ -267,9 +292,62 @@
     <script>
         const SUPABASE_URL = 'https://ntaectphgoelmhzrkatp.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YWVjdHBoZ29lbG1oenJrYXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NzExNDYsImV4cCI6MjA4ODE0NzE0Nn0.-8E98wpkzHBARRhW6PKhBtf2XKhWFjq7idAzw9jlcKg';
-        
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        const quotes = [
+            { t: "Bekerjalah seakan-akan kamu hidup selamanya, beribadahlah seakan-akan kamu mati besok.", s: "Hasan Al-Bashri" },
+            { t: "Sebaik-baik manusia adalah yang paling bermanfaat bagi orang lain.", s: "HR. Ahmad" },
+            { t: "Sesungguhnya sesudah kesulitan itu ada kemudahan.", s: "QS. Al-Insyirah: 6" },
+            { t: "Barangsiapa yang bertaqwa kepada Allah, niscaya Dia akan membukakan jalan keluar baginya.", s: "QS. At-Talaq: 2" },
+            { t: "Cukuplah Allah menjadi Penolong kami dan Allah adalah sebaik-baik Pelindung.", s: "QS. Ali Imran: 173" },
+            { t: "Harta tidak akan berkurang karena sedekah.", s: "HR. Muslim" },
+            { t: "Senyummu di hadapan saudaramu adalah sedekah.", s: "HR. Tirmidzi" },
+            { t: "Orang yang paling kuat adalah orang yang mampu mengendalikan dirinya ketika marah.", s: "HR. Bukhari" },
+            { t: "Mencari rezeki yang halal adalah wajib bagi setiap muslim.", s: "HR. Thabrani" },
+            { t: "Berbaktilah kepada orang tuamu, niscaya anak-anakmu akan berbakti kepadamu.", s: "Hadits Tabrani" },
+            { t: "Dunia ini adalah perhiasan, dan sebaik-baik perhiasan dunia adalah istri yang shalihah.", s: "HR. Muslim" },
+            { t: "Hendaklah kalian jujur, karena kejujuran membawa kepada kebaikan.", s: "HR. Bukhari" },
+            { t: "Seorang mukmin dengan mukmin lainnya seperti satu bangunan yang saling menguatkan.", s: "HR. Muslim" },
+            { t: "Barangsiapa yang menempuh jalan untuk mencari ilmu, Allah mudahkan baginya jalan menuju surga.", s: "HR. Muslim" },
+            { t: "Bekerja mencari rezeki halal untuk keluarga adalah bagian dari jihad fisabilillah.", s: "Nasehat Ulama" },
+            { t: "Kekayaan sejati bukanlah banyaknya harta, melainkan kekayaan hati.", s: "HR. Bukhari" },
+            { t: "Janganlah kamu berputus asa dari rahmat Allah.", s: "QS. Az-Zumar: 53" },
+            { t: "Ingatlah Allah di waktu luangmu, maka Allah akan ingat padamu di waktu sempitmu.", s: "HR. Hakim" },
+            { t: "Barangsiapa mempermudah urusan orang lain, Allah akan mempermudah urusannya di dunia dan akhirat.", s: "HR. Muslim" },
+            { t: "Tangan di atas lebih baik daripada tangan di bawah.", s: "HR. Bukhari" },
+            { t: "Ridha Allah terletak pada ridha kedua orang tua.", s: "HR. Tirmidzi" },
+            { t: "Tidak beriman seseorang sampai ia mencintai saudaranya seperti mencintai dirinya sendiri.", s: "HR. Bukhari" },
+            { t: "Doa adalah senjata bagi orang mukmin.", s: "HR. Abu Ya’la" },
+            { t: "Keadilan adalah perhiasan kepemimpinan.", s: "Ali bin Abi Thalib" },
+            { t: "Sabar itu ada dua: sabar terhadap apa yang kau benci dan sabar terhadap apa yang kau ingini.", s: "Ali bin Abi Thalib" },
+            { t: "Barangsiapa yang diam, maka dia akan selamat.", s: "HR. Tirmidzi" },
+            { t: "Keindahan seorang wanita terletak pada rasa malunya.", s: "Nasehat Bijak" },
+            { t: "Rumahku adalah Surgaku.", s: "Pepatah Arab" },
+            { t: "Bekerjalah dengan jujur, karena keberkahan ada dalam kejujuran.", s: "Nasehat Kerja" },
+            { t: "Jangan meremehkan kebaikan sekecil apa pun.", s: "HR. Muslim" },
+            { t: "Allah tidak membebani seseorang melainkan sesuai dengan kesanggupannya.", s: "QS. Al-Baqarah: 286" },
+            { t: "Sebaik-baik kalian adalah yang paling baik terhadap istrinya.", s: "HR. Tirmidzi" },
+            { t: "Ilmu tanpa amal bagaikan pohon tanpa buah.", s: "Pepatah Bijak" },
+            { t: "Waktu bagaikan pedang, jika kau tidak menebasnya maka ia yang akan menebasmu.", s: "Imam Syafi'i" },
+            { t: "Sesuatu yang sedikit namun berkah lebih baik daripada banyak namun melalaikan.", s: "Nasehat Bijak" },
+            { t: "Hiduplah di dunia ini seakan-akan kamu adalah orang asing atau pengembara.", s: "HR. Bukhari" },
+            { t: "Barangsiapa bersyukur, niscaya Aku akan menambah nikmat-Ku kepadamu.", s: "QS. Ibrahim: 7" },
+            { t: "Tanda Allah berpaling dari hamba-Nya adalah ketika hamba tersebut sibuk dengan hal yang tidak bermanfaat.", s: "Imam Ghazali" },
+            { t: "Jadilah seperti bunga yang memberikan keharuman bahkan kepada tangan yang menghancurkannya.", s: "Ali bin Abi Thalib" },
+            { t: "Kejujuran adalah pintu dari segala ketenangan.", s: "Nasehat Bijak" },
+            { t: "Siapa yang menanam, dia yang akan menuai.", s: "Pepatah" },
+            { t: "Kesabaran adalah kunci kegembiraan.", s: "Nasehat Bijak" },
+            { t: "Lidahmu jangan biarkan menyebut kekurangan orang lain.", s: "Imam Syafi'i" },
+            { t: "Puncak ibadah adalah diam.", s: "Nasehat Ulama" },
+            { t: "Barangsiapa yang harinya hari ini lebih baik dari kemarin, maka ia beruntung.", s: "Hadits Syarif" },
+            { t: "Menuntut ilmu adalah ibadah.", s: "Nasehat Bijak" },
+            { t: "Niat adalah ruh dari setiap amal perbuatan.", s: "Imam Nawawi" },
+            { t: "Ketahuilah bahwa kemenangan itu datang bersama kesabaran.", s: "HR. Ahmad" },
+            { t: "Shalatlah tepat waktu, itu adalah amalan yang paling dicintai Allah.", s: "HR. Bukhari" },
+            { t: "Istighfar adalah kunci pembuka pintu rezeki yang terkunci.", s: "Nasehat Ulama" }
+        ];
+
+        let quoteIndex = 0;
         const audio = document.getElementById('murottalAudio');
         const btn = document.getElementById('playPauseBtn');
         const statusLabel = document.getElementById('audio-status');
@@ -290,19 +368,14 @@
         }
 
         function playSource(index) {
-            if (index >= streamSources.length) {
-                statusLabel.innerText = "Error Link"; currentSourceIndex = 0; return;
-            }
+            if (index >= streamSources.length) { statusLabel.innerText = "Error Link"; return; }
             statusLabel.innerText = "Connecting...";
             audio.src = streamSources[index];
             audio.play().then(() => {
                 btn.innerText = "⏸"; statusLabel.innerText = "QUR'AN";
-            }).catch(err => {
-                currentSourceIndex++; playSource(currentSourceIndex);
-            });
+            }).catch(() => { currentSourceIndex++; playSource(currentSourceIndex); });
         }
 
-        // --- ANIMASI HURUF (TEXT FX) ---
         function wrapText(element) {
             const nodes = element.childNodes;
             nodes.forEach(node => {
@@ -327,7 +400,7 @@
             const letters = row.querySelectorAll('.letter');
             for (let i = 0; i < letters.length; i++) {
                 letters[i].classList.add('in');
-                if (i % 5 === 0) await new Promise(r => setTimeout(r, 10)); // Masuk cepat tapi bertahap
+                if (i % 8 === 0) await new Promise(r => setTimeout(r, 10));
             }
         }
 
@@ -336,11 +409,33 @@
             for (let i = 0; i < letters.length; i++) {
                 letters[i].classList.remove('in');
                 letters[i].classList.add('out');
-                if (i % 8 === 0) await new Promise(r => setTimeout(r, 5));
+                if (i % 12 === 0) await new Promise(r => setTimeout(r, 5));
             }
         }
 
-        // --- AUTO SCROLL LOGIC ---
+        async function showQuote() {
+            const overlay = document.getElementById('quoteOverlay');
+            const qTxt = document.getElementById('quoteText');
+            const qSrc = document.getElementById('quoteSource');
+            
+            const q = quotes[quoteIndex];
+            qTxt.innerText = `"${q.t}"`;
+            qSrc.innerText = `— ${q.s}`;
+            
+            wrapText(qTxt);
+            wrapText(qSrc);
+            
+            overlay.style.display = 'flex';
+            await animateIn(overlay);
+            
+            await new Promise(r => setTimeout(r, 5000)); // Tampil 5 detik
+            
+            await animateOut(overlay);
+            overlay.style.display = 'none';
+            
+            quoteIndex = (quoteIndex + 1) % quotes.length;
+        }
+
         let scrollInterval;
         const scrollContainer = document.getElementById('scrollContainer');
         
@@ -351,49 +446,35 @@
             setTimeout(() => {
                 scrollInterval = setInterval(async () => {
                     scrollContainer.scrollTop += 1; 
-                    
                     if (scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight - 1) {
                         clearInterval(scrollInterval);
                         
-                        // Animasi keluar sebelum refresh
                         const rows = document.querySelectorAll('#tableBody tr');
-                        for (let row of rows) {
-                            animateOut(row);
-                        }
+                        for (let row of rows) animateOut(row);
 
-                        setTimeout(() => {
+                        setTimeout(async () => {
+                            await showQuote(); // Tampilkan Quote di sini
                             resetScroll();
-                        }, 2000);
+                        }, 1500);
                     }
-                }, 60); // Kecepatan scroll diperlambat (dari 40 ke 60)
+                }, 60);
             }, 3000);
         }
 
         function resetScroll() {
             scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
-            setTimeout(() => {
-                loadDashboard();
-            }, 1000);
+            setTimeout(loadDashboard, 1000);
         }
 
-        function getWIB() {
-            return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Jakarta"}));
-        }
+        function getWIB() { return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Jakarta"})); }
 
         async function loadDashboard() {
             try {
                 const hariIni = getWIB();
                 const isoHariIni = hariIni.getFullYear() + '-' + String(hariIni.getMonth() + 1).padStart(2, '0') + '-' + String(hariIni.getDate()).padStart(2, '0');
-                
-                document.getElementById('targetDate').innerText = hariIni.toLocaleDateString('id-ID', { 
-                    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-                }).toUpperCase();
+                document.getElementById('targetDate').innerText = hariIni.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
 
-                const { data, error } = await _supabase
-                    .from('data_pengiriman')
-                    .select('*')
-                    .gte('tanggal', isoHariIni);
-
+                const { data, error } = await _supabase.from('data_pengiriman').select('*').gte('tanggal', isoHariIni);
                 if (error) throw error;
 
                 if (data) {
@@ -406,30 +487,23 @@
                     });
                     renderData(data, isoHariIni);
                 }
-            } catch (err) {
-                console.error("Gagal memuat data:", err.message);
-            }
+            } catch (err) { console.error("Error:", err.message); }
         }
 
         async function renderData(data, isoHariIni) {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
             let currentGroupDate = isoHariIni;
-
             const tempRows = [];
 
             data.forEach((row) => {
                 if (row.tanggal > currentGroupDate) {
-                    const fmtDate = new Date(row.tanggal).toLocaleDateString('id-ID', { 
-                        weekday: 'long', day: 'numeric', month: 'short' 
-                    }).toUpperCase();
-                    
+                    const fmtDate = new Date(row.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' }).toUpperCase();
                     const divider = document.createElement('tr');
                     divider.innerHTML = `<td colspan="4" class="date-divider">${fmtDate}</td>`;
                     tempRows.push(divider);
                     currentGroupDate = row.tanggal;
                 }
-
                 const st = (row.status || "").toUpperCase();
                 let cls = "st-terjadwal";
                 if (st.includes("PROSES")) cls = "st-proses";
@@ -441,13 +515,8 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>
-                        <div class="flight-cell">
-                            <div class="nopol-block">${row.nopol || '-'}</div>
-                            <div class="sopir-name">${row.sopir || '-'}</div>
-                        </div>
-                        <div class="destination-container">
-                            TO: ${row.delivery_to || '-'} | <span style="color:var(--text-gold-soft)">${row.lokasi || '-'}</span>
-                        </div>
+                        <div class="flight-cell"><div class="nopol-block">${row.nopol || '-'}</div><div class="sopir-name">${row.sopir || '-'}</div></div>
+                        <div class="destination-container">TO: ${row.delivery_to || '-'} | <span style="color:var(--text-gold-soft)">${row.lokasi || '-'}</span></div>
                     </td>
                     <td style="text-align:center; font-weight:bold; color:var(--text-gold-soft); font-size:18px;">${row.jumlah_keluar || '0'}</td>
                     <td><span style="font-size:13px; font-weight:600;">${row.supplier || '-'}</span></td>
@@ -456,23 +525,18 @@
                 tempRows.push(tr);
             });
 
-            // Append all and wrap letters
             for (let tr of tempRows) {
                 wrapText(tr);
                 tbody.appendChild(tr);
-                animateIn(tr); // Animasi masuk satu-satu
-                await new Promise(r => setTimeout(r, 100)); // Delay antar baris
+                animateIn(tr);
+                await new Promise(r => setTimeout(r, 80));
             }
-
             startAutoScroll();
         }
 
         function updateClock() {
             const now = getWIB();
-            document.getElementById('clock').innerText = 
-                String(now.getHours()).padStart(2, '0') + ":" + 
-                String(now.getMinutes()).padStart(2, '0') + ":" + 
-                String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('clock').innerText = String(now.getHours()).padStart(2, '0') + ":" + String(now.getMinutes()).padStart(2, '0') + ":" + String(now.getSeconds()).padStart(2, '0');
         }
 
         _supabase.channel('any').on('postgres_changes', { event: '*', schema: 'public', table: 'data_pengiriman' }, loadDashboard).subscribe();
