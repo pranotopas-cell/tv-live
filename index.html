@@ -43,7 +43,7 @@
             align-items: center;
             border-bottom: 2px solid var(--text-gold-soft);
             flex-shrink: 0;
-            z-index: 100;
+            z-index: 500; /* Header paling atas */
         }
         
         .header h1 { margin: 0; font-size: 26px; letter-spacing: 2px; color: var(--text-white-soft); font-weight: 800; }
@@ -64,37 +64,48 @@
             flex: 1; 
             overflow-y: hidden; 
             width: 100%;
-            padding-bottom: 40px; 
             position: relative;
         }
-        
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        th { background: var(--header-bg); color: var(--text-gold-soft); text-align: left; padding: 16px 10px; font-size: 14px; border-bottom: 1px solid var(--border-blue); position: sticky; top: 0; z-index: 10; }
-        td { padding: 15px 10px; font-size: 15px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
 
-        /* OVERLAY KUTIPAN */
+        /* OVERLAY KUTIPAN FULL SCREEN */
         #quoteOverlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed; /* Menimpa tabel sepenuhnya */
+            top: 75px; bottom: 35px; left: 0; right: 0;
             background: var(--bg-airport);
-            display: none; /* Muncul lewat JS */
+            display: none; 
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 50px;
-            z-index: 200;
+            padding: 40px;
+            z-index: 1000;
         }
 
-        .quote-text { font-size: 32px; color: var(--text-white-soft); font-weight: 600; font-style: italic; max-width: 900px; line-height: 1.5; margin-bottom: 30px; }
-        .quote-source { font-size: 20px; color: var(--text-gold-soft); font-weight: 700; text-transform: uppercase; letter-spacing: 3px; }
+        .quote-text { font-size: 38px; color: var(--text-white-soft); font-weight: 600; font-style: italic; max-width: 85%; line-height: 1.4; margin-bottom: 30px; }
+        .quote-source { font-size: 24px; color: var(--text-gold-soft); font-weight: 700; text-transform: uppercase; letter-spacing: 4px; }
 
-        /* ANIMASI HURUF */
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        th { background: var(--header-bg); color: var(--text-gold-soft); text-align: left; padding: 16px 10px; font-size: 14px; border-bottom: 1px solid var(--border-blue); position: sticky; top: 0; z-index: 10; }
+        td { padding: 15px 10px; font-size: 15px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
+
+        /* PEMBATAS TANGGAL */
+        .date-divider { 
+            background: #1a2235; 
+            color: var(--text-gold-soft); 
+            text-align: center; 
+            font-size: 14px; 
+            padding: 12px 0; 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            letter-spacing: 2px;
+            border-top: 1px solid var(--border-blue);
+            border-bottom: 1px solid var(--border-blue);
+        }
+
         .letter { display: inline-block; opacity: 0; transform: translateY(15px); transition: all 0.4s ease; }
         .letter.in { opacity: 1; transform: translateY(0); }
         .letter.out { opacity: 0; transform: translateY(-15px); }
 
-        .date-divider { background: rgba(30, 41, 59, 0.9); color: var(--text-gold-soft); text-align: center; font-size: 14px; padding: 12px 0; font-weight: bold; text-transform: uppercase; }
         .st-proses { color: var(--color-proses); animation: blink 1.5s infinite; font-weight: bold; }
         .st-langsir { color: var(--color-langsir); animation: blink 2s infinite; } 
         .st-oper { color: var(--color-oper); font-weight: bold; animation: blink 1.8s infinite; }
@@ -105,12 +116,11 @@
         .flight-cell { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
         .nopol-block { background: #e2e8f0; color: #1e293b; padding: 4px 8px; border-radius: 4px; font-weight: 800; font-size: 13px; min-width: 90px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
         .sopir-name { color: var(--text-blue-soft); font-weight: 700; font-size: 16px; }
-        .destination-container { font-size: 14px; color: var(--text-white-soft); }
-
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         @keyframes pulse { 0% { transform: scale(0.9); } 50% { transform: scale(1.2); } 100% { transform: scale(0.9); } }
 
-        .footer-marquee { position: fixed; bottom: 0; width: 100%; background: #000; color: var(--text-white-soft); height: 35px; line-height: 35px; font-size: 14px; border-top: 1px solid var(--text-gold-soft); z-index: 100; }
+        .footer-marquee { position: fixed; bottom: 0; width: 100%; background: #000; color: var(--text-white-soft); height: 35px; line-height: 35px; font-size: 13px; border-top: 1px solid var(--text-gold-soft); z-index: 500; }
     </style>
 </head>
 <body>
@@ -172,57 +182,20 @@
             { t: "Dunia adalah perhiasan, dan sebaik-baik perhiasan dunia adalah istri yang shalihah.", s: "HR. Muslim" },
             { t: "Mencari rezeki halal adalah wajib setelah ibadah fardhu.", s: "HR. Ath-Thabrani" },
             { t: "Barangsiapa yang mempermudah urusan orang lain, Allah akan mempermudah urusannya di dunia & akhirat.", s: "HR. Muslim" },
-            { t: "Kekayaan hakiki bukanlah banyaknya harta, namun kekayaan jiwa.", s: "HR. Bukhari" },
-            { t: "Senyummu di depan saudaramu adalah sedekah.", s: "HR. Tirmidzi" },
             { t: "Allah mencintai seorang hamba yang apabila bekerja, ia bekerja dengan itqan (profesional).", s: "HR. Al-Baihaqi" },
-            { t: "Jaga dirimu dan keluargamu dari api neraka.", s: "QS. At-Tahrim: 6" },
-            { t: "Shalatlah tepat waktu, karena ia adalah amalan yang paling dicintai Allah.", s: "HR. Bukhari" },
-            { t: "Barangsiapa bersyukur, niscaya Aku akan menambah nikmat-Ku kepadamu.", s: "QS. Ibrahim: 7" },
-            { t: "Ridha Allah terletak pada ridha kedua orang tua.", s: "HR. Tirmidzi" },
-            { t: "Harta tidak akan berkurang karena sedekah.", s: "HR. Muslim" },
-            { t: "Sampaikanlah dariku walau hanya satu ayat.", s: "HR. Bukhari" },
-            { t: "Kejujuran membawa kepada kebaikan, dan kebaikan membawa ke surga.", s: "HR. Bukhari" },
-            { t: "Siapa yang menanam, dia yang akan menuai.", s: "Pepatah Arab" },
-            { t: "Janganlah kamu berputus asa dari rahmat Allah.", s: "QS. Az-Zumar: 53" },
-            { t: "Makanlah dari rezeki yang halal lagi baik.", s: "QS. Al-Baqarah: 168" },
-            { t: "Sebaik-baik kalian adalah yang paling baik terhadap keluarganya.", s: "HR. Tirmidzi" },
-            { t: "Cukuplah Allah sebagai penolong kami.", s: "QS. Ali Imran: 173" },
-            { t: "Berdoalah kepada-Ku, niscaya akan Aku perkenankan bagimu.", s: "QS. Ghafir: 60" },
-            { t: "Ingatlah Allah di waktu luangmu, maka Dia akan ingat padamu di waktu sempitmu.", s: "HR. Hakim" },
-            { t: "Kesabaran adalah kunci keberhasilan.", s: "Nasehat Bijak" },
-            { t: "Bekerja dengan jujur adalah bentuk syukur kepada Sang Pencipta.", s: "Nasehat Dunia Kerja" },
-            { t: "Sesuatu yang sedikit namun berkah lebih baik daripada banyak namun melalaikan.", s: "Nasehat Ulama" },
             { t: "Niatkan kerjamu sebagai ibadah, maka lelahmu menjadi pahala.", s: "Kata Bijak Muslim" },
-            { t: "Orang yang paling kuat adalah yang mampu menahan amarahnya.", s: "HR. Bukhari" },
-            { t: "Jangan meremehkan kebaikan sekecil apa pun.", s: "HR. Muslim" },
             { t: "Rumahku adalah surgaku.", s: "Nasehat Rumah Tangga" },
-            { t: "Ketenangan hati hanya didapat dengan mengingat Allah.", s: "QS. Ar-Ra'd: 28" },
-            { t: "Bekerjalah dengan sepenuh hati, Allah melihat setiap usahamu.", s: "Nasehat Kerja" },
-            { t: "Berbaktilah kepada ibumu, kemudian ibumu, kemudian ibumu.", s: "HR. Bukhari" },
-            { t: "Keindahan seorang wanita adalah pada rasa malunya.", s: "Nasehat Bijak" },
-            { t: "Jangan memaksakan kehendak dalam rumah tangga, gunakan musyawarah.", s: "Nasehat Keluarga" },
-            { t: "Pintu rezeki terbuka lebar bagi mereka yang gemar bersilaturahmi.", s: "HR. Bukhari" },
-            { t: "Waktu adalah pedang, jika kau tak menggunakannya, ia akan menebasmu.", s: "Imam Syafi'i" },
-            { t: "Kejujuran dalam berdagang/bekerja mendatangkan keberkahan rezeki.", s: "Nasehat Bisnis" },
-            { t: "Jangan mengeluh atas lelahnya bekerja, banyak orang di luar sana ingin di posisimu.", s: "Motivasi Kerja" },
-            { t: "Istighfar adalah pembuka pintu-pintu langit.", s: "QS. Nuh: 10-12" },
-            { t: "Jagalah lisanmu dari menyakiti perasaan saudaramu.", s: "HR. Muslim" },
-            { t: "Kesuksesan berawal dari ketaatan kepada Sang Khalik.", s: "Nasehat Hidup" },
-            { t: "Sabar itu pahit, tapi buahnya sangat manis.", s: "Kata Mutiara" },
-            { t: "Jangan biarkan HP-mu menjauhkan yang dekat di rumah tanggamu.", s: "Nasehat Modern" },
-            { t: "Didiklah anak-anakmu dengan adab sebelum ilmu.", s: "Imam Malik" },
-            { t: "Rezeki sudah diatur, tugas kita hanyalah menjemputnya dengan cara yang baik.", s: "Nasehat Tauhid" },
-            { t: "Jangan membandingkan hidupmu dengan orang lain di media sosial.", s: "Self Reminder" },
-            { t: "Akhlak yang baik adalah timbangan terberat di hari kiamat.", s: "HR. Abu Dawud" }
+            { t: "Janganlah kamu berputus asa dari rahmat Allah.", s: "QS. Az-Zumar: 53" }
+            // Tambahkan sendiri list kutipan lainnya di sini
         ];
 
         let quoteIndex = 0;
         const audio = document.getElementById('murottalAudio');
-        const btn = document.getElementById('playPauseBtn');
-        const statusLabel = document.getElementById('audio-status');
-        const streamSources = ["https://live.mp3quran.net/makkah", "https://live.mp3quran.net/madinah", "https://qurango.net/radio/mix"];
+        const streamSources = ["https://live.mp3quran.net/makkah", "https://live.mp3quran.net/madinah"];
 
         function toggleAudio() {
+            const btn = document.getElementById('playPauseBtn');
+            const statusLabel = document.getElementById('audio-status');
             if (audio.paused || audio.src === "") {
                 audio.src = streamSources[0];
                 audio.play().then(() => { btn.innerText = "⏸"; statusLabel.innerText = "QUR'AN"; });
@@ -265,7 +238,6 @@
             const qTxt = document.getElementById('quoteText');
             const qSrc = document.getElementById('quoteSource');
             
-            // Pilih kutipan acak atau berurutan
             const q = quotes[quoteIndex];
             quoteIndex = (quoteIndex + 1) % quotes.length;
 
@@ -278,7 +250,7 @@
             overlay.style.display = 'flex';
             await animateIn(overlay);
             
-            await new Promise(r => setTimeout(r, 7000)); // Tampil 7 detik
+            await new Promise(r => setTimeout(r, 60000)); // TAMPIL 1 MENIT SESUAI REQ
             
             await animateOut(overlay);
             overlay.style.display = 'none';
@@ -297,20 +269,13 @@
                     if (scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight - 1) {
                         clearInterval(scrollInterval);
                         
-                        // Animasi Keluar Tabel
-                        const rows = document.querySelectorAll('#tableBody tr');
-                        for (let row of rows) {
-                            const letters = row.querySelectorAll('.letter');
-                            letters.forEach(l => { l.classList.remove('in'); l.classList.add('out'); });
-                        }
-
                         setTimeout(async () => {
-                            await showQuote(); // TAMPILKAN KUTIPAN DISINI
-                            loadDashboard(); // Refresh data setelah kutipan
-                        }, 1500);
+                            await showQuote(); 
+                            loadDashboard();
+                        }, 2000);
                     }
                 }, 60);
-            }, 3000);
+            }, 5000);
         }
 
         function getWIB() { return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Jakarta"})); }
@@ -323,18 +288,34 @@
 
                 const { data, error } = await _supabase.from('data_pengiriman').select('*').gte('tanggal', isoHariIni);
                 if (error) throw error;
-                renderData(data || [], isoHariIni);
+                renderData(data || []);
             } catch (err) { console.error("Gagal:", err.message); }
         }
 
-        async function renderData(data, isoHariIni) {
+        async function renderData(data) {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
             
             const priority = { "PROSES": 1, "OPER": 2, "TERJADWAL": 3, "LANGSIR": 4, "TUNGGU": 5, "DELIVERED": 6 };
-            data.sort((a, b) => (priority[a.status?.toUpperCase()] || 99) - (priority[b.status?.toUpperCase()] || 99));
+            data.sort((a, b) => {
+                if(a.tanggal !== b.tanggal) return new Date(a.tanggal) - new Date(b.tanggal);
+                return (priority[a.status?.toUpperCase()] || 99) - (priority[b.status?.toUpperCase()] || 99);
+            });
+
+            let currentTanggal = "";
 
             for (let row of data) {
+                // Tambahkan Pembatas Tanggal Jika Berubah
+                if (row.tanggal !== currentTanggal) {
+                    currentTanggal = row.tanggal;
+                    const dateObj = new Date(currentTanggal);
+                    const dateStr = dateObj.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase();
+                    
+                    const divider = document.createElement('tr');
+                    divider.innerHTML = `<td colspan="4" class="date-divider">--- JADWAL PENGIRIMAN: ${dateStr} ---</td>`;
+                    tbody.appendChild(divider);
+                }
+
                 const tr = document.createElement('tr');
                 const st = (row.status || "").toUpperCase();
                 let cls = "st-terjadwal";
@@ -346,20 +327,16 @@
                 tr.innerHTML = `
                     <td>
                         <div class="flight-cell"><div class="nopol-block">${row.nopol || '-'}</div><div class="sopir-name">${row.sopir || '-'}</div></div>
-                        <div class="destination-container">TO: ${row.delivery_to || '-'} | <span style="color:var(--text-gold-soft)">${row.lokasi || '-'}</span></div>
+                        <div style="font-size:14px;">TO: ${row.delivery_to || '-'} | <span style="color:var(--text-gold-soft)">${row.lokasi || '-'}</span></div>
                     </td>
                     <td style="text-align:center; font-weight:bold; color:var(--text-gold-soft); font-size:18px;">${row.jumlah_keluar || '0'}</td>
                     <td><span style="font-size:13px; font-weight:600;">${row.supplier || '-'}</span></td>
                     <td class="${cls}" style="text-align:right; font-size:13px; font-weight:bold;">${st}</td>
                 `;
                 
-                // Animasi huruf per baris
-                const cells = tr.querySelectorAll('td, div, span');
-                cells.forEach(c => { if(c.children.length === 0) wrapText(c); });
-                
                 tbody.appendChild(tr);
                 animateIn(tr);
-                await new Promise(r => setTimeout(r, 100));
+                await new Promise(r => setTimeout(r, 80));
             }
             startAutoScroll();
         }
