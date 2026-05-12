@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>LIVE TV SCEDULE</title>
+    <title>LIVE TV SCHEDULE - CINEMATIC</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -35,6 +35,7 @@
             width: 100%;
         }
 
+        /* HEADER */
         .header {
             background: var(--header-bg);
             padding: 15px 20px;
@@ -60,17 +61,19 @@
         #audio-status { font-size: 10px; color: var(--text-gold-soft); font-weight: bold; text-transform: uppercase; }
         .play-btn { background: var(--text-gold-soft); color: #000; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
 
+        /* MAIN CONTENT */
         .main-content { 
             flex: 1; 
-            overflow-y: hidden; 
+            overflow: hidden; 
             width: 100%;
             position: relative;
         }
 
+        /* CINEMATIC QUOTE OVERLAY */
         #quoteOverlay {
-            position: fixed; 
-            top: 75px; bottom: 35px; left: 0; right: 0;
-            background: var(--bg-airport);
+            position: absolute; 
+            top: 0; bottom: 0; left: 0; right: 0;
+            background: radial-gradient(circle at center, rgba(16, 23, 42, 0.95) 0%, #050811 100%);
             display: none; 
             flex-direction: column;
             justify-content: center;
@@ -78,45 +81,77 @@
             text-align: center;
             padding: 40px;
             z-index: 1000;
+            backdrop-filter: blur(15px);
+            opacity: 0;
+            transition: opacity 1.5s ease;
         }
 
-        .quote-text { font-size: 38px; color: var(--text-white-soft); font-weight: 600; font-style: italic; max-width: 85%; line-height: 1.4; margin-bottom: 30px; }
-        .quote-source { font-size: 24px; color: var(--text-gold-soft); font-weight: 700; text-transform: uppercase; letter-spacing: 4px; }
+        .quote-text { 
+            font-size: 48px; 
+            color: #fff; 
+            font-weight: 300; 
+            font-style: italic; 
+            max-width: 75%; 
+            line-height: 1.4; 
+            margin-bottom: 50px;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            perspective: 1000px;
+        }
 
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        .quote-source { 
+            font-size: 22px; 
+            color: var(--text-gold-soft); 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            letter-spacing: 8px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(229, 192, 123, 0.3);
+        }
+
+        /* TABLE ANIMATION CONTAINER */
+        #deliveryTable { 
+            width: 100%; 
+            border-collapse: collapse; 
+            table-layout: fixed;
+            transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1), filter 1.2s ease, opacity 1s ease;
+        }
+
         th { background: var(--header-bg); color: var(--text-gold-soft); text-align: left; padding: 16px 10px; font-size: 14px; border-bottom: 1px solid var(--border-blue); position: sticky; top: 0; z-index: 10; }
         td { padding: 15px 10px; font-size: 15px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
 
         .date-divider { 
-            background: #1a2235; 
+            background: linear-gradient(90deg, #1a2235, #0a0f1d); 
             color: var(--text-gold-soft); 
             text-align: center; 
-            font-size: 14px; 
-            padding: 12px 0; 
+            font-size: 16px; 
+            padding: 15px 0; 
             font-weight: bold; 
             text-transform: uppercase; 
-            letter-spacing: 2px;
-            border-top: 1px solid var(--border-blue);
-            border-bottom: 1px solid var(--border-blue);
+            letter-spacing: 4px;
         }
 
-        .letter { display: inline-block; opacity: 0; transform: translateY(15px); transition: all 0.4s ease; }
-        .letter.in { opacity: 1; transform: translateY(0); }
-        .letter.out { opacity: 0; transform: translateY(-15px); }
+        /* TEXT ANIMATION ENGINE */
+        .letter { 
+            display: inline-block; 
+            opacity: 0; 
+            transform: translate3d(0, 40px, 0) rotateX(-90deg); 
+            filter: blur(12px);
+            transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1); 
+        }
+        .letter.in { opacity: 1; transform: translate3d(0, 0, 0) rotateX(0deg); filter: blur(0); }
+        .letter.out { opacity: 0; transform: translate3d(0, -40px, 0) rotateX(90deg); filter: blur(12px); }
 
+        /* STATUS & BADGES */
         .st-proses { color: var(--color-proses); animation: blink 1.5s infinite; font-weight: bold; }
         .st-langsir { color: var(--color-langsir); animation: blink 2s infinite; } 
         .st-oper { color: var(--color-oper); font-weight: bold; animation: blink 1.8s infinite; }
         .st-delivered { color: var(--color-delivered); opacity: 0.8; }
-        .st-tunggu { color: var(--color-tunggu); }
-        .st-terjadwal { color: var(--color-terjadwal); }
-
-        .flight-cell { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
-        .nopol-block { background: #e2e8f0; color: #1e293b; padding: 4px 8px; border-radius: 4px; font-weight: 800; font-size: 13px; min-width: 90px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        
+        .nopol-block { background: #e2e8f0; color: #1e293b; padding: 4px 8px; border-radius: 4px; font-weight: 800; font-size: 13px; min-width: 90px; text-align: center; }
         .sopir-name { color: var(--text-blue-soft); font-weight: 700; font-size: 16px; }
         
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        @keyframes pulse { 0% { transform: scale(0.9); } 50% { transform: scale(1.2); } 100% { transform: scale(0.9); } }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        @keyframes pulse { 0% { transform: scale(0.9); } 50% { transform: scale(1.1); } 100% { transform: scale(0.9); } }
 
         .footer-marquee { position: fixed; bottom: 0; width: 100%; background: #000; color: var(--text-white-soft); height: 35px; line-height: 35px; font-size: 13px; border-top: 1px solid var(--text-gold-soft); z-index: 500; }
     </style>
@@ -140,7 +175,6 @@
         </div>
     </div>
 
-    <!-- Gunakan Audio Element Standar -->
     <audio id="murottalAudio" crossorigin="anonymous"></audio>
 
     <div class="main-content" id="scrollContainer">
@@ -152,9 +186,9 @@
         <table id="deliveryTable">
             <thead>
                 <tr>
-                    <th style="width: 50%;">NOPOL / DEST / DRIVER</th>
+                    <th style="width: 45%;">NOPOL / DRIVER / LOKASI</th>
                     <th style="width: 10%; text-align: center;">QTY</th>
-                    <th style="width: 20%;">STORAGE</th>
+                    <th style="width: 25%;">DESTINATION & STORAGE</th>
                     <th style="width: 20%; text-align: right;">STATUS</th>
                 </tr>
             </thead>
@@ -177,8 +211,13 @@
             { t: "Sebaik-baik manusia adalah yang paling bermanfaat bagi orang lain.", s: "HR. Ahmad" },
             { t: "Barangsiapa bertaqwa kepada Allah, niscaya Dia akan membukakan jalan keluar baginya.", s: "QS. At-Talaq: 2" },
             { t: "Allah mencintai seorang hamba yang apabila bekerja, ia bekerja dengan itqan (profesional).", s: "HR. Al-Baihaqi" },
-            { t: "Niatkan kerjamu sebagai ibadah, maka lelahmu menjadi pahala.", s: "Kata Bijak Muslim" },
-            { t: "Rumahku adalah surgaku.", s: "Nasehat Rumah Tangga" },
+            { t: "Niatkan kerjamu sebagai ibadah, maka lelahmu menjadi pahala.", s: "Nasehat Tauhid" },
+            { t: "Rezeki sudah diatur, tugas kita hanyalah menjemputnya dengan cara yang baik.", s: "Nasehat Tauhid" },
+            { t: "Tangan di atas lebih baik daripada tangan di bawah.", s: "HR. Bukhari & Muslim" },
+            { t: "Mencari rezeki halal adalah wajib setelah ibadah fardhu.", s: "HR. Ath-Thabrani" },
+            { t: "Janganlah kamu berputus asa dari rahmat Allah.", s: "QS. Az-Zumar: 53"},
+            { t: "Ridha Allah terletak pada ridha kedua orang tua.", s: "HR. Tirmidzi" },
+            { t: "Harta tidak akan berkurang karena sedekah.", s: "HR. Muslim" },
             { t: "Pintu rezeki terbuka lebar bagi mereka yang gemar bersilaturahmi.", s: "HR. Bukhari" },
             { t: "Rezeki sudah diatur, tugas kita hanyalah menjemputnya dengan cara yang baik.", s: "Nasehat Tauhid" },
             { t: "Sesungguhnya sesudah kesulitan itu ada kemudahan.", s: "QS. Al-Insyirah: 6" },
@@ -297,43 +336,29 @@
 
         let quoteIndex = 0;
         const audio = document.getElementById('murottalAudio');
-        
-        // DAFTAR LINK BACKUP (Jika 1 mati, pindah ke berikutnya)
         const streamSources = [
             "https://live.mp3quran.net/makkah",
             "https://live.mp3quran.net/madinah",
-            "https://qurango.net/radio/mix",
-            "https://n02.radiojar.com/8sps7y7yhb9uv"
+            "https://qurango.net/radio/mix"
         ];
         let currentSourceIndex = 0;
 
         function toggleAudio() {
             const btn = document.getElementById('playPauseBtn');
             const statusLabel = document.getElementById('audio-status');
-
-            if (audio.paused) {
-                playCurrentSource();
-            } else {
-                audio.pause();
-                btn.innerText = "▶";
-                statusLabel.innerText = "STOP";
-            }
+            if (audio.paused) { playCurrentSource(); } 
+            else { audio.pause(); btn.innerText = "▶"; statusLabel.innerText = "STOP"; }
         }
 
         function playCurrentSource() {
             const btn = document.getElementById('playPauseBtn');
             const statusLabel = document.getElementById('audio-status');
-            
             statusLabel.innerText = "CONNECTING...";
             audio.src = streamSources[currentSourceIndex];
-            
             audio.play().then(() => {
                 btn.innerText = "⏸";
                 statusLabel.innerText = "QUR'AN LIVE";
-            }).catch(err => {
-                console.log("Stream error, trying backup...");
-                tryNextSource();
-            });
+            }).catch(() => tryNextSource());
         }
 
         function tryNextSource() {
@@ -341,18 +366,7 @@
             playCurrentSource();
         }
 
-        // Tangani jika koneksi putus di tengah jalan
-        audio.onerror = function() {
-            if (!audio.paused) tryNextSource();
-        };
-
-        // Memancing izin browser saat klik pertama
-        document.body.addEventListener('click', () => {
-            if (audio.src === "") {
-                audio.load();
-            }
-        }, { once: true });
-
+        // FUNGSI ANIMASI TEXT
         function wrapText(element) {
             const text = element.textContent;
             element.innerHTML = '';
@@ -368,7 +382,7 @@
             const letters = container.querySelectorAll('.letter');
             for (let i = 0; i < letters.length; i++) {
                 letters[i].classList.add('in');
-                if (i % 5 === 0) await new Promise(r => setTimeout(r, 10));
+                if (i % 3 === 0) await new Promise(r => setTimeout(r, 10));
             }
         }
 
@@ -377,31 +391,46 @@
             for (let i = 0; i < letters.length; i++) {
                 letters[i].classList.remove('in');
                 letters[i].classList.add('out');
-                if (i % 8 === 0) await new Promise(r => setTimeout(r, 5));
+                if (i % 5 === 0) await new Promise(r => setTimeout(r, 5));
             }
         }
 
         async function showQuote() {
             const overlay = document.getElementById('quoteOverlay');
+            const table = document.getElementById('deliveryTable');
             const qTxt = document.getElementById('quoteText');
             const qSrc = document.getElementById('quoteSource');
             
+            // Fade out table cinematic
+            table.style.filter = 'blur(20px)';
+            table.style.transform = 'scale(1.1)';
+            table.style.opacity = '0';
+
             const q = quotes[quoteIndex];
             quoteIndex = (quoteIndex + 1) % quotes.length;
-
             qTxt.textContent = q.t;
             qSrc.textContent = q.s;
-            
             wrapText(qTxt);
             wrapText(qSrc);
             
             overlay.style.display = 'flex';
-            await animateIn(overlay);
+            setTimeout(() => overlay.style.opacity = '1', 50);
+
+            await animateIn(qTxt);
+            await animateIn(qSrc);
             
-            await new Promise(r => setTimeout(r, 60000)); 
+            await new Promise(r => setTimeout(r, 8000)); 
             
-            await animateOut(overlay);
-            overlay.style.display = 'none';
+            await animateOut(qTxt);
+            await animateOut(qSrc);
+            
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                table.style.filter = 'blur(0px)';
+                table.style.transform = 'scale(1)';
+                table.style.opacity = '1';
+            }, 1500);
         }
 
         let scrollInterval;
@@ -413,16 +442,16 @@
 
             setTimeout(() => {
                 scrollInterval = setInterval(async () => {
-                    scrollContainer.scrollTop += 1; 
-                    if (scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight - 1) {
+                    scrollContainer.scrollTop += 0.8; // Perhalus scroll
+                    if (scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight - 2) {
                         clearInterval(scrollInterval);
                         setTimeout(async () => {
                             await showQuote(); 
                             loadDashboard();
-                        }, 2000);
+                        }, 2500);
                     }
-                }, 60);
-            }, 5000);
+                }, 40); 
+            }, 3000);
         }
 
         function getWIB() { return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Jakarta"})); }
@@ -472,14 +501,19 @@
 
                 tr.innerHTML = `
                     <td>
-                        <div class="flight-cell"><div class="nopol-block">${row.nopol || '-'}</div><div class="sopir-name">${row.sopir || '-'}</div></div>
-                        <div style="font-size:14px;">TO: ${row.delivery_to || '-'} | <span style="color:var(--text-gold-soft)">${row.lokasi || '-'}</span></div>
+                        <div class="flight-cell" style="display:flex; align-items:center; gap:12px; margin-bottom:6px;">
+                            <div class="nopol-block">${row.nopol || '-'}</div>
+                            <div class="sopir-name">${row.sopir || '-'}</div>
+                        </div>
+                        <div style="font-size:13px; color:var(--text-gold-soft); margin-left:2px;">📍 ${row.lokasi || '-'}</div>
                     </td>
                     <td style="text-align:center; font-weight:bold; color:var(--text-gold-soft); font-size:18px;">${row.jumlah_keluar || '0'}</td>
-                    <td><span style="font-size:13px; font-weight:600;">${row.supplier || '-'}</span></td>
-                    <td class="${cls}" style="text-align:right; font-size:13px; font-weight:bold;">${st}</td>
+                    <td>
+                        <div style="color:var(--text-white-soft); font-weight:bold; font-size:15px; margin-bottom:4px;">${row.delivery_to || '-'}</div>
+                        <div style="color:var(--text-blue-soft); font-size:12px; font-weight:600; text-transform:uppercase;">📦 ${row.supplier || '-'}</div>
+                    </td>
+                    <td class="${cls}" style="text-align:right; font-size:14px; font-weight:bold; letter-spacing:1px;">${st}</td>
                 `;
-                
                 tbody.appendChild(tr);
             }
             startAutoScroll();
