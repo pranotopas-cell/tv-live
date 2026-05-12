@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>LIVE TV SCHEDULE - CINEMATIC</title>
+    <title>LIVE DELIVERY SCHEDULE - CINEMATIC</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -73,7 +73,7 @@
         #quoteOverlay {
             position: absolute; 
             top: 0; bottom: 0; left: 0; right: 0;
-            background: radial-gradient(circle at center, rgba(16, 23, 42, 0.98) 0%, #050811 100%);
+            background: radial-gradient(circle at center, rgba(10, 15, 29, 0.98) 0%, #050811 100%);
             display: none; 
             flex-direction: column;
             justify-content: center;
@@ -81,66 +81,67 @@
             text-align: center;
             padding: 40px;
             z-index: 1000;
-            backdrop-filter: blur(15px);
+            backdrop-filter: blur(20px);
             opacity: 0;
             transition: opacity 1.5s ease;
         }
 
         .quote-text { 
-            font-size: 42px; 
+            font-size: 38px; 
             color: #fff; 
             font-weight: 300; 
             font-style: italic; 
-            max-width: 85%; 
-            line-height: 1.4; 
-            margin-bottom: 50px;
-            text-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            max-width: 80%; 
+            line-height: 1.5; 
+            margin-bottom: 40px;
+            text-shadow: 0 10px 20px rgba(0,0,0,0.5);
         }
 
         .quote-source { 
-            font-size: 20px; 
+            font-size: 18px; 
             color: var(--text-gold-soft); 
             font-weight: 700; 
             text-transform: uppercase; 
-            letter-spacing: 8px;
-            padding-top: 25px;
+            letter-spacing: 6px;
+            padding-top: 20px;
             border-top: 1px solid rgba(229, 192, 123, 0.3);
         }
 
-        /* TABLE ANIMATION CONTAINER */
+        /* TABLE */
         #deliveryTable { 
             width: 100%; 
             border-collapse: collapse; 
             table-layout: fixed;
-            transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1), filter 1.2s ease, opacity 1s ease;
+            transition: transform 1.2s ease, filter 1.2s ease, opacity 1s ease;
         }
 
         th { background: var(--header-bg); color: var(--text-gold-soft); text-align: left; padding: 16px 10px; font-size: 14px; border-bottom: 1px solid var(--border-blue); position: sticky; top: 0; z-index: 10; }
         td { padding: 15px 10px; font-size: 15px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
 
         .date-divider { 
-            background: linear-gradient(90deg, #1a2235, #0a0f1d); 
+            background: linear-gradient(90deg, #1e293b, #0a0f1d); 
             color: var(--text-gold-soft); 
             text-align: center; 
-            font-size: 16px; 
-            padding: 15px 0; 
-            font-weight: bold; 
+            font-size: 14px; 
+            padding: 12px 0; 
+            font-weight: 800; 
             text-transform: uppercase; 
-            letter-spacing: 4px;
+            letter-spacing: 3px;
+            border-bottom: 1px solid var(--text-gold-soft);
         }
 
-        /* TEXT ANIMATION ENGINE */
+        /* LETTER ANIMATION */
         .letter { 
             display: inline-block; 
             opacity: 0; 
-            transform: translate3d(0, 30px, 0); 
-            filter: blur(8px);
+            transform: translateY(20px); 
+            filter: blur(5px);
             transition: all 0.6s ease-out; 
         }
-        .letter.in { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }
-        .letter.out { opacity: 0; transform: translate3d(0, -30px, 0); filter: blur(8px); }
+        .letter.in { opacity: 1; transform: translateY(0); filter: blur(0); }
+        .letter.out { opacity: 0; transform: translateY(-20px); filter: blur(5px); }
 
-        /* STATUS & BADGES */
+        /* STATUS */
         .st-proses { color: var(--color-proses); animation: blink 1.5s infinite; font-weight: bold; }
         .st-langsir { color: var(--color-langsir); animation: blink 2s infinite; } 
         .st-oper { color: var(--color-oper); font-weight: bold; animation: blink 1.8s infinite; }
@@ -150,7 +151,7 @@
         .sopir-name { color: var(--text-blue-soft); font-weight: 700; font-size: 16px; }
         
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-        @keyframes pulse { 0% { transform: scale(0.9); } 50% { transform: scale(1.1); } 100% { transform: scale(0.9); } }
+        @keyframes pulse { 0% { transform: scale(0.95); } 50% { transform: scale(1); } 100% { transform: scale(0.95); } }
 
         .footer-marquee { position: fixed; bottom: 0; width: 100%; background: #000; color: var(--text-white-soft); height: 35px; line-height: 35px; font-size: 13px; border-top: 1px solid var(--text-gold-soft); z-index: 500; }
     </style>
@@ -210,48 +211,27 @@
             { t: "Sebaik-baik manusia adalah yang paling bermanfaat bagi orang lain.", s: "HR. Ahmad" },
             { t: "Barangsiapa bertaqwa kepada Allah, niscaya Dia akan membukakan jalan keluar baginya.", s: "QS. At-Talaq: 2" },
             { t: "Allah mencintai seorang hamba yang apabila bekerja, ia bekerja dengan itqan (profesional).", s: "HR. Al-Baihaqi" },
-            { t: "Niatkan kerjamu sebagai ibadah, maka lelahmu menjadi pahala.", s: "Nasehat Tauhid" },
-            { t: "Rezeki sudah diatur, tugas kita hanyalah menjemputnya dengan cara yang baik.", s: "Nasehat Tauhid" },
-            { t: "Tangan di atas lebih baik daripada tangan di bawah.", s: "HR. Bukhari & Muslim" },
-            { t: "Mencari rezeki halal adalah wajib setelah ibadah fardhu.", s: "HR. Ath-Thabrani" },
-            { t: "Janganlah kamu berputus asa dari rahmat Allah.", s: "QS. Az-Zumar: 53"},
-            { t: "Ridha Allah terletak pada ridha kedua orang tua.", s: "HR. Tirmidzi" },
-            { t: "Harta tidak akan berkurang karena sedekah.", s: "HR. Muslim" }
+            { t: "Niatkan kerjamu sebagai ibadah, maka lelahmu menjadi pahala.", s: "Nasehat Tauhid" }
         ];
 
         let quoteIndex = 0;
         const audio = document.getElementById('murottalAudio');
-        const streamSources = [
-            "https://live.mp3quran.net/makkah",
-            "https://live.mp3quran.net/madinah",
-            "https://qurango.net/radio/mix"
-        ];
+        const streamSources = ["https://live.mp3quran.net/makkah", "https://live.mp3quran.net/madinah"];
         let currentSourceIndex = 0;
 
         function toggleAudio() {
-            const btn = document.getElementById('playPauseBtn');
-            const statusLabel = document.getElementById('audio-status');
-            if (audio.paused) { playCurrentSource(); } 
-            else { audio.pause(); btn.innerText = "▶"; statusLabel.innerText = "STOP"; }
+            if (audio.paused) { 
+                audio.src = streamSources[currentSourceIndex];
+                audio.play();
+                document.getElementById('playPauseBtn').innerText = "⏸";
+                document.getElementById('audio-status').innerText = "QUR'AN LIVE";
+            } else { 
+                audio.pause(); 
+                document.getElementById('playPauseBtn').innerText = "▶";
+                document.getElementById('audio-status').innerText = "STOP";
+            }
         }
 
-        function playCurrentSource() {
-            const btn = document.getElementById('playPauseBtn');
-            const statusLabel = document.getElementById('audio-status');
-            statusLabel.innerText = "CONNECTING...";
-            audio.src = streamSources[currentSourceIndex];
-            audio.play().then(() => {
-                btn.innerText = "⏸";
-                statusLabel.innerText = "QUR'AN LIVE";
-            }).catch(() => tryNextSource());
-        }
-
-        function tryNextSource() {
-            currentSourceIndex = (currentSourceIndex + 1) % streamSources.length;
-            playCurrentSource();
-        }
-
-        // FUNGSI ANIMASI TEXT
         function wrapText(element, text) {
             element.innerHTML = '';
             text.split('').forEach(char => {
@@ -263,104 +243,101 @@
         }
 
         async function showQuote() {
-            return new Promise(async (resolve) => {
-                const overlay = document.getElementById('quoteOverlay');
-                const table = document.getElementById('deliveryTable');
-                const qTxt = document.getElementById('quoteText');
-                const qSrc = document.getElementById('quoteSource');
-                
-                // 1. Sembunyikan Tabel
-                table.style.filter = 'blur(20px)';
-                table.style.transform = 'scale(1.1)';
-                table.style.opacity = '0';
+            const overlay = document.getElementById('quoteOverlay');
+            const table = document.getElementById('deliveryTable');
+            const qTxt = document.getElementById('quoteText');
+            const qSrc = document.getElementById('quoteSource');
 
-                // 2. Siapkan Konten Quote
-                const q = quotes[quoteIndex];
-                quoteIndex = (quoteIndex + 1) % quotes.length;
-                wrapText(qTxt, q.t);
-                wrapText(qSrc, q.s);
-                
-                // 3. Tampilkan Overlay
-                overlay.style.display = 'flex';
-                await new Promise(r => setTimeout(r, 100));
-                overlay.style.opacity = '1';
+            // Persiapan konten
+            const q = quotes[quoteIndex];
+            quoteIndex = (quoteIndex + 1) % quotes.length;
+            wrapText(qTxt, q.t);
+            wrapText(qSrc, q.s);
 
-                // 4. Animasi Huruf Masuk
-                const letters = overlay.querySelectorAll('.letter');
-                for (let i = 0; i < letters.length; i++) {
-                    setTimeout(() => letters[i].classList.add('in'), i * 20);
-                }
+            // Sembunyikan tabel & Tampilkan overlay
+            table.style.filter = 'blur(20px)';
+            table.style.opacity = '0';
+            overlay.style.display = 'flex';
+            
+            await new Promise(r => setTimeout(r, 100));
+            overlay.style.opacity = '1';
 
-                // 5. Durasi Tampil
-                await new Promise(r => setTimeout(r, 7000));
-                
-                // 6. Animasi Keluar
-                for (let i = 0; i < letters.length; i++) {
-                    setTimeout(() => {
-                        letters[i].classList.remove('in');
-                        letters[i].classList.add('out');
-                    }, i * 10);
-                }
-
-                // 7. Sembunyikan Overlay & Kembalikan Tabel
-                setTimeout(() => {
-                    overlay.style.opacity = '0';
-                    setTimeout(() => {
-                        overlay.style.display = 'none';
-                        table.style.filter = 'blur(0px)';
-                        table.style.transform = 'scale(1)';
-                        table.style.opacity = '1';
-                        resolve();
-                    }, 1000);
-                }, 1000);
+            // Animasi Huruf Masuk
+            const letters = overlay.querySelectorAll('.letter');
+            letters.forEach((l, i) => {
+                setTimeout(() => l.classList.add('in'), i * 30);
             });
+
+            await new Promise(r => setTimeout(r, 6000));
+
+            // Animasi Keluar
+            letters.forEach((l, i) => {
+                setTimeout(() => {
+                    l.classList.remove('in');
+                    l.classList.add('out');
+                }, i * 15);
+            });
+
+            await new Promise(r => setTimeout(r, 1500));
+            overlay.style.opacity = '0';
+            
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                table.style.filter = 'blur(0px)';
+                table.style.opacity = '1';
+            }, 1000);
         }
 
         let scrollInterval;
-        const scrollContainer = document.getElementById('scrollContainer');
-        
         function startAutoScroll() {
+            const container = document.getElementById('scrollContainer');
             clearInterval(scrollInterval);
-            scrollContainer.scrollTop = 0;
+            container.scrollTop = 0;
 
             setTimeout(() => {
                 scrollInterval = setInterval(async () => {
-                    scrollContainer.scrollTop += 1;
-                    if (Math.ceil(scrollContainer.scrollTop + scrollContainer.clientHeight) >= scrollContainer.scrollHeight) {
+                    container.scrollTop += 1;
+                    if (Math.ceil(container.scrollTop + container.clientHeight) >= container.scrollHeight) {
                         clearInterval(scrollInterval);
                         setTimeout(async () => {
-                            await showQuote(); 
-                            loadDashboard();
+                            await showQuote();
+                            setTimeout(loadDashboard, 1000);
                         }, 2000);
                     }
-                }, 50); 
+                }, 50);
             }, 3000);
         }
 
-        function getWIB() { return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Jakarta"})); }
-
         async function loadDashboard() {
             try {
-                const hariIni = getWIB();
-                const isoHariIni = hariIni.toISOString().split('T')[0];
-                document.getElementById('targetDate').innerText = hariIni.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
+                const now = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Jakarta"}));
+                const isoDate = now.toISOString().split('T')[0];
+                document.getElementById('targetDate').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
 
-                const { data, error } = await _supabase.from('data_pengiriman').select('*').gte('tanggal', isoHariIni);
+                const { data, error } = await _supabase.from('data_pengiriman').select('*').gte('tanggal', isoDate);
                 if (error) throw error;
                 renderData(data || []);
-            } catch (err) { console.error("Gagal:", err.message); }
+            } catch (err) { console.error(err); }
         }
 
         function renderData(data) {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
             
-            const priority = { "PROSES": 1, "OPER": 2, "TERJADWAL": 3, "LANGSIR": 4, "TUNGGU": 5, "DELIVERED": 6 };
-            data.sort((a, b) => (priority[a.status?.toUpperCase()] || 99) - (priority[b.status?.toUpperCase()] || 99));
+            // Tambahkan Pembatas Tanggal / Header Grup
+            const divider = document.createElement('tr');
+            divider.innerHTML = `<td colspan="4" class="date-divider">DATA PENGIRIMAN HARI INI</td>`;
+            tbody.appendChild(divider);
 
             if(data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="date-divider">BELUM ADA JADWAL HARI INI</td></tr>';
+                tbody.innerHTML += '<tr><td colspan="4" style="text-align:center; padding:50px; color:gray;">TIDAK ADA JADWAL</td></tr>';
+                // Jika kosong, tetap jalankan quote setelah jeda
+                setTimeout(showQuote, 5000);
+                return;
             }
+
+            const priority = { "PROSES": 1, "OPER": 2, "TERJADWAL": 3, "LANGSIR": 4, "TUNGGU": 5, "DELIVERED": 6 };
+            data.sort((a, b) => (priority[a.status?.toUpperCase()] || 99) - (priority[b.status?.toUpperCase()] || 99));
 
             data.forEach(row => {
                 const tr = document.createElement('tr');
@@ -377,14 +354,14 @@
                             <div class="nopol-block">${row.nopol || '-'}</div>
                             <div class="sopir-name">${row.sopir || '-'}</div>
                         </div>
-                        <div style="font-size:13px; color:var(--text-gold-soft); margin-left:2px;">📍 ${row.lokasi || '-'}</div>
+                        <div style="font-size:13px; color:var(--text-gold-soft);">📍 ${row.lokasi || '-'}</div>
                     </td>
                     <td style="text-align:center; font-weight:bold; color:var(--text-gold-soft); font-size:18px;">${row.jumlah_keluar || '0'}</td>
                     <td>
-                        <div style="color:var(--text-white-soft); font-weight:bold; font-size:15px; margin-bottom:4px;">${row.delivery_to || '-'}</div>
-                        <div style="color:var(--text-blue-soft); font-size:12px; font-weight:600; text-transform:uppercase;">📦 ${row.supplier || '-'}</div>
+                        <div style="color:var(--text-white-soft); font-weight:bold; font-size:14px; margin-bottom:4px;">${row.delivery_to || '-'}</div>
+                        <div style="color:var(--text-blue-soft); font-size:11px; font-weight:600;">📦 ${row.supplier || '-'}</div>
                     </td>
-                    <td class="${cls}" style="text-align:right; font-size:14px; font-weight:bold; letter-spacing:1px;">${st}</td>
+                    <td class="${cls}" style="text-align:right; font-size:13px; font-weight:bold;">${st}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -392,7 +369,7 @@
         }
 
         setInterval(() => {
-            const now = getWIB();
+            const now = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Jakarta"}));
             document.getElementById('clock').innerText = now.toTimeString().split(' ')[0];
         }, 1000);
 
