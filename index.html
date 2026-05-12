@@ -84,7 +84,7 @@
         }
 
         .quote-text { 
-            font-size: 42px; 
+            font-size: 40px; 
             color: #fff; 
             font-weight: 600; 
             font-style: italic; 
@@ -353,7 +353,7 @@
                     const dateStr = dateObj.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase();
                     
                     const divider = document.createElement('tr');
-                    divider.innerHTML = `<td colspan="4" class="date-divider">--- JADWAL PENGIRIMAN: ${dateStr} ---</td>`;
+                    divider.innerHTML = `<td colspan="4" class="date-divider"> JADWAL: ${dateStr} </td>`;
                     tbody.appendChild(divider);
                 }
 
@@ -373,12 +373,12 @@
                         </div>
                         <div style="font-size:13px; color:var(--text-gold-soft); margin-left:2px;">📍 ${row.lokasi || '-'}</div>
                     </td>
-                    <td style="text-align:center; font-weight:bold; color:var(--text-gold-soft); font-size:18px;">${row.jumlah_keluar || '0'}</td>
+                    <td style="text-align:center; font-weight:bold; color:var(--text-gold-soft); font-size:14px;">${row.jumlah_keluar || '0'}</td>
                     <td>
-                        <div style="color:var(--text-white-soft); font-weight:bold; font-size:15px; margin-bottom:4px;">${row.delivery_to || '-'}</div>
+                        <div style="color:var(--text-white-soft); font-weight:bold; font-size:12px; margin-bottom:4px;">${row.delivery_to || '-'}</div>
                         <div style="color:var(--text-blue-soft); font-size:12px; font-weight:600; text-transform:uppercase;">📦 ${row.supplier || '-'}</div>
                     </td>
-                    <td class="${cls}" style="text-align:right; font-size:14px; font-weight:bold; letter-spacing:1px;">${st}</td>
+                    <td class="${cls}" style="text-align:right; font-size:12px; font-weight:bold; letter-spacing:1px;">${st}</td>
                 `;
                 
                 tbody.appendChild(tr);
