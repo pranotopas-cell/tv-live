@@ -73,7 +73,7 @@
         #quoteOverlay {
             position: absolute; 
             top: 0; bottom: 0; left: 0; right: 0;
-            background: radial-gradient(circle at center, rgba(16, 23, 42, 0.95) 0%, #050811 100%);
+            background: radial-gradient(circle at center, rgba(16, 23, 42, 0.98) 0%, #050811 100%);
             display: none; 
             flex-direction: column;
             justify-content: center;
@@ -87,19 +87,18 @@
         }
 
         .quote-text { 
-            font-size: 48px; 
+            font-size: 42px; 
             color: #fff; 
             font-weight: 300; 
             font-style: italic; 
-            max-width: 75%; 
+            max-width: 85%; 
             line-height: 1.4; 
             margin-bottom: 50px;
             text-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            perspective: 1000px;
         }
 
         .quote-source { 
-            font-size: 22px; 
+            font-size: 20px; 
             color: var(--text-gold-soft); 
             font-weight: 700; 
             text-transform: uppercase; 
@@ -134,12 +133,12 @@
         .letter { 
             display: inline-block; 
             opacity: 0; 
-            transform: translate3d(0, 40px, 0) rotateX(-90deg); 
-            filter: blur(12px);
-            transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1); 
+            transform: translate3d(0, 30px, 0); 
+            filter: blur(8px);
+            transition: all 0.6s ease-out; 
         }
-        .letter.in { opacity: 1; transform: translate3d(0, 0, 0) rotateX(0deg); filter: blur(0); }
-        .letter.out { opacity: 0; transform: translate3d(0, -40px, 0) rotateX(90deg); filter: blur(12px); }
+        .letter.in { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }
+        .letter.out { opacity: 0; transform: translate3d(0, -30px, 0); filter: blur(8px); }
 
         /* STATUS & BADGES */
         .st-proses { color: var(--color-proses); animation: blink 1.5s infinite; font-weight: bold; }
@@ -253,8 +252,7 @@
         }
 
         // FUNGSI ANIMASI TEXT
-        function wrapText(element) {
-            const text = element.textContent;
+        function wrapText(element, text) {
             element.innerHTML = '';
             text.split('').forEach(char => {
                 const s = document.createElement('span');
@@ -264,59 +262,58 @@
             });
         }
 
-        async function animateIn(container) {
-            const letters = container.querySelectorAll('.letter');
-            for (let i = 0; i < letters.length; i++) {
-                letters[i].classList.add('in');
-                if (i % 3 === 0) await new Promise(r => setTimeout(r, 10));
-            }
-        }
-
-        async function animateOut(container) {
-            const letters = container.querySelectorAll('.letter');
-            for (let i = 0; i < letters.length; i++) {
-                letters[i].classList.remove('in');
-                letters[i].classList.add('out');
-                if (i % 5 === 0) await new Promise(r => setTimeout(r, 5));
-            }
-        }
-
         async function showQuote() {
-            const overlay = document.getElementById('quoteOverlay');
-            const table = document.getElementById('deliveryTable');
-            const qTxt = document.getElementById('quoteText');
-            const qSrc = document.getElementById('quoteSource');
-            
-            // Fade out table cinematic
-            table.style.filter = 'blur(20px)';
-            table.style.transform = 'scale(1.1)';
-            table.style.opacity = '0';
+            return new Promise(async (resolve) => {
+                const overlay = document.getElementById('quoteOverlay');
+                const table = document.getElementById('deliveryTable');
+                const qTxt = document.getElementById('quoteText');
+                const qSrc = document.getElementById('quoteSource');
+                
+                // 1. Sembunyikan Tabel
+                table.style.filter = 'blur(20px)';
+                table.style.transform = 'scale(1.1)';
+                table.style.opacity = '0';
 
-            const q = quotes[quoteIndex];
-            quoteIndex = (quoteIndex + 1) % quotes.length;
-            qTxt.textContent = q.t;
-            qSrc.textContent = q.s;
-            wrapText(qTxt);
-            wrapText(qSrc);
-            
-            overlay.style.display = 'flex';
-            setTimeout(() => overlay.style.opacity = '1', 50);
+                // 2. Siapkan Konten Quote
+                const q = quotes[quoteIndex];
+                quoteIndex = (quoteIndex + 1) % quotes.length;
+                wrapText(qTxt, q.t);
+                wrapText(qSrc, q.s);
+                
+                // 3. Tampilkan Overlay
+                overlay.style.display = 'flex';
+                await new Promise(r => setTimeout(r, 100));
+                overlay.style.opacity = '1';
 
-            await animateIn(qTxt);
-            await animateIn(qSrc);
-            
-            await new Promise(r => setTimeout(r, 8000)); 
-            
-            await animateOut(qTxt);
-            await animateOut(qSrc);
-            
-            overlay.style.opacity = '0';
-            setTimeout(() => {
-                overlay.style.display = 'none';
-                table.style.filter = 'blur(0px)';
-                table.style.transform = 'scale(1)';
-                table.style.opacity = '1';
-            }, 1500);
+                // 4. Animasi Huruf Masuk
+                const letters = overlay.querySelectorAll('.letter');
+                for (let i = 0; i < letters.length; i++) {
+                    setTimeout(() => letters[i].classList.add('in'), i * 20);
+                }
+
+                // 5. Durasi Tampil
+                await new Promise(r => setTimeout(r, 7000));
+                
+                // 6. Animasi Keluar
+                for (let i = 0; i < letters.length; i++) {
+                    setTimeout(() => {
+                        letters[i].classList.remove('in');
+                        letters[i].classList.add('out');
+                    }, i * 10);
+                }
+
+                // 7. Sembunyikan Overlay & Kembalikan Tabel
+                setTimeout(() => {
+                    overlay.style.opacity = '0';
+                    setTimeout(() => {
+                        overlay.style.display = 'none';
+                        table.style.filter = 'blur(0px)';
+                        table.style.transform = 'scale(1)';
+                        table.style.opacity = '1';
+                        resolve();
+                    }, 1000);
+                }, 1000);
+            });
         }
 
         let scrollInterval;
@@ -328,15 +325,15 @@
 
             setTimeout(() => {
                 scrollInterval = setInterval(async () => {
-                    scrollContainer.scrollTop += 0.8; // Perhalus scroll
-                    if (scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight - 2) {
+                    scrollContainer.scrollTop += 1;
+                    if (Math.ceil(scrollContainer.scrollTop + scrollContainer.clientHeight) >= scrollContainer.scrollHeight) {
                         clearInterval(scrollInterval);
                         setTimeout(async () => {
                             await showQuote(); 
                             loadDashboard();
-                        }, 2500);
+                        }, 2000);
                     }
-                }, 40); 
+                }, 50); 
             }, 3000);
         }
 
@@ -354,29 +351,18 @@
             } catch (err) { console.error("Gagal:", err.message); }
         }
 
-        async function renderData(data) {
+        function renderData(data) {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
             
             const priority = { "PROSES": 1, "OPER": 2, "TERJADWAL": 3, "LANGSIR": 4, "TUNGGU": 5, "DELIVERED": 6 };
-            data.sort((a, b) => {
-                if(a.tanggal !== b.tanggal) return new Date(a.tanggal) - new Date(b.tanggal);
-                return (priority[a.status?.toUpperCase()] || 99) - (priority[b.status?.toUpperCase()] || 99);
-            });
+            data.sort((a, b) => (priority[a.status?.toUpperCase()] || 99) - (priority[b.status?.toUpperCase()] || 99));
 
-            let currentTanggal = "";
+            if(data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="date-divider">BELUM ADA JADWAL HARI INI</td></tr>';
+            }
 
-            for (let row of data) {
-                if (row.tanggal !== currentTanggal) {
-                    currentTanggal = row.tanggal;
-                    const dateObj = new Date(currentTanggal);
-                    const dateStr = dateObj.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase();
-                    
-                    const divider = document.createElement('tr');
-                    divider.innerHTML = `<td colspan="4" class="date-divider">--- JADWAL PENGIRIMAN: ${dateStr} ---</td>`;
-                    tbody.appendChild(divider);
-                }
-
+            data.forEach(row => {
                 const tr = document.createElement('tr');
                 const st = (row.status || "").toUpperCase();
                 let cls = "st-terjadwal";
@@ -387,7 +373,7 @@
 
                 tr.innerHTML = `
                     <td>
-                        <div class="flight-cell" style="display:flex; align-items:center; gap:12px; margin-bottom:6px;">
+                        <div style="display:flex; align-items:center; gap:12px; margin-bottom:6px;">
                             <div class="nopol-block">${row.nopol || '-'}</div>
                             <div class="sopir-name">${row.sopir || '-'}</div>
                         </div>
@@ -401,7 +387,7 @@
                     <td class="${cls}" style="text-align:right; font-size:14px; font-weight:bold; letter-spacing:1px;">${st}</td>
                 `;
                 tbody.appendChild(tr);
-            }
+            });
             startAutoScroll();
         }
 
