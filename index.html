@@ -48,7 +48,7 @@
         }
         
         .header h1 { margin: 0; font-size: 26px; letter-spacing: 2px; color: var(--text-white-soft); font-weight: 800; }
-        #targetDate { font-size: 18px; color: var(--text-gold-soft); font-weight: 700; }
+        $("#targetDate") { font-size: 18px; color: var(--text-gold-soft); font-weight: 700; }
         
         .header-right { display: flex; align-items: center; gap: 25px; }
         .clock-container { text-align: right; display: flex; flex-direction: column; justify-content: center; }
@@ -69,7 +69,7 @@
             position: relative;
         }
 
-        /* QUOTE OVERLAY - FIX WRAPPING */
+        /* QUOTE OVERLAY - SMOOTH FADE & ROLL */
         #quoteOverlay {
             position: fixed; 
             top: 75px; bottom: 35px; left: 0; right: 0;
@@ -81,6 +81,17 @@
             text-align: center;
             padding: 50px;
             z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+        }
+
+        /* ANIMASI TEKS MENGGULUNG (ROLLING TEXT) */
+        .quote-text, .quote-source {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 85%;
+            line-height: 1.4;
         }
 
         .quote-text { 
@@ -88,13 +99,10 @@
             color: #fff; 
             font-weight: 600; 
             font-style: italic; 
-            max-width: 85%; 
-            line-height: 1.4; 
             margin-bottom: 40px;
             text-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            word-wrap: break-word;
-            overflow-wrap: break-word;
         }
+        
         .quote-source { 
             font-size: 24px; 
             color: var(--text-gold-soft); 
@@ -104,6 +112,23 @@
             border-top: 2px solid var(--text-gold-soft);
             padding-top: 20px;
         }
+
+        /* KARAKTER MODEL PAPAN BANDARA MENGGULUNG */
+        .letter-wrapper {
+            display: inline-block;
+            overflow: hidden;
+            vertical-align: bottom;
+            height: 1.4em;
+        }
+
+        .letter { 
+            display: inline-block; 
+            transform: translateY(100%); 
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+        
+        .letter.in { transform: translateY(0); }
+        .letter.out { transform: translateY(-100%); }
 
         /* TABEL */
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
@@ -122,16 +147,6 @@
             border-top: 1px solid var(--border-blue);
             border-bottom: 1px solid var(--border-blue);
         }
-
-        .letter { 
-            display: inline-block; 
-            opacity: 0; 
-            transform: scale(0.5) translateY(30px); 
-            filter: blur(10px);
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-        }
-        .letter.in { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
-        .letter.out { opacity: 0; transform: scale(1.2) translateY(-30px); filter: blur(10px); }
 
         .st-proses { color: var(--color-proses); animation: blink 1.5s infinite; font-weight: bold; }
         .st-langsir { color: var(--color-langsir); animation: blink 2s infinite; } 
@@ -199,6 +214,7 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YWVjdHBoZ29lbG1oenJrYXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NzExNDYsImV4cCI6MjA4ODE0NzE0Nn0.-8E98wpkzHBARRhW6PKhBtf2XKhWFjq7idAzw9jlcKg';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // DATA QUOTE DIPERBANYAK (AL-QUR'AN, HADITS & KATA BIJAK ISLAMI)
         const quotes = [
             { t: "Sesungguhnya sesudah kesulitan itu ada kemudahan.", s: "QS. Al-Insyirah: 6" },
             { t: "Bekerjalah untuk duniamu seolah hidup selamanya, beramallah untuk akhiratmu seolah mati besok.", s: "Ali bin Abi Thalib" },
@@ -211,7 +227,15 @@
             { t: "Mencari rezeki halal adalah wajib setelah ibadah fardhu.", s: "HR. Ath-Thabrani" },
             { t: "Janganlah kamu berputus asa dari rahmat Allah.", s: "QS. Az-Zumar: 53"},
             { t: "Ridha Allah terletak pada ridha kedua orang tua.", s: "HR. Tirmidzi" },
-            { t: "Harta tidak akan berkurang karena sedekah.", s: "HR. Muslim" }
+            { t: "Harta tidak akan berkurang karena sedekah.", s: "HR. Muslim" },
+            { t: "Dan barangsiapa yang bertawakal kepada Allah, niscaya Allah akan mencukupkan keperluannya.", s: "QS. At-Talaq: 3" },
+            { t: "Kekayaan bukanlah dengan banyaknya harta, namun kekayaan adalah hati yang selalu merasa cukup.", s: "HR. Bukhari" },
+            { t: "Jadikanlah sabar dan shalat sebagai penolongmu. Dan sesungguhnya yang demikian itu sungguh berat, kecuali bagi orang-orang yang khusyu.", s: "QS. Al-Baqarah: 45" },
+            { t: "Tidak ada satu subuh pun yang dialami hamba-hamba Allah melainkan malaikat turun dan berdoa: Ya Allah, berikanlah ganti bagi orang yang berinfak.", s: "HR. Bukhari" },
+            { t: "Mukmin yang kuat lebih baik dan lebih dicintai Allah daripada mukmin yang lemah.", s: "HR. Muslim" },
+            { t: "Sesungguhnya Allah tidak akan mengubah keadaan suatu kaum sebelum mereka mengubah keadaan diri mereka sendiri.", s: "QS. Ar-Ra'd: 11" },
+            { t: "Senyummu di hadapan saudaramu adalah sedekah.", s: "HR. Tirmidzi" },
+            { t: "Bersemangatlah atas hal-hal yang bermanfaat bagimu dan mintalah pertolongan kepada Allah, jangan menjadi lemah.", s: "HR. Muslim" }
         ];
 
         let quoteIndex = 0;
@@ -246,32 +270,47 @@
             playCurrentSource();
         }
 
+        // FUNGSI WRAP TEXT MODEL MATRIKS / ROLL ELEMEN
         function wrapText(element) {
             const text = element.textContent;
             element.innerHTML = '';
             text.split('').forEach(char => {
+                const wrapper = document.createElement('span');
+                wrapper.className = 'letter-wrapper';
+                
                 const s = document.createElement('span');
                 s.className = 'letter';
                 s.innerHTML = char === ' ' ? '&nbsp;' : char;
-                element.appendChild(s);
+                
+                wrapper.appendChild(s);
+                element.appendChild(wrapper);
             });
         }
 
-        async function animateIn(container) {
-            const letters = container.querySelectorAll('.letter');
+        async function animateIn(overlay) {
+            overlay.style.display = 'flex';
+            // Trigger reflow
+            overlay.offsetHeight;
+            overlay.style.opacity = '1';
+
+            const letters = overlay.querySelectorAll('.letter');
             for (let i = 0; i < letters.length; i++) {
+                letters[i].classList.remove('out');
                 letters[i].classList.add('in');
-                if (i % 5 === 0) await new Promise(r => setTimeout(r, 10));
+                if (i % 3 === 0) await new Promise(r => setTimeout(r, 15));
             }
         }
 
-        async function animateOut(container) {
-            const letters = container.querySelectorAll('.letter');
+        async function animateOut(overlay) {
+            const letters = overlay.querySelectorAll('.letter');
             for (let i = 0; i < letters.length; i++) {
                 letters[i].classList.remove('in');
                 letters[i].classList.add('out');
-                if (i % 8 === 0) await new Promise(r => setTimeout(r, 5));
+                if (i % 4 === 0) await new Promise(r => setTimeout(r, 10));
             }
+            overlay.style.opacity = '0';
+            await new Promise(r => setTimeout(r, 800));
+            overlay.style.display = 'none';
         }
 
         async function showQuote() {
@@ -288,11 +327,9 @@
             wrapText(qTxt);
             wrapText(qSrc);
             
-            overlay.style.display = 'flex';
             await animateIn(overlay);
-            await new Promise(r => setTimeout(r, 6000)); 
+            await new Promise(r => setTimeout(r, 7000)); // Durasi membaca quote (7 detik)
             await animateOut(overlay);
-            overlay.style.display = 'none';
         }
 
         let scrollRequest;
@@ -302,15 +339,13 @@
             cancelAnimationFrame(scrollRequest);
             scrollContainer.scrollTop = 0;
 
-            const scrollSpeed = 0.6; // Kecepatan scroll
+            const scrollSpeed = 0.6; 
 
             function step() {
-                // DETEKSI AKHIR SCROLL YANG AKURAT
                 const currentPos = Math.ceil(scrollContainer.scrollTop + scrollContainer.clientHeight);
                 const maxPos = scrollContainer.scrollHeight;
 
                 if (currentPos >= maxPos) {
-                    // Berhenti sejenak di baris terakhir
                     setTimeout(async () => {
                         cancelAnimationFrame(scrollRequest);
                         await showQuote(); 
@@ -325,7 +360,7 @@
 
             setTimeout(() => {
                 scrollRequest = requestAnimationFrame(step);
-            }, 3000); // Tunggu 3 detik di awal sebelum jalan
+            }, 3000); 
         }
 
         function getWIB() { return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Jakarta"})); }
