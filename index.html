@@ -156,7 +156,32 @@
         .st-terjadwal { color: var(--color-terjadwal); }
 
         .flight-cell { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
-        .nopol-block { background: #e2e8f0; color: #1e293b; padding: 4px 8px; border-radius: 4px; font-weight: 800; font-size: 13px; min-width: 90px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        
+        /* UPDATE BACKGROUND NOPOL DENGAN LOGO MITSUBISHI & HINO */
+        .nopol-block { 
+            color: #1e293b; 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-weight: 800; 
+            font-size: 13px; 
+            min-width: 90px; 
+            text-align: center; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+            
+            /* Background dasar abu-abu dengan gabungan logo Mitsubishi dan Hino */
+            background-color: #e2e8f0;
+            background-image: 
+                /* Logo Mitsubishi Kiri (Merah Transparan 12%) */
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50,5 33,35 67,35' fill='%23ff0000' fill-opacity='0.12'/%3E%3Cpolygon points='33,35 0,95 34,95' fill='%23ff0000' fill-opacity='0.12'/%3E%3Cpolygon points='67,35 66,95 100,95' fill='%23ff0000' fill-opacity='0.12'/%3E%3C/svg%3E"),
+                /* Logo Hino Kanan (Merah Transparan 12%) */
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M20,10 L35,10 L35,42 L65,42 L65,10 L80,10 L80,90 L65,90 L65,58 L35,58 L35,90 L20,90 Z M10,35 L90,35 L90,45 L10,45 Z M10,55 L90,55 L90,65 L10,65 Z' fill='%23ff0000' fill-opacity='0.12'/%3E%3C/svg%3E");
+            background-repeat: no-repeat, no-repeat;
+            background-position: left 4px center, right 4px center;
+            background-size: 20px 20px, 18px 18px;
+        }
+        
         .sopir-name { color: var(--text-blue-soft); font-weight: 700; font-size: 16px; }
         
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
