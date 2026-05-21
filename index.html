@@ -157,31 +157,37 @@
 
         .flight-cell { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
         
-        /* UPDATE BACKGROUND NOPOL DENGAN LOGO MITSUBISHI & HINO */
+        /* UPDATE: Nopol Block base style dengan background berlogo */
         .nopol-block { 
-            color: #1e293b; 
             padding: 4px 8px; 
             border-radius: 4px; 
             font-weight: 800; 
             font-size: 13px; 
-            min-width: 90px; 
+            min-width: 95px; 
             text-align: center; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            position: relative;
-            z-index: 1;
-            
-            /* Background dasar abu-abu dengan gabungan logo Mitsubishi dan Hino */
-            background-color: #e2e8f0;
-            background-image: 
-                /* Logo Mitsubishi Kiri (Merah Transparan 12%) */
-                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50,5 33,35 67,35' fill='%23ff0000' fill-opacity='0.12'/%3E%3Cpolygon points='33,35 0,95 34,95' fill='%23ff0000' fill-opacity='0.12'/%3E%3Cpolygon points='67,35 66,95 100,95' fill='%23ff0000' fill-opacity='0.12'/%3E%3C/svg%3E"),
-                /* Logo Hino Kanan (Merah Transparan 12%) */
-                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M20,10 L35,10 L35,42 L65,42 L65,10 L80,10 L80,90 L65,90 L65,58 L35,58 L35,90 L20,90 Z M10,35 L90,35 L90,45 L10,45 Z M10,55 L90,55 L90,65 L10,65 Z' fill='%23ff0000' fill-opacity='0.12'/%3E%3C/svg%3E");
-            background-repeat: no-repeat, no-repeat;
-            background-position: left 4px center, right 4px center;
-            background-size: 20px 20px, 18px 18px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3); 
+            background-repeat: no-repeat;
+            background-position: right 3px center;
+            background-size: 14px auto;
+            padding-right: 20px; /* Memberi ruang untuk logo di kanan */
         }
-        
+
+        /* Varian Brand Isuzu (Putih) */
+        .bg-isuzu {
+            background-color: #ffffff; 
+            color: #e60012; /* Warna merah khas teks Isuzu jika diperlukan */
+            /* Menggunakan SVG Logo Isuzu Segitiga Ganda Resmi */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='15,85 40,15 55,15 30,85' fill='%23e60012'/%3E%3Cpolygon points='45,85 70,15 85,15 60,85' fill='%23e60012'/%3E%3C/svg%3E");
+        }
+
+        /* Varian Brand Hino (Hijau) */
+        .bg-hino {
+            background-color: #2e7d32; 
+            color: #ffffff; 
+            /* Menggunakan SVG Logo Sayap Hino 'H' Resmi */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M20,15 L35,15 L35,42 Q50,30 65,42 L65,15 L80,15 L80,85 L65,85 L65,58 Q50,70 35,58 L35,85 L20,85 Z' fill='%23ffffff'/%3E%3Cpath d='M30,50 L70,50' stroke='%23ffffff' stroke-width='8'/%3E%3C/svg%3E");
+        }
+
         .sopir-name { color: var(--text-blue-soft); font-weight: 700; font-size: 16px; }
         
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
@@ -435,10 +441,16 @@
                 else if (st.includes("OPER")) cls = "st-oper";
                 else if (st.includes("DELIVERED")) cls = "st-delivered";
 
+                // UPDATE LOGIKA: Menentukan background Isuzu atau Hino berdasarkan angka nopol secara dinamis
+                const nopolStr = row.nopol || '';
+                const numericPart = nopolStr.replace(/[^0-9]/g, '');
+                const lastDigit = numericPart ? parseInt(numericPart.slice(-1)) : 0;
+                const brandClass = (lastDigit % 2 === 0) ? 'bg-isuzu' : 'bg-hino';
+
                 tr.innerHTML = `
                     <td>
                         <div class="flight-cell">
-                            <div class="nopol-block">${row.nopol || '-'}</div>
+                            <div class="nopol-block ${brandClass}">${row.nopol || '-'}</div>
                             <div class="sopir-name">${row.sopir || '-'}</div>
                         </div>
                         <div style="font-size:13px; color:var(--text-gold-soft); margin-left:2px;">📍 ${row.lokasi || '-'}</div>
