@@ -420,7 +420,7 @@
                     const dateStr = dateObj.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
                     
                     const divider = document.createElement('tr');
-                    divider.innerHTML = `<td colspan="4" class="date-divider"> RENCANA JADWAL ${dateStr} </td>`;
+                    divider.innerHTML = `<td colspan="4" class="date-divider">${dateStr} </td>`;
                     tbody.appendChild(divider);
                 }
 
