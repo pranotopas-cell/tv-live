@@ -47,14 +47,13 @@
         
         .header h1 { margin: 0; font-size: 26px; letter-spacing: 2px; color: var(--text-white-soft); font-weight: 800; }
         
-        /* PERBAIKAN: Selektor CSS ID yang sebelumnya salah format */
         #targetDate { font-size: 18px; color: var(--text-gold-soft); font-weight: 700; }
         
         .header-right { display: flex; align-items: center; gap: 25px; }
         .clock-container { text-align: right; display: flex; flex-direction: column; justify-content: center; }
         #clock { font-size: 24px; font-weight: 800; color: var(--text-white-soft); line-height: 1; }
         
-        .cloud-status { font-size: 13px; display: flex; align-items: center; justify-content: flex-end; gap: 5px; color: var(--color-proses); margin-top: 4px; }
+        .cloud-status { font-size: 12px; display: flex; align-items: center; justify-content: flex-end; gap: 5px; color: var(--color-proses); margin-top: 4px; }
         .dot { height: 8px; width: 8px; background-color: var(--color-proses); border-radius: 50%; animation: pulse 2s infinite; }
 
         .audio-controls { display: flex; flex-direction: column; align-items: center; gap: 4px; background: rgba(255, 255, 255, 0.05); padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(229, 192, 123, 0.2); }
@@ -130,14 +129,17 @@
         /* TABEL */
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         th { background: var(--header-bg); color: var(--text-gold-soft); text-align: left; padding: 16px 10px; font-size: 14px; border-bottom: 1px solid var(--border-blue); position: sticky; top: 0; z-index: 10; }
-        td { padding: 15px 10px; font-size: 15px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
+        
+        /* UPDATE: Menyeragamkan ukuran teks isi tabel menjadi 12px */
+        td { padding: 15px 10px; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
 
+        /* UPDATE: Teks pembatas tanggal rata kanan (pinggir kanan) */
         .date-divider { 
             background: linear-gradient(90deg, #1a2235, #0a0f1d); 
             color: var(--text-gold-soft); 
-            text-align: center; 
+            text-align: right; 
             font-size: 16px; 
-            padding: 15px 0; 
+            padding: 15px 20px; 
             font-weight: bold; 
             text-transform: uppercase; 
             letter-spacing: 4px;
@@ -152,39 +154,38 @@
 
         .flight-cell { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
         
-        /* BARU: Modifikasi total Nopol Block agar mirip flap board/LED papan bandara */
+        /* UPDATE: Ukuran teks nopol disesuaikan menjadi 12px agar seragam */
         .nopol-block { 
             padding: 6px 12px; 
             border-radius: 6px; 
-            font-family: 'Courier New', Courier, monospace; /* Font monospace kaku khas bandara */
+            font-family: 'Courier New', Courier, monospace; 
             font-weight: 900; 
-            font-size: 15px; 
-            min-width: 125px; 
+            font-size: 12px; 
+            min-width: 115px; 
             text-align: left; 
-            background-color: #030712; /* Dasar hitam pekat metalik */
-            color: #ffb703; /* Warna kuning oranye menyala terang (Efek lampu LED) */
+            background-color: #030712; 
+            color: #ffb703; 
             border: 2px solid #1e293b;
             box-shadow: inset 0 0 8px rgba(255,183,3,0.2), 0 3px 6px rgba(0,0,0,0.5); 
             
             background-repeat: no-repeat;
             background-position: right 8px center;
-            background-size: 22px auto;
-            padding-right: 38px; /* Memberi jarak aman agar teks nopol tidak menabrak logo */
+            background-size: 18px auto;
+            padding-right: 34px; 
             display: inline-block;
             letter-spacing: 1px;
         }
 
-        /* BARU: Perbaikan SVG Logo Isuzu Segitiga Ganda Merah (Asli Resmi) */
         .bg-isuzu {
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='10,90 38,10 54,10 26,90' fill='%23ff3333'/%3E%3Cpolygon points='46,90 74,10 90,10 62,90' fill='%23ff3333'/%3E%3C/svg%3E");
         }
 
-        /* BARU: Perbaikan SVG Logo Hino Putih dengan Bayangan Lembut */
         .bg-hino {
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M20,15 L36,15 L36,44 Q50,30 64,44 L64,15 L80,15 L80,85 L64,85 L64,56 Q50,70 36,56 L36,85 L20,85 Z' fill='%23ffffff'/%3E%3Cpath d='M28,50 L72,50' stroke='%23ffffff' stroke-width='10'/%3E%3C/svg%3E");
         }
 
-        .sopir-name { color: var(--text-blue-soft); font-weight: 700; font-size: 16px; }
+        /* UPDATE: Ukuran teks nama sopir seragam ke 12px */
+        .sopir-name { color: var(--text-blue-soft); font-weight: 700; font-size: 12px; }
         
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
         @keyframes pulse { 0% { transform: scale(0.9); } 50% { transform: scale(1.2); } 100% { transform: scale(0.9); } }
@@ -419,10 +420,11 @@
                 if (row.tanggal !== currentTanggal) {
                     currentTanggal = row.tanggal;
                     const dateObj = new Date(currentTanggal);
-                    const dateStr = dateObj.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase();
+                    const dateStr = dateObj.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
                     
+                    // UPDATE: Mengubah teks pembatas menjadi RENCANA JADWAL [HARI], [TANGGAL] [BULAN] [TAHUN]
                     const divider = document.createElement('tr');
-                    divider.innerHTML = `<td colspan="4" class="date-divider"> JADWAL: ${dateStr} </td>`;
+                    divider.innerHTML = `<td colspan="4" class="date-divider"> RENCANA JADWAL ${dateStr} </td>`;
                     tbody.appendChild(divider);
                 }
 
@@ -434,26 +436,26 @@
                 else if (st.includes("OPER")) cls = "st-oper";
                 else if (st.includes("DELIVERED")) cls = "st-delivered";
 
-                // Logika Penentuan Brand Isuzu vs Hino berdasarkan angka ganjil/genap nopol
                 const nopolStr = row.nopol || '';
                 const numericPart = nopolStr.replace(/[^0-9]/g, '');
                 const lastDigit = numericPart ? parseInt(numericPart.slice(-1)) : 0;
                 const brandClass = (lastDigit % 2 === 0) ? 'bg-isuzu' : 'bg-hino';
 
+                // UPDATE: Menyeragamkan semua ukuran teks detail di bawah ini menjadi 12px melalui CSS inline dan kelas terkait
                 tr.innerHTML = `
                     <td>
                         <div class="flight-cell">
                             <div class="nopol-block ${brandClass}">${row.nopol || '-'}</div>
                             <div class="sopir-name">${row.sopir || '-'}</div>
                         </div>
-                        <div style="font-size:14px; color:var(--text-gold-soft); margin-left:2px;">📍 ${row.lokasi || '-'}</div>
+                        <div style="font-size:12px; color:var(--text-gold-soft); margin-left:2px;">📍 ${row.lokasi || '-'}</div>
                     </td>
-                    <td style="text-align:center; font-weight:bold; color:var(--text-gold-soft); font-size:14px;">${row.jumlah_keluar || '0'}</td>
+                    <td style="text-align:center; font-weight:bold; color:var(--text-gold-soft); font-size:12px;">${row.jumlah_keluar || '0'}</td>
                     <td>
-                        <div style="color:var(--text-white-soft); font-weight:bold; font-size:14px; margin-bottom:4px;">${row.delivery_to || '-'}</div>
-                        <div style="color:var(--text-blue-soft); font-size:14px; font-weight:600; text-transform:uppercase;">📦 ${row.supplier || '-'}</div>
+                        <div style="color:var(--text-white-soft); font-weight:bold; font-size:12px; margin-bottom:4px;">${row.delivery_to || '-'}</div>
+                        <div style="color:var(--text-blue-soft); font-size:12px; font-weight:600; text-transform:uppercase;">📦 ${row.supplier || '-'}</div>
                     </td>
-                    <td class="${cls}" style="text-align:right; font-size:14px; font-weight:bold; letter-spacing:1px;">${st}</td>
+                    <td class="${cls}" style="text-align:right; font-size:12px; font-weight:bold; letter-spacing:1px;">${st}</td>
                 `;
                 tbody.appendChild(tr);
             }
