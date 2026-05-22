@@ -130,10 +130,8 @@
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         th { background: var(--header-bg); color: var(--text-gold-soft); text-align: left; padding: 16px 10px; font-size: 14px; border-bottom: 1px solid var(--border-blue); position: sticky; top: 0; z-index: 10; }
         
-        /* UPDATE: Menyeragamkan ukuran teks isi tabel menjadi 12px */
         td { padding: 15px 10px; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
 
-        /* UPDATE: Teks pembatas tanggal rata kanan (pinggir kanan) */
         .date-divider { 
             background: linear-gradient(90deg, #1a2235, #0a0f1d); 
             color: var(--text-gold-soft); 
@@ -154,14 +152,13 @@
 
         .flight-cell { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
         
-        /* UPDATE: Ukuran teks nopol disesuaikan menjadi 12px agar seragam */
         .nopol-block { 
             padding: 6px 12px; 
             border-radius: 6px; 
             font-family: 'Courier New', Courier, monospace; 
             font-weight: 900; 
             font-size: 12px; 
-            min-width: 115px; 
+            min-width: 125px; 
             text-align: left; 
             background-color: #030712; 
             color: #ffb703; 
@@ -169,22 +166,22 @@
             box-shadow: inset 0 0 8px rgba(255,183,3,0.2), 0 3px 6px rgba(0,0,0,0.5); 
             
             background-repeat: no-repeat;
-            background-position: right 8px center;
-            background-size: 18px auto;
+            background-position: right 6px center;
+            background-size: 22px auto;
             padding-right: 34px; 
             display: inline-block;
             letter-spacing: 1px;
         }
 
+        /* LOGO UPDATE */
         .bg-isuzu {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='10,90 38,10 54,10 26,90' fill='%23ff3333'/%3E%3Cpolygon points='46,90 74,10 90,10 62,90' fill='%23ff3333'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e60012'/%3E%3Cpolygon points='22,75 42,15 54,15 34,75' fill='%23ffffff'/%3E%3Cpolygon points='46,75 66,15 78,15 58,75' fill='%23ffffff'/%3E%3C/svg%3E");
         }
 
         .bg-hino {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M20,15 L36,15 L36,44 Q50,30 64,44 L64,15 L80,15 L80,85 L64,85 L64,56 Q50,70 36,56 L36,85 L20,85 Z' fill='%23ffffff'/%3E%3Cpath d='M28,50 L72,50' stroke='%23ffffff' stroke-width='10'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 65'%3E%3Cpath d='M50,3 C25,3 12,20 12,32.5 C12,45 25,62 50,62 C75,62 88,45 88,32.5 C88,20 75,3 50,3 Z M50,11 C65,11 74,20 78,30 L64,30 C60,24 56,20 50,20 C44,20 40,24 36,30 L22,30 C26,20 35,11 50,11 Z M22,35 L36,35 C40,41 44,45 50,45 C56,45 60,41 64,35 L78,35 C74,45 65,54 50,54 C35,54 26,45 22,35 Z' fill='%23ff1a1a'/%3E%3Crect x='20' y='30' width='60' height='5' fill='%23ff1a1a'/%3E%3C/svg%3E");
         }
 
-        /* UPDATE: Ukuran teks nama sopir seragam ke 12px */
         .sopir-name { color: var(--text-blue-soft); font-weight: 700; font-size: 12px; }
         
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
@@ -422,9 +419,8 @@
                     const dateObj = new Date(currentTanggal);
                     const dateStr = dateObj.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
                     
-                    // UPDATE: Mengubah teks pembatas menjadi RENCANA JADWAL [HARI], [TANGGAL] [BULAN] [TAHUN]
                     const divider = document.createElement('tr');
-                    divider.innerHTML = `<td colspan="4" class="date-divider"> ${dateStr} </td>`;
+                    divider.innerHTML = `<td colspan="4" class="date-divider"> RENCANA JADWAL ${dateStr} </td>`;
                     tbody.appendChild(divider);
                 }
 
@@ -436,12 +432,16 @@
                 else if (st.includes("OPER")) cls = "st-oper";
                 else if (st.includes("DELIVERED")) cls = "st-delivered";
 
+                // LOGIC FILTER BRAND (8, 1, 4, 7 = ISUZU, SELAINNYA = HINO)
                 const nopolStr = row.nopol || '';
                 const numericPart = nopolStr.replace(/[^0-9]/g, '');
-                const lastDigit = numericPart ? parseInt(numericPart.slice(-1)) : 0;
-                const brandClass = (lastDigit % 2 === 0) ? 'bg-isuzu' : 'bg-hino';
+                const lastDigit = numericPart ? parseInt(numericPart.slice(-1)) : null;
+                
+                let brandClass = 'bg-hino'; // Default brand jika tidak masuk kriteria Isuzu
+                if (lastDigit !== null && [8, 1, 4, 7].includes(lastDigit)) {
+                    brandClass = 'bg-isuzu';
+                }
 
-                // UPDATE: Menyeragamkan semua ukuran teks detail di bawah ini menjadi 12px melalui CSS inline dan kelas terkait
                 tr.innerHTML = `
                     <td>
                         <div class="flight-cell">
