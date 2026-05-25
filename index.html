@@ -16,6 +16,7 @@
             --color-langsir: #fff176;
             --color-delivered: #4db6ac;
             --color-oper: #ff9800;
+            --color-ngisi: #bd2130; /* Warna Merah Tua untuk NGISI AJA */
             --border-blue: #1e293b;
         }
 
@@ -146,9 +147,11 @@
         }
 
         .st-proses { color: var(--color-proses); animation: blink 1.5s infinite; font-weight: bold; }
-        .st-langsir { color: var(--color-langsir); animation: blink 2s infinite; } 
+        .st-langsir { color: var(--color-langsir); animation: blink 2s infinite; font-weight: bold; } 
         .st-oper { color: var(--color-oper); font-weight: bold; animation: blink 1.8s infinite; }
+        .st-ngisi { color: var(--color-ngisi); font-weight: bold; animation: blink 1.8s infinite; }
         .st-delivered { color: var(--color-delivered); opacity: 0.8; }
+        .st-terjadwal { color: var(--text-white-soft); }
 
         .flight-cell { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
         
@@ -173,7 +176,7 @@
             letter-spacing: 1px;
         }
 
-        /* LOGO UPDATE */
+        /* LOGO ARMAADA */
         .bg-isuzu {
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e60012'/%3E%3Cpolygon points='22,75 42,15 54,15 34,75' fill='%23ffffff'/%3E%3Cpolygon points='46,75 66,15 78,15 58,75' fill='%23ffffff'/%3E%3C/svg%3E");
         }
@@ -406,7 +409,17 @@
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
             
-            const priority = { "PROSES": 1, "OPER": 2, "TERJADWAL": 3, "LANGSIR": 4, "TUNGGU": 5, "DELIVERED": 6 };
+            // URUTAN PRIORITAS BARU: PROSES -> LANGSIRAN -> TERJADWAL -> OPER -> NGISI AJA -> TUNGGU -> DELIVERED
+            const priority = { 
+                "PROSES": 1, 
+                "LANGSIRAN": 2, 
+                "TERJADWAL": 3, 
+                "OPER": 4, 
+                "NGISI AJA": 5, 
+                "TUNGGU": 6, 
+                "DELIVERED": 7 
+            };
+
             data.sort((a, b) => {
                 if(a.tanggal !== b.tanggal) return new Date(a.tanggal) - new Date(b.tanggal);
                 return (priority[a.status?.toUpperCase()] || 99) - (priority[b.status?.toUpperCase()] || 99);
@@ -426,10 +439,13 @@
 
                 const tr = document.createElement('tr');
                 const st = (row.status || "").toUpperCase();
+                
+                // Logika Penentuan Kelas CSS Warna Status (Mendukung NGISI AJA)
                 let cls = "st-terjadwal";
                 if (st.includes("PROSES")) cls = "st-proses";
                 else if (st.includes("LANGSIR")) cls = "st-langsir";
                 else if (st.includes("OPER")) cls = "st-oper";
+                else if (st.includes("NGISI")) cls = "st-ngisi";
                 else if (st.includes("DELIVERED")) cls = "st-delivered";
 
                 // LOGIC FILTER BRAND (8, 1, 4, 7 = ISUZU, SELAINNYA = HINO)
@@ -437,7 +453,7 @@
                 const numericPart = nopolStr.replace(/[^0-9]/g, '');
                 const lastDigit = numericPart ? parseInt(numericPart.slice(-1)) : null;
                 
-                let brandClass = 'bg-hino'; // Default brand jika tidak masuk kriteria Isuzu
+                let brandClass = 'bg-hino'; 
                 if (lastDigit !== null && [8, 1, 4, 7].includes(lastDigit)) {
                     brandClass = 'bg-isuzu';
                 }
