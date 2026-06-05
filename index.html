@@ -62,13 +62,14 @@
         #audio-status { font-size: 10px; color: var(--text-gold-soft); font-weight: bold; text-transform: uppercase; }
         .play-btn { background: var(--text-gold-soft); color: #000; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
 
-        /* MAIN CONTENT - OPTIMIZED FOR iOS */
+        /* MAIN CONTENT - FIXED FOR iOS REFLUIDITY */
         .main-content { 
             flex: 1; 
-            overflow-y: scroll; /* Memaksa iOS membuat layer scrolling mandiri */
+            overflow-y: scroll; 
             width: 100%;
             position: relative;
             -webkit-overflow-scrolling: touch; 
+            scroll-behavior: auto !important; /* Menolak transisi smooth bawaan iOS saat direset */
         }
 
         .main-content::-webkit-scrollbar {
@@ -368,28 +369,34 @@
         let scrollRequest;
         const scrollContainer = document.getElementById('scrollContainer');
         
-        /* LOGIKA AUTO SCROLL TERUPDATE - MEMAKSA IPHONE RESET KE ATAS */
+        /* SOLUSI FIX AMAN UNTUK SCROLL UP DI IPHONE */
         function startAutoScroll() {
+            // 1. Matikan request frame animasi yang sedang berjalan agar koordinat bebas
             cancelAnimationFrame(scrollRequest);
             
-            // Menggunakan scrollTo bawaan dengan behavior 'auto' untuk mematahkan lock render Safari iOS
-            scrollContainer.scrollTo({ top: 0, behavior: 'auto' });
+            // 2. Reset paksa posisi ke 0 secara instan
+            scrollContainer.scrollTop = 0;
 
             const scrollSpeed = 0.6; 
 
             function step() {
-                // Memberikan toleransi pengenalan tinggi halaman di iOS (+4)
-                const currentPos = scrollContainer.scrollTop + scrollContainer.clientHeight + 4;
+                // Toleransi + 5 piksel untuk menghitung render sub-pixel layar Retina iPhone
+                const currentPos = scrollContainer.scrollTop + scrollContainer.clientHeight + 5;
                 const maxPos = scrollContainer.scrollHeight;
 
                 if (currentPos >= maxPos) {
+                    // Hentikan request loop saat mencapai batas bawah
+                    cancelAnimationFrame(scrollRequest);
+
                     setTimeout(async () => {
-                        cancelAnimationFrame(scrollRequest);
                         await showQuote(); 
                         
-                        // Memaksa reset ke koordinat 0 sebelum memuat ulang dashboard data
-                        scrollContainer.scrollTo({ top: 0, behavior: 'auto' });
-                        loadDashboard(); 
+                        // 3. SEBELUM MUAT DATA: Reset total koordinat scroll container lewat Micro-task Timeout
+                        scrollContainer.scrollTop = 0;
+                        
+                        setTimeout(() => {
+                            loadDashboard(); 
+                        }, 50); // Jeda aman memberikan browser iOS kesempatan merestrukturisasi layout tabel
                     }, 2000);
                     return; 
                 }
@@ -398,7 +405,7 @@
                 scrollRequest = requestAnimationFrame(step);
             }
 
-            // Jeda awal 3 detik sebelum halaman bergerak bergulir
+            // Jeda awal 3 detik sebelum tabel mulai bergerak turun
             setTimeout(() => {
                 scrollRequest = requestAnimationFrame(step);
             }, 3000); 
