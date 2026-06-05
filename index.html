@@ -62,16 +62,15 @@
         #audio-status { font-size: 10px; color: var(--text-gold-soft); font-weight: bold; text-transform: uppercase; }
         .play-btn { background: var(--text-gold-soft); color: #000; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
 
-        /* MAIN CONTENT - FIXED FOR iOS SCROLLING */
+        /* MAIN CONTENT - OPTIMIZED FOR iOS */
         .main-content { 
             flex: 1; 
-            overflow-y: auto; /* Menggunakan auto agar iOS mendaftarkan tinggi dokumen secara presisi */
+            overflow-y: scroll; /* Memaksa iOS membuat layer scrolling mandiri */
             width: 100%;
             position: relative;
-            -webkit-overflow-scrolling: touch; /* Menjaga kompatibilitas momentum scrolling */
+            -webkit-overflow-scrolling: touch; 
         }
 
-        /* Menyembunyikan scrollbar agar tampilan tetap bersih seperti semula */
         .main-content::-webkit-scrollbar {
             display: none;
         }
@@ -369,16 +368,18 @@
         let scrollRequest;
         const scrollContainer = document.getElementById('scrollContainer');
         
-        /* LOGIKA AUTO SCROLL FIX UNTUK iOS / IPHONE */
+        /* LOGIKA AUTO SCROLL TERUPDATE - MEMAKSA IPHONE RESET KE ATAS */
         function startAutoScroll() {
             cancelAnimationFrame(scrollRequest);
-            scrollContainer.scrollTop = 0;
+            
+            // Menggunakan scrollTo bawaan dengan behavior 'auto' untuk mematahkan lock render Safari iOS
+            scrollContainer.scrollTo({ top: 0, behavior: 'auto' });
 
             const scrollSpeed = 0.6; 
 
             function step() {
-                // Ditambahkan "+ 2" piksel toleransi untuk mengantisipasi ketidakcocokan sub-pixel di Safari iOS
-                const currentPos = scrollContainer.scrollTop + scrollContainer.clientHeight + 2;
+                // Memberikan toleransi pengenalan tinggi halaman di iOS (+4)
+                const currentPos = scrollContainer.scrollTop + scrollContainer.clientHeight + 4;
                 const maxPos = scrollContainer.scrollHeight;
 
                 if (currentPos >= maxPos) {
@@ -386,8 +387,8 @@
                         cancelAnimationFrame(scrollRequest);
                         await showQuote(); 
                         
-                        // Setel ulang posisi scroll ke atas secara eksplisit sebelum reload dashboard data
-                        scrollContainer.scrollTop = 0;
+                        // Memaksa reset ke koordinat 0 sebelum memuat ulang dashboard data
+                        scrollContainer.scrollTo({ top: 0, behavior: 'auto' });
                         loadDashboard(); 
                     }, 2000);
                     return; 
@@ -397,6 +398,7 @@
                 scrollRequest = requestAnimationFrame(step);
             }
 
+            // Jeda awal 3 detik sebelum halaman bergerak bergulir
             setTimeout(() => {
                 scrollRequest = requestAnimationFrame(step);
             }, 3000); 
