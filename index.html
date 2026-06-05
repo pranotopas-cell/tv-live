@@ -62,12 +62,18 @@
         #audio-status { font-size: 10px; color: var(--text-gold-soft); font-weight: bold; text-transform: uppercase; }
         .play-btn { background: var(--text-gold-soft); color: #000; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
 
-        /* MAIN CONTENT */
+        /* MAIN CONTENT - FIXED FOR iOS SCROLLING */
         .main-content { 
             flex: 1; 
-            overflow-y: hidden; 
+            overflow-y: auto; /* Menggunakan auto agar iOS mendaftarkan tinggi dokumen secara presisi */
             width: 100%;
             position: relative;
+            -webkit-overflow-scrolling: touch; /* Menjaga kompatibilitas momentum scrolling */
+        }
+
+        /* Menyembunyikan scrollbar agar tampilan tetap bersih seperti semula */
+        .main-content::-webkit-scrollbar {
+            display: none;
         }
 
         #quoteOverlay {
@@ -157,7 +163,6 @@
 
         .flight-cell { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
         
-        /* ADJUSTED NOPOL BLOCK: Menyesuaikan warna tabel dashboard, tanpa logo/simbol brand */
         .nopol-block { 
             padding: 6px 12px; 
             border-radius: 6px; 
@@ -364,6 +369,7 @@
         let scrollRequest;
         const scrollContainer = document.getElementById('scrollContainer');
         
+        /* LOGIKA AUTO SCROLL FIX UNTUK iOS / IPHONE */
         function startAutoScroll() {
             cancelAnimationFrame(scrollRequest);
             scrollContainer.scrollTop = 0;
@@ -371,13 +377,17 @@
             const scrollSpeed = 0.6; 
 
             function step() {
-                const currentPos = Math.ceil(scrollContainer.scrollTop + scrollContainer.clientHeight);
+                // Ditambahkan "+ 2" piksel toleransi untuk mengantisipasi ketidakcocokan sub-pixel di Safari iOS
+                const currentPos = scrollContainer.scrollTop + scrollContainer.clientHeight + 2;
                 const maxPos = scrollContainer.scrollHeight;
 
                 if (currentPos >= maxPos) {
                     setTimeout(async () => {
                         cancelAnimationFrame(scrollRequest);
                         await showQuote(); 
+                        
+                        // Setel ulang posisi scroll ke atas secara eksplisit sebelum reload dashboard data
+                        scrollContainer.scrollTop = 0;
                         loadDashboard(); 
                     }, 2000);
                     return; 
@@ -413,7 +423,6 @@
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
             
-            // URUTAN PRIORITAS BARU: PROSES -> LANGSIRAN -> TERJADWAL -> OPER -> NGISI AJA -> TUNGGU -> DELIVERED
             const priority = { 
                 "PROSES": 1, 
                 "LANGSIRAN": 2, 
@@ -444,7 +453,6 @@
                 const tr = document.createElement('tr');
                 const st = (row.status || "").toUpperCase();
                 
-                // Logika Penentuan Kelas CSS Warna Status (Mendukung NGISI AJA)
                 let cls = "st-terjadwal";
                 if (st.includes("PROSES")) cls = "st-proses";
                 else if (st.includes("LANGSIR")) cls = "st-langsir";
