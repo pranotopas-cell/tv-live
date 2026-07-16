@@ -38,7 +38,7 @@
         /* HEADER */
         .header {
             background: var(--header-bg);
-            padding: 15px 20px;
+            padding: 12px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -47,10 +47,29 @@
             z-index: 500; 
         }
         
+        .header-left {
+            display: flex;
+            flex-direction: column;
+        }
+
         .header h1 { margin: 0; font-size: 26px; letter-spacing: 2px; color: var(--text-white-soft); font-weight: 800; }
         
-        #targetDate { font-size: 18px; color: var(--text-gold-soft); font-weight: 700; }
+        #targetDate { font-size: 18px; color: var(--text-gold-soft); font-weight: 700; margin-top: 2px; }
         
+        /* Tambahan Kontainer Logo Tengah */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 0 20px;
+        }
+
+        .logo-container img {
+            height: 45px;
+            width: auto;
+            object-fit: contain;
+        }
+
         .header-right { display: flex; align-items: center; gap: 25px; }
         .clock-container { text-align: right; display: flex; flex-direction: column; justify-content: center; }
         #clock { font-size: 24px; font-weight: 800; color: var(--text-white-soft); line-height: 1; }
@@ -62,14 +81,14 @@
         #audio-status { font-size: 10px; color: var(--text-gold-soft); font-weight: bold; text-transform: uppercase; }
         .play-btn { background: var(--text-gold-soft); color: #000; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
 
-        /* MAIN CONTENT - FIXED FOR iOS REFLUIDITY */
+        /* MAIN CONTENT */
         .main-content { 
             flex: 1; 
             overflow-y: scroll; 
             width: 100%;
             position: relative;
             -webkit-overflow-scrolling: touch; 
-            scroll-behavior: auto !important; /* Menolak transisi smooth bawaan iOS saat direset */
+            scroll-behavior: auto !important;
         }
 
         .main-content::-webkit-scrollbar {
@@ -118,6 +137,12 @@
             padding-top: 20px;
         }
 
+        .word-wrapper {
+            display: inline-block;
+            white-space: nowrap;
+            margin-right: 0.25em; 
+        }
+
         .letter-wrapper {
             display: inline-block;
             overflow: hidden;
@@ -136,16 +161,32 @@
 
         /* TABEL */
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        th { background: var(--header-bg); color: var(--text-gold-soft); text-align: left; padding: 16px 10px; font-size: 14px; border-bottom: 1px solid var(--border-blue); position: sticky; top: 0; z-index: 10; }
         
-        td { padding: 15px 10px; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
+        th { 
+            background: var(--header-bg); 
+            color: var(--text-gold-soft); 
+            text-align: left; 
+            padding: 18px 10px; 
+            font-size: 18px;    
+            border-bottom: 1px solid var(--border-blue); 
+            position: sticky; 
+            top: 0; 
+            z-index: 10; 
+        }
+        
+        td { 
+            padding: 20px 10px; 
+            font-size: 16px;    
+            border-bottom: 1px solid rgba(255,255,255,0.03); 
+            vertical-align: middle; 
+        }
 
         .date-divider { 
             background: linear-gradient(90deg, #1a2235, #0a0f1d); 
             color: var(--text-gold-soft); 
             text-align: right; 
-            font-size: 16px; 
-            padding: 15px 20px; 
+            font-size: 20px;    
+            padding: 18px 20px; 
             font-weight: bold; 
             text-transform: uppercase; 
             letter-spacing: 4px;
@@ -164,12 +205,12 @@
         .flight-cell { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
         
         .nopol-block { 
-            padding: 6px 12px; 
+            padding: 8px 14px; 
             border-radius: 6px; 
             font-family: 'Courier New', Courier, monospace; 
             font-weight: 900; 
-            font-size: 14px; 
-            min-width: 125px; 
+            font-size: 18px;    
+            min-width: 145px;   
             text-align: center; 
             background-color: #0d1527; 
             color: var(--text-white-soft); 
@@ -179,7 +220,11 @@
             letter-spacing: 1px;
         }
 
-        .sopir-name { color: var(--text-blue-soft); font-weight: 700; font-size: 12px; }
+        .sopir-name { 
+            color: var(--text-blue-soft); 
+            font-weight: 700; 
+            font-size: 16px;    
+        }
         
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
         @keyframes pulse { 0% { transform: scale(0.9); } 50% { transform: scale(1.2); } 100% { transform: scale(0.9); } }
@@ -190,10 +235,17 @@
 <body>
 
     <div class="header">
-        <div>
+        <div class="header-left">
             <h1>SCHEDULE DELIVERY IKAEN GROUP</h1>
             <div id="targetDate">LOADING...</div>
         </div>
+        
+        <div class="logo-container">
+            <img src="header1.png" alt="Header Logo">
+            <img src="ide1.png" alt="IDE Logo">
+            <img src="ikaen.png" alt="IKAEN Logo">
+        </div>
+
         <div class="header-right">
             <div class="clock-container">
                 <div id="clock">00:00:00</div>
@@ -309,16 +361,28 @@
         function wrapText(element) {
             const text = element.textContent;
             element.innerHTML = '';
-            text.split('').forEach(char => {
-                const wrapper = document.createElement('span');
-                wrapper.className = 'letter-wrapper';
+            
+            const words = text.split(' ');
+            
+            words.forEach((word) => {
+                if (!word) return;
+
+                const wordSpan = document.createElement('span');
+                wordSpan.className = 'word-wrapper';
                 
-                const s = document.createElement('span');
-                s.className = 'letter';
-                s.innerHTML = char === ' ' ? '&nbsp;' : char;
+                word.split('').forEach(char => {
+                    const wrapper = document.createElement('span');
+                    wrapper.className = 'letter-wrapper';
+                    
+                    const s = document.createElement('span');
+                    s.className = 'letter';
+                    s.innerHTML = char;
+                    
+                    wrapper.appendChild(s);
+                    wordSpan.appendChild(wrapper);
+                });
                 
-                wrapper.appendChild(s);
-                element.appendChild(wrapper);
+                element.appendChild(wordSpan);
             });
         }
 
@@ -369,34 +433,26 @@
         let scrollRequest;
         const scrollContainer = document.getElementById('scrollContainer');
         
-        /* SOLUSI FIX AMAN UNTUK SCROLL UP DI IPHONE */
         function startAutoScroll() {
-            // 1. Matikan request frame animasi yang sedang berjalan agar koordinat bebas
             cancelAnimationFrame(scrollRequest);
-            
-            // 2. Reset paksa posisi ke 0 secara instan
             scrollContainer.scrollTop = 0;
 
-            const scrollSpeed = 0.6; 
+            const scrollSpeed = 0.8; 
 
             function step() {
-                // Toleransi + 5 piksel untuk menghitung render sub-pixel layar Retina iPhone
                 const currentPos = scrollContainer.scrollTop + scrollContainer.clientHeight + 5;
                 const maxPos = scrollContainer.scrollHeight;
 
                 if (currentPos >= maxPos) {
-                    // Hentikan request loop saat mencapai batas bawah
                     cancelAnimationFrame(scrollRequest);
 
                     setTimeout(async () => {
                         await showQuote(); 
-                        
-                        // 3. SEBELUM MUAT DATA: Reset total koordinat scroll container lewat Micro-task Timeout
                         scrollContainer.scrollTop = 0;
                         
                         setTimeout(() => {
                             loadDashboard(); 
-                        }, 50); // Jeda aman memberikan browser iOS kesempatan merestrukturisasi layout tabel
+                        }, 50); 
                     }, 2000);
                     return; 
                 }
@@ -405,7 +461,6 @@
                 scrollRequest = requestAnimationFrame(step);
             }
 
-            // Jeda awal 3 detik sebelum tabel mulai bergerak turun
             setTimeout(() => {
                 scrollRequest = requestAnimationFrame(step);
             }, 3000); 
@@ -476,14 +531,14 @@
                             <div class="nopol-block">${row.nopol || '-'}</div>
                             <div class="sopir-name">${row.sopir || '-'}</div>
                         </div>
-                        <div style="font-size:12px; color:var(--text-gold-soft); margin-left:2px;">LOCATION : ${row.lokasi || '-'}</div>
+                        <div style="font-size:15px; color:var(--text-gold-soft); margin-left:2px;">LOCATION : ${row.lokasi || '-'}</div>
                     </td>
-                    <td style="text-align:center; font-weight:bold; color:var(--text-gold-soft); font-size:12px;">${row.jumlah_keluar || '0'}</td>
+                    <td style="text-align:center; font-weight:bold; color:var(--text-gold-soft); font-size:18px;">${row.jumlah_keluar || '0'}</td>
                     <td>
-                        <div style="color:var(--text-white-soft); font-weight:bold; font-size:12px; margin-bottom:4px;">${row.delivery_to || '-'}</div>
-                        <div style="color:var(--text-blue-soft); font-size:12px; font-weight:600; text-transform:uppercase;">DEPO : ${row.supplier || '-'}</div>
+                        <div style="color:var(--text-white-soft); font-weight:bold; font-size:16px; margin-bottom:4px;">${row.delivery_to || '-'}</div>
+                        <div style="color:var(--text-blue-soft); font-size:14px; font-weight:600; text-transform:uppercase;">DEPO : ${row.supplier || '-'}</div>
                     </td>
-                    <td class="${cls}" style="text-align:right; font-size:12px; font-weight:bold; letter-spacing:1px;">${st}</td>
+                    <td class="${cls}" style="text-align:right; font-size:16px; font-weight:bold; letter-spacing:1px;">${st}</td>
                 `;
                 tbody.appendChild(tr);
             }
