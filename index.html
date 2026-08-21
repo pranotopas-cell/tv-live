@@ -35,7 +35,32 @@
             width: 100%;
         }
 
-        /* HEADER */
+        #audioEnableBanner {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 8, 17, 0.98);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #audioEnableBanner button {
+            background: var(--text-gold-soft);
+            color: #000;
+            border: none;
+            padding: 16px 36px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 0 20px rgba(229, 192, 123, 0.6);
+        }
+
         .header {
             background: var(--header-bg);
             padding: 12px 20px;
@@ -47,28 +72,12 @@
             z-index: 500; 
         }
         
-        .header-left {
-            display: flex;
-            flex-direction: column;
-        }
-
+        .header-left { display: flex; flex-direction: column; }
         .header h1 { margin: 0; font-size: 26px; letter-spacing: 2px; color: var(--text-white-soft); font-weight: 800; }
-        
         #targetDate { font-size: 18px; color: var(--text-gold-soft); font-weight: 700; margin-top: 2px; }
         
-        /* Tambahan Kontainer Logo Tengah */
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin: 0 20px;
-        }
-
-        .logo-container img {
-            height: 35px;
-            width: auto;
-            object-fit: contain;
-        }
+        .logo-container { display: flex; align-items: center; gap: 15px; margin: 0 20px; }
+        .logo-container img { height: 35px; width: auto; object-fit: contain; }
 
         .header-right { display: flex; align-items: center; gap: 25px; }
         .clock-container { text-align: right; display: flex; flex-direction: column; justify-content: center; }
@@ -81,7 +90,6 @@
         #audio-status { font-size: 10px; color: var(--text-gold-soft); font-weight: bold; text-transform: uppercase; }
         .play-btn { background: var(--text-gold-soft); color: #000; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
 
-        /* MAIN CONTENT */
         .main-content { 
             flex: 1; 
             overflow-y: scroll; 
@@ -90,10 +98,7 @@
             -webkit-overflow-scrolling: touch; 
             scroll-behavior: auto !important;
         }
-
-        .main-content::-webkit-scrollbar {
-            display: none;
-        }
+        .main-content::-webkit-scrollbar { display: none; }
 
         #quoteOverlay {
             position: fixed; 
@@ -110,89 +115,21 @@
             transition: opacity 0.8s ease-in-out;
         }
 
-        .quote-text, .quote-source {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            max-width: 85%;
-            line-height: 1.4;
-        }
+        .quote-text, .quote-source { display: flex; flex-wrap: wrap; justify-content: center; max-width: 85%; line-height: 1.4; }
+        .quote-text { font-size: 40px; color: #fff; font-weight: 600; font-style: italic; margin-bottom: 40px; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .quote-source { font-size: 24px; color: var(--text-gold-soft); font-weight: 700; text-transform: uppercase; letter-spacing: 4px; border-top: 2px solid var(--text-gold-soft); padding-top: 20px; }
 
-        .quote-text { 
-            font-size: 40px; 
-            color: #fff; 
-            font-weight: 600; 
-            font-style: italic; 
-            margin-bottom: 40px;
-            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        }
-        
-        .quote-source { 
-            font-size: 24px; 
-            color: var(--text-gold-soft); 
-            font-weight: 700; 
-            text-transform: uppercase; 
-            letter-spacing: 4px;
-            border-top: 2px solid var(--text-gold-soft);
-            padding-top: 20px;
-        }
-
-        .word-wrapper {
-            display: inline-block;
-            white-space: nowrap;
-            margin-right: 0.25em; 
-        }
-
-        .letter-wrapper {
-            display: inline-block;
-            overflow: hidden;
-            vertical-align: bottom;
-            height: 1.4em;
-        }
-
-        .letter { 
-            display: inline-block; 
-            transform: translateY(100%); 
-            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-        }
-        
+        .word-wrapper { display: inline-block; white-space: nowrap; margin-right: 0.25em; }
+        .letter-wrapper { display: inline-block; overflow: hidden; vertical-align: bottom; height: 1.4em; }
+        .letter { display: inline-block; transform: translateY(100%); transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .letter.in { transform: translateY(0); }
         .letter.out { transform: translateY(-100%); }
 
-        /* TABEL */
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        
-        th { 
-            background: var(--header-bg); 
-            color: var(--text-gold-soft); 
-            text-align: left; 
-            padding: 18px 10px; 
-            font-size: 18px;    
-            border-bottom: 1px solid var(--border-blue); 
-            position: sticky; 
-            top: 0; 
-            z-index: 10; 
-        }
-        
-        td { 
-            padding: 20px 10px; 
-            font-size: 16px;    
-            border-bottom: 1px solid rgba(255,255,255,0.03); 
-            vertical-align: middle; 
-        }
+        th { background: var(--header-bg); color: var(--text-gold-soft); text-align: left; padding: 18px 10px; font-size: 18px; border-bottom: 1px solid var(--border-blue); position: sticky; top: 0; z-index: 10; }
+        td { padding: 20px 10px; font-size: 16px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
 
-        .date-divider { 
-            background: linear-gradient(90deg, #1a2235, #0a0f1d); 
-            color: var(--text-gold-soft); 
-            text-align: right; 
-            font-size: 20px;    
-            padding: 18px 20px; 
-            font-weight: bold; 
-            text-transform: uppercase; 
-            letter-spacing: 4px;
-            border-top: 1px solid var(--border-blue);
-            border-bottom: 1px solid var(--border-blue);
-        }
+        .date-divider { background: linear-gradient(90deg, #1a2235, #0a0f1d); color: var(--text-gold-soft); text-align: right; font-size: 20px; padding: 18px 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 4px; border-top: 1px solid var(--border-blue); border-bottom: 1px solid var(--border-blue); }
 
         .st-proses { color: var(--color-proses); animation: blink 1.5s infinite; font-weight: bold; }
         .st-langsir { color: var(--text-blue-soft); } 
@@ -203,28 +140,8 @@
         .st-tunggu { color: var(--color-tunggu); }
 
         .flight-cell { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
-        
-        .nopol-block { 
-            padding: 8px 14px; 
-            border-radius: 6px; 
-            font-family: 'Courier New', Courier, monospace; 
-            font-weight: 900; 
-            font-size: 18px;    
-            min-width: 145px;   
-            text-align: center; 
-            background-color: #0d1527; 
-            color: var(--text-white-soft); 
-            border: 1px solid var(--border-blue);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3); 
-            display: inline-block;
-            letter-spacing: 1px;
-        }
-
-        .sopir-name { 
-            color: var(--text-blue-soft); 
-            font-weight: 700; 
-            font-size: 16px;    
-        }
+        .nopol-block { padding: 8px 14px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-weight: 900; font-size: 18px; min-width: 145px; text-align: center; background-color: #0d1527; color: var(--text-white-soft); border: 1px solid var(--border-blue); box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: inline-block; letter-spacing: 1px; }
+        .sopir-name { color: var(--text-blue-soft); font-weight: 700; font-size: 16px; }
         
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
         @keyframes pulse { 0% { transform: scale(0.9); } 50% { transform: scale(1.2); } 100% { transform: scale(0.9); } }
@@ -233,6 +150,12 @@
     </style>
 </head>
 <body>
+
+    <div id="audioEnableBanner">
+        <h2>SISTEM LIVE SCHEDULE</h2>
+        <p>Klik tombol di bawah ini untuk mengaktifkan & tes pengumuman suara.</p>
+        <button onclick="enableAudioSystem()">AKTIFKAN & TES SUARA</button>
+    </div>
 
     <div class="header">
         <div class="header-left">
@@ -291,39 +214,7 @@
         const quotes = [
             { t: "Sesungguhnya sesudah kesulitan itu ada kemudahan.", s: "QS. Al-Insyirah: 6" },
             { t: "Bekerjalah untuk duniamu seolah hidup selamanya ,\nberamallah untuk akhiratmu seolah mati besok.", s: "Ali bin Abi Thalib" },
-            { t: "Sebaik-baik manusia adalah yang paling bermanfaat bagi orang lain.", s: "HR. Ahmad" },
-            { t: "Barangsiapa bertaqwa kepada Allah, \nniscaya Dia akan membukakan jalan keluar baginya.", s: "QS. At-Talaq: 2" },
-            { t: "Allah mencintai seorang hamba yang apabila bekerja, \nia bekerja dengan itqan (profesional).", s: "HR. Al-Baihaqi" },
-            { t: "Niatkan kerjamu sebagai ibadah, maka lelahmu menjadi pahala.", s: "Kata Bijak Muslim" },
-            { t: "Rezeki sudah diatur, tugas kita hanyalah menjemputnya dengan cara yang baik.", s: "Nasehat Tauhid" },
-            { t: "Tangan di atas lebih baik daripada tangan di bawah.", s: "HR. Bukhari & Muslim" },
-            { t: "Mencari rezeki halal adalah wajib setelah ibadah fardhu.", s: "HR. Ath-Thabrani" },
-            { t: "Janganlah kamu berputus asa dari rahmat Allah.", s: "QS. Az-Zumar: 53"},
-            { t: "Ridha Allah terletak pada ridha kedua orang tua.", s: "HR. Tirmidzi" },
-            { t: "Harta tidak akan berkurang karena sedekah.", s: "HR. Muslim" },
-            { t: "Dan barangsiapa yang bertawakal kepada Allah, niscaya Allah akan mencukupkan keperluannya.", s: "QS. At-Talaq: 3" },
-            { t: "Kekayaan bukanlah dengan banyaknya harta, namun kekayaan adalah hati yang selalu merasa cukup.", s: "HR. Bukhari" },
-            { t: "Jadikanlah sabar dan shalat sebagai penolongmu. Dan sesungguhnya yang demikian itu sungguh berat, kecuali bagi orang-orang yang khusyu.", s: "QS. Al-Baqarah: 45" },
-            { t: "Tidak ada satu subuh pun yang dialami hamba-hamba Allah melainkan malaikat turun dan berdoa: Ya Allah, berikanlah ganti bagi orang yang berinfak.", s: "HR. Bukhari" },
-            { t: "Mukmin yang kuat lebih baik dan lebih dicintai Allah daripada mukmin yang lemah.", s: "HR. Muslim" },
-            { t: "Sesungguhnya Allah tidak akan mengubah keadaan suatu kaum sebelum mereka mengubah keadaan diri mereka sendiri.", s: "QS. Ar-Ra'd: 11" },
-            { t: "Senyummu di hadapan saudaramu adalah sedekah.", s: "HR. Tirmidzi" },
-            { t: "Bersemangatlah atas hal-hal yang bermanfaat bagimu dan mintalah pertolongan kepada Allah, jangan menjadi lemah.", s: "HR. Muslim" },
-            { t: "Sesungguhnya bersama kesulitan ada kemudahan, maka melangkahlah dengan iman.", s: "QS. Al-Insyirah: 6" },
-            { t: "Jangan remehkan kebaikan sekecil apa pun, karena kita tidak pernah tahu kebaikan mana yang membawakan surga.", s: "HR. Muslim" },
-            { t: "Rezeki yang berkah bukan tentang seberapa banyak jumlahnya, melainkan seberapa tenang hati yang menerimanya.", s: "Nasehat Tauhid" },
-            { t: "Dunia ini hanya tempat persinggahan; jadikan setiap lelahmu di sini sebagai bekal pulang yang indah.", s: "Kata Bijak Muslim" },
-            { t: "Barangsiapa yang menempuh jalan untuk mencari ilmu, maka Allah akan mudahkan jalannya menuju surga.", s: "HR. Muslim" },
-            { t: "Bukan kesulitan yang membuat kita takut, melainkan ketakutan yang membuat segalanya menjadi sulit. Bertawakallah.", s: "Ali bin Abi Thalib" },
-            { t: "Dan bersabarlah kamu, sesungguhnya janji Allah adalah benar.", s: "QS. Ar-Rum: 60" },
-            { t: "Bekerjalah dengan jujur, karena rezeki yang berkah akan melahirkan keturunan yang berkah pula.", s: "Nasehat Bijak" },
-            { t: "Dua nikmat yang sering dilupakan oleh manusia adalah kesehatan dan waktu luang.", s: "HR. Bukhari" },
-            { t: "Ketika kamu merasa sendirian, ingatlah bahwa Allah senantiasa mendengar bisikan doa dalam sujudmu.", s: "Kata Bijak Muslim" },
-            { t: "Siapa yang menabur kebaikan, ia akan memanen kebahagiaan, baik di dunia maupun di akhirat.", s: "Nasehat Tauhid" },
-            { t: "Bukan kemiskinan yang kita takuti, melainkan hilangnya rasa syukur saat harta melimpah.", s: "Kata Hikmah" },
-            { t: "Jika Allah menunda sesuatu yang kamu inginkan, itu karena Dia ingin memberimu sesuatu yang jauh lebih baik pada waktu yang tepat.", s: "QS. Al-Baqarah: 216" },
-            { t: "Senyummu di hadapan saudaramu adalah bernilai sedekah.", s: "HR. Tirmidzi" },
-            { t: "Mulailah pagimu dengan bismillah, jalani siangmu dengan alhamdulillah, dan tutuplah malammu dengan istighfar.", s: "Nasehat Bijak" }
+            { t: "Sebaik-baik manusia adalah yang paling bermanfaat bagi orang lain.", s: "HR. Ahmad" }
         ];
 
         let quoteIndex = 0;
@@ -334,6 +225,46 @@
             "https://qurango.net/radio/mix"
         ];
         let currentSourceIndex = 0;
+
+        let previousStatusMap = {};
+        let isInitialLoad = true;
+
+        // FUNGSI MEMUTAR SUARA SUARA GOOGLE AUDIO MP3 LANGSUNG (BEBAS BUG/LEBIH STABIL)
+        function playGoogleVoice(text) {
+            const originalVolume = audio.volume;
+            if (!audio.paused) audio.volume = 0.1;
+
+            const restoreVolume = () => {
+                if (!audio.paused) audio.volume = originalVolume;
+            };
+
+            const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=id&client=tw-ob`;
+            const voiceAudio = new Audio(ttsUrl);
+
+            voiceAudio.play().then(() => {
+                voiceAudio.onended = restoreVolume;
+                voiceAudio.onerror = restoreVolume;
+            }).catch(err => {
+                console.warn("Mencoba cara ke-2 (Web Speech API):", err);
+                // Fallback ke browser speech API jika audio terblokir
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const msg = new SpeechSynthesisUtterance(text);
+                    msg.lang = 'id-ID';
+                    msg.onend = restoreVolume;
+                    msg.onerror = restoreVolume;
+                    window.speechSynthesis.speak(msg);
+                } else {
+                    restoreVolume();
+                }
+            });
+        }
+
+        // TOMBOL AKTIFKAN AUDIO DARI USER INTERACTION
+        function enableAudioSystem() {
+            document.getElementById('audioEnableBanner').style.display = 'none';
+            playGoogleVoice("Sistem pengumuman suara telah aktif.");
+        }
 
         function toggleAudio() {
             const btn = document.getElementById('playPauseBtn');
@@ -361,27 +292,20 @@
         function wrapText(element) {
             const text = element.textContent;
             element.innerHTML = '';
-            
             const words = text.split(' ');
-            
             words.forEach((word) => {
                 if (!word) return;
-
                 const wordSpan = document.createElement('span');
                 wordSpan.className = 'word-wrapper';
-                
                 word.split('').forEach(char => {
                     const wrapper = document.createElement('span');
                     wrapper.className = 'letter-wrapper';
-                    
                     const s = document.createElement('span');
                     s.className = 'letter';
                     s.innerHTML = char;
-                    
                     wrapper.appendChild(s);
                     wordSpan.appendChild(wrapper);
                 });
-                
                 element.appendChild(wordSpan);
             });
         }
@@ -390,7 +314,6 @@
             overlay.style.display = 'flex';
             overlay.offsetHeight;
             overlay.style.opacity = '1';
-
             const letters = overlay.querySelectorAll('.letter');
             for (let i = 0; i < letters.length; i++) {
                 letters[i].classList.remove('out');
@@ -436,7 +359,6 @@
         function startAutoScroll() {
             cancelAnimationFrame(scrollRequest);
             scrollContainer.scrollTop = 0;
-
             const scrollSpeed = 0.8; 
 
             function step() {
@@ -445,14 +367,10 @@
 
                 if (currentPos >= maxPos) {
                     cancelAnimationFrame(scrollRequest);
-
                     setTimeout(async () => {
                         await showQuote(); 
                         scrollContainer.scrollTop = 0;
-                        
-                        setTimeout(() => {
-                            loadDashboard(); 
-                        }, 50); 
+                        setTimeout(() => { loadDashboard(); }, 50); 
                     }, 2000);
                     return; 
                 }
@@ -461,12 +379,27 @@
                 scrollRequest = requestAnimationFrame(step);
             }
 
-            setTimeout(() => {
-                scrollRequest = requestAnimationFrame(step);
-            }, 3000); 
+            setTimeout(() => { scrollRequest = requestAnimationFrame(step); }, 3000); 
         }
 
         function getWIB() { return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Jakarta"})); }
+
+        // PERAKITAN KALIMAT SUARA (TANPA NOPOL)
+        function announceStatusChange(item, statusType) {
+            const sopir = item.sopir || 'Tanpa Nama';
+            const tujuan = item.delivery_to || 'Tujuan';
+
+            let teks = "";
+            if (statusType === "PROSES") {
+                teks = `Pemberitahuan. Driver ${sopir}, tujuan ${tujuan}, saat ini sedang dalam status PROSES.`;
+            } else if (statusType === "DELIVERED") {
+                teks = `Pemberitahuan. Driver ${sopir}, tujuan ${tujuan}, status telah DELIVERED.`;
+            }
+
+            if (teks) {
+                playGoogleVoice(teks);
+            }
+        }
 
         async function loadDashboard() {
             try {
@@ -476,7 +409,30 @@
 
                 const { data, error } = await _supabase.from('data_pengiriman').select('*').gte('tanggal', isoHariIni);
                 if (error) throw error;
-                renderData(data || []);
+                
+                const currentData = data || [];
+
+                // DETEKSI PERUBAHAN STATUS
+                currentData.forEach(item => {
+                    const id = item.id || (item.sopir + '_' + item.tanggal + '_' + item.delivery_to);
+                    const statusBaru = (item.status || "").toUpperCase();
+                    const isHariIni = (item.tanggal === isoHariIni);
+
+                    if (!isInitialLoad && isHariIni) {
+                        const statusLama = previousStatusMap[id];
+                        
+                        if (statusBaru.includes("PROSES") && statusLama && !statusLama.includes("PROSES")) {
+                            announceStatusChange(item, "PROSES");
+                        }
+                        else if (statusBaru.includes("DELIVERED") && statusLama && !statusLama.includes("DELIVERED")) {
+                            announceStatusChange(item, "DELIVERED");
+                        }
+                    }
+                    previousStatusMap[id] = statusBaru;
+                });
+
+                isInitialLoad = false;
+                renderData(currentData);
             } catch (err) { 
                 console.error("Gagal:", err.message); 
                 startAutoScroll();
@@ -487,15 +443,7 @@
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
             
-            const priority = { 
-                "PROSES": 1, 
-                "LANGSIR": 2, 
-                "TERJADWAL": 3, 
-                "OPER": 4, 
-                "NGISI ": 5, 
-                "TUNGGU": 6, 
-                "DELIVERED": 7 
-            };
+            const priority = { "PROSES": 1, "LANGSIR": 2, "TERJADWAL": 3, "OPER": 4, "NGISI ": 5, "TUNGGU": 6, "DELIVERED": 7 };
 
             data.sort((a, b) => {
                 if(a.tanggal !== b.tanggal) return new Date(a.tanggal) - new Date(b.tanggal);
