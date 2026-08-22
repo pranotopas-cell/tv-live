@@ -268,7 +268,7 @@
 
     <!-- Audio Enable Banner Khusus TV (Wajib Di-klik/Tekan OK Remote) -->
     <div id="audioEnableBanner" onclick="enableAudioSystem(event)">
-        📢  MENGAKTIFKAN SUARA PENGUMUMAN
+        📢 TEKAN OK / KLIK DI SINI DENGAN REMOTE TV UNTUK MENGAKTIFKAN SUARA PENGUMUMAN
     </div>
 
     <!-- Header Section -->
@@ -378,7 +378,6 @@
         let scrollRequest = null;
         let scrollTimeout = null;
 
-        // Buka blokir audio TV secara otomatis begitu tombol di-klik
         function handleGlobalInteraction() {
             if (!isAudioAllowed) {
                 enableAudioSystem();
@@ -390,46 +389,57 @@
             isAudioAllowed = true;
             document.getElementById('audioEnableBanner').style.display = 'none';
 
-            // Pancing izin audio browser TV dengan memutar file kosong/suara singkat
-            ttsAudio.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==";
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.resume();
+            }
+
             ttsAudio.play().then(() => {
-                playVoiceAnnouncement("Sistem suara pengumuman aktif.");
-            }).catch(err => {
-                console.log("Audio unlock failed", err);
-            });
+                ttsAudio.pause();
+            }).catch(() => {});
+
+            playVoiceAnnouncement("Sistem suara pengumuman aktif.");
         }
 
-        // FUNGSI UTAMA TTS TV COMPATIBLE (Memakai Google Translate Audio Engine)
         function playVoiceAnnouncement(text) {
             if (!isAudioAllowed) return;
 
-            // Turunkan volume radio murottal jika sedang menyala
             const originalVolume = audio.volume;
             if (!audio.paused) audio.volume = 0.15;
 
-            // URL Google TTS Server (Paling Kompatibel untuk Smart TV & Android TV)
+            const restoreVolume = () => {
+                if (!audio.paused) audio.volume = originalVolume;
+            };
+
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                
+                const msg = new SpeechSynthesisUtterance(text);
+                msg.lang = 'id-ID';
+                msg.rate = 0.9;
+                msg.pitch = 1.0;
+
+                msg.onend = restoreVolume;
+                msg.onerror = () => {
+                    restoreVolume();
+                    fallbackGoogleTTS(text, restoreVolume);
+                };
+
+                window.speechSynthesis.speak(msg);
+            } else {
+                fallbackGoogleTTS(text, restoreVolume);
+            }
+        }
+
+        function fallbackGoogleTTS(text, callback) {
             const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=id&client=tw-ob`;
-
-            ttsAudio.src = ttsUrl;
             
-            ttsAudio.onended = () => {
-                if (!audio.paused) audio.volume = originalVolume;
-            };
-
-            ttsAudio.onerror = () => {
-                if (!audio.paused) audio.volume = originalVolume;
-                // Fallback jika Google TTS gagal
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel();
-                    const msg = new SpeechSynthesisUtterance(text);
-                    msg.lang = 'id-ID';
-                    window.speechSynthesis.speak(msg);
-                }
-            };
+            ttsAudio.src = ttsUrl;
+            ttsAudio.onended = callback;
+            ttsAudio.onerror = callback;
 
             ttsAudio.play().catch(err => {
-                console.log("Gagal memutar suara di TV:", err);
-                if (!audio.paused) audio.volume = originalVolume;
+                console.log("Gagal memutar audio TTS:", err);
+                callback();
             });
         }
 
