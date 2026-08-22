@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Pengiriman Live</title>
+    <title>Dashboard Pengiriman Live - TV Version</title>
     
-    <!-- Supabase & ResponsiveVoice CDN -->
+    <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://code.responsivevoice.org/responsivevoice.js?key=FREE_KEY"></script>
 
     <style>
         :root {
@@ -35,6 +34,26 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
+        }
+
+        /* Banner Aktivasi Suara khusus TV */
+        #audioEnableBanner {
+            background-color: #e11d48;
+            color: #ffffff;
+            text-align: center;
+            padding: 14px;
+            font-weight: bold;
+            font-size: 18px;
+            cursor: pointer;
+            z-index: 999;
+            box-shadow: 0 4px 15px rgba(225, 29, 72, 0.5);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
         }
 
         /* Header Layout */
@@ -103,17 +122,6 @@
             justify-content: center;
         }
 
-        /* Banner Suara */
-        #audioEnableBanner {
-            background-color: var(--text-gold);
-            color: #000;
-            text-align: center;
-            padding: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            z-index: 20;
-        }
-
         /* Scroll Area & Table */
         #scrollContainer {
             flex: 1;
@@ -175,7 +183,6 @@
             margin-bottom: 4px;
         }
 
-        /* Nopol Background Putih Teks Hitam */
         .nopol-block {
             background-color: #ffffff;
             color: #000000;
@@ -201,7 +208,7 @@
         .st-ngisi { color: #06b6d4; }
         .st-delivered { color: #10b981; }
 
-        /* Quote Overlay Corporate Style */
+        /* Quote Overlay */
         #quoteOverlay {
             position: fixed;
             top: 0;
@@ -257,11 +264,11 @@
         }
     </style>
 </head>
-<body>
+<body onclick="handleGlobalInteraction()">
 
-    <!-- Audio Enable Banner -->
-    <div id="audioEnableBanner" onclick="enableAudioSystem()">
-        🔊 Klik di sini untuk mengaktifkan Fitur Suara Pengumuman
+    <!-- Audio Enable Banner Khusus TV (Wajib Di-klik/Tekan OK Remote) -->
+    <div id="audioEnableBanner" onclick="enableAudioSystem(event)">
+        📢  MENGAKTIFKAN SUARA PENGUMUMAN
     </div>
 
     <!-- Header Section -->
@@ -272,7 +279,7 @@
         </div>
         <div class="header-controls">
             <div class="audio-control">
-                <button class="audio-btn" id="playPauseBtn" onclick="toggleAudio()">▶</button>
+                <button class="audio-btn" id="playPauseBtn" onclick="toggleAudio(event)">▶</button>
                 <span id="audio-status" style="font-size: 12px; font-weight: bold;">STOP</span>
             </div>
             <div class="clock-block">
@@ -306,7 +313,9 @@
         </div>
     </div>
 
+    <!-- Element Audio Universal -->
     <audio id="murottalAudio" crossorigin="anonymous"></audio>
+    <audio id="ttsAudio" crossorigin="anonymous"></audio>
 
     <script>
         const SUPABASE_URL = 'https://ntaectphgoelmhzrkatp.supabase.co';
@@ -353,6 +362,8 @@
 
         let quoteIndex = 0;
         const audio = document.getElementById('murottalAudio');
+        const ttsAudio = document.getElementById('ttsAudio');
+
         const streamSources = [
             "https://live.mp3quran.net/makkah",
             "https://live.mp3quran.net/madinah",
@@ -367,56 +378,63 @@
         let scrollRequest = null;
         let scrollTimeout = null;
 
-        function getWIBDateString() {
-            const d = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
-            const yyyy = d.getFullYear();
-            const mm = String(d.getMonth() + 1).padStart(2, '0');
-            const dd = String(d.getDate()).padStart(2, '0');
-            return `${yyyy}-${mm}-${dd}`;
+        // Buka blokir audio TV secara otomatis begitu tombol di-klik
+        function handleGlobalInteraction() {
+            if (!isAudioAllowed) {
+                enableAudioSystem();
+            }
         }
 
+        function enableAudioSystem(e) {
+            if(e) e.stopPropagation();
+            isAudioAllowed = true;
+            document.getElementById('audioEnableBanner').style.display = 'none';
+
+            // Pancing izin audio browser TV dengan memutar file kosong/suara singkat
+            ttsAudio.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==";
+            ttsAudio.play().then(() => {
+                playVoiceAnnouncement("Sistem suara pengumuman aktif.");
+            }).catch(err => {
+                console.log("Audio unlock failed", err);
+            });
+        }
+
+        // FUNGSI UTAMA TTS TV COMPATIBLE (Memakai Google Translate Audio Engine)
         function playVoiceAnnouncement(text) {
             if (!isAudioAllowed) return;
 
+            // Turunkan volume radio murottal jika sedang menyala
             const originalVolume = audio.volume;
-            if (!audio.paused) audio.volume = 0.1;
+            if (!audio.paused) audio.volume = 0.15;
 
-            const speakFallback = () => {
+            // URL Google TTS Server (Paling Kompatibel untuk Smart TV & Android TV)
+            const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=id&client=tw-ob`;
+
+            ttsAudio.src = ttsUrl;
+            
+            ttsAudio.onended = () => {
+                if (!audio.paused) audio.volume = originalVolume;
+            };
+
+            ttsAudio.onerror = () => {
+                if (!audio.paused) audio.volume = originalVolume;
+                // Fallback jika Google TTS gagal
                 if ('speechSynthesis' in window) {
                     window.speechSynthesis.cancel();
                     const msg = new SpeechSynthesisUtterance(text);
                     msg.lang = 'id-ID';
-                    msg.rate = 0.9;
-                    msg.onend = () => { if (!audio.paused) audio.volume = originalVolume; };
-                    msg.onerror = () => { if (!audio.paused) audio.volume = originalVolume; };
                     window.speechSynthesis.speak(msg);
                 }
             };
 
-            if (window.responsiveVoice && typeof responsiveVoice.speak === 'function') {
-                try {
-                    responsiveVoice.speak(text, "Indonesian Female", {
-                        pitch: 1,
-                        rate: 0.9,
-                        volume: 1,
-                        onend: () => { if (!audio.paused) audio.volume = originalVolume; },
-                        onerror: () => speakFallback()
-                    });
-                } catch (e) {
-                    speakFallback();
-                }
-            } else {
-                speakFallback();
-            }
+            ttsAudio.play().catch(err => {
+                console.log("Gagal memutar suara di TV:", err);
+                if (!audio.paused) audio.volume = originalVolume;
+            });
         }
 
-        function enableAudioSystem() {
-            isAudioAllowed = true;
-            document.getElementById('audioEnableBanner').style.display = 'none';
-            playVoiceAnnouncement("Sistem pengumuman suara telah aktif.");
-        }
-
-        function toggleAudio() {
+        function toggleAudio(e) {
+            if(e) e.stopPropagation();
             const btn = document.getElementById('playPauseBtn');
             const statusLabel = document.getElementById('audio-status');
             if (audio.paused) { playCurrentSource(); } 
@@ -439,6 +457,14 @@
             playCurrentSource();
         }
 
+        function getWIBDateString() {
+            const d = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+
         async function showQuote() {
             const overlay = document.getElementById('quoteOverlay');
             const quoteBox = document.getElementById('quoteBox');
@@ -459,7 +485,6 @@
                 quoteBox.classList.add('active');
             }, 100);
 
-            // Quote tampil 10 detik
             await new Promise(r => setTimeout(r, 10000)); 
 
             quoteBox.classList.remove('active');
@@ -487,11 +512,9 @@
         function startAutoScroll() {
             stopAutoScroll();
 
-            // Berikan jeda 3 detik sebelum mulai scrolling
             scrollTimeout = setTimeout(() => {
                 const maxScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight;
                 
-                // Jika konten tidak melebihi container (tidak perlu scroll)
                 if (maxScroll <= 5) {
                     setTimeout(async () => {
                         await showQuote();
@@ -501,31 +524,20 @@
                 }
 
                 isScrolling = true;
-                const scrollSpeed = 0.5; // Kecepatan scroll halus
+                const scrollSpeed = 0.5;
 
                 async function handleScrollEnd() {
                     stopAutoScroll();
-                    // Jeda 2 detik di ujung bawah
                     await new Promise(r => setTimeout(r, 2000));
-                    
-                    // Tampilkan Quote
                     await showQuote(); 
-                    
-                    // RESET KEMBALI KE ATAS
                     scrollContainer.scrollTop = 0;
-                    
-                    // Refresh data
-                    setTimeout(() => { 
-                        loadDashboard(); 
-                    }, 500); 
+                    setTimeout(() => { loadDashboard(); }, 500); 
                 }
 
                 function step() {
                     if (!isScrolling) return;
-
                     scrollContainer.scrollTop += scrollSpeed;
 
-                    // Deteksi presisi batas bawah layar
                     if (scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight - 8) {
                         handleScrollEnd();
                         return; 
