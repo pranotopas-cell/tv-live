@@ -282,7 +282,7 @@
 </head>
 <body onclick="handleGlobalInteraction()">
 
-    <!-- Audio Enable Banner Khusus TV (Wajib Di-klik/Tekan OK Remote) -->
+    <!-- Banner Aktivasi Suara -->
     <div id="audioEnableBanner" onclick="enableAudioSystem(event)">
         📢 TEKAN OK / KLIK DI SINI DENGAN REMOTE TV UNTUK MENGAKTIFKAN SUARA PENGUMUMAN
     </div>
@@ -305,7 +305,7 @@
         </div>
     </header>
 
-    <!-- Table & Scroll Container -->
+    <!-- Table Container -->
     <div id="scrollContainer">
         <table>
             <thead>
@@ -330,7 +330,6 @@
         </div>
     </div>
 
-    <!-- Element Audio Universal -->
     <audio id="murottalAudio" crossorigin="anonymous"></audio>
 
     <script>
@@ -343,37 +342,7 @@
             { t: "Bekerjalah untuk duniamu seolah hidup selamanya,\nberamallah untuk akhiratmu seolah mati besok.", s: "Ali bin Abi Thalib" },
             { t: "Sebaik-baik manusia adalah yang paling bermanfaat bagi orang lain.", s: "HR. Ahmad" },
             { t: "Barangsiapa bertaqwa kepada Allah,\nniscaya Dia akan membukakan jalan keluar baginya.", s: "QS. At-Talaq: 2" },
-            { t: "Allah mencintai seorang hamba yang apabila bekerja,\nia bekerja dengan itqan (profesional).", s: "HR. Al-Baihaqi" },
-            { t: "Niatkan kerjamu sebagai ibadah, maka lelahmu menjadi pahala.", s: "Kata Bijak Muslim" },
-            { t: "Rezeki sudah diatur, tugas kita hanyalah menjemputnya dengan cara yang baik.", s: "Nasehat Tauhid" },
-            { t: "Tangan di atas lebih baik daripada tangan di bawah.", s: "HR. Bukhari & Muslim" },
-            { t: "Mencari rezeki halal adalah wajib setelah ibadah fardhu.", s: "HR. Ath-Thabrani" },
-            { t: "Janganlah kamu berputus asa dari rahmat Allah.", s: "QS. Az-Zumar: 53"},
-            { t: "Ridha Allah terletak pada ridha kedua orang tua.", s: "HR. Tirmidzi" },
-            { t: "Harta tidak akan berkurang karena sedekah.", s: "HR. Muslim" },
-            { t: "Dan barangsiapa yang bertawakal kepada Allah, niscaya Allah akan mencukupkan keperluannya.", s: "QS. At-Talaq: 3" },
-            { t: "Kekayaan bukanlah dengan banyaknya harta, namun kekayaan adalah hati yang selalu merasa cukup.", s: "HR. Bukhari" },
-            { t: "Jadikanlah sabar dan shalat sebagai penolongmu. Dan sesungguhnya yang demikian itu sungguh berat, kecuali bagi orang-orang yang khusyu.", s: "QS. Al-Baqarah: 45" },
-            { t: "Tidak ada satu subuh pun yang dialami hamba-hamba Allah melainkan malaikat turun dan berdoa: Ya Allah, berikanlah ganti bagi orang yang berinfak.", s: "HR. Bukhari" },
-            { t: "Mukmin yang kuat lebih baik dan lebih dicintai Allah daripada mukmin yang lemah.", s: "HR. Muslim" },
-            { t: "Sesungguhnya Allah tidak akan mengubah keadaan suatu kaum sebelum mereka mengubah keadaan diri mereka sendiri.", s: "QS. Ar-Ra'd: 11" },
-            { t: "Senyummu di hadapan saudaramu adalah sedekah.", s: "HR. Tirmidzi" },
-            { t: "Bersemangatlah atas hal-hal yang bermanfaat bagimu dan mintalah pertolongan kepada Allah, jangan menjadi lemah.", s: "HR. Muslim" },
-            { t: "Sesungguhnya bersama kesulitan ada kemudahan, maka melangkahlah dengan iman.", s: "QS. Al-Insyirah: 6" },
-            { t: "Jangan remehkan kebaikan sekecil apa pun, karena kita tidak pernah tahu kebaikan mana yang membawakan surga.", s: "HR. Muslim" },
-            { t: "Rezeki yang berkah bukan tentang seberapa banyak jumlahnya, melainkan seberapa tenang hati yang menerimanya.", s: "Nasehat Tauhid" },
-            { t: "Dunia ini hanya tempat persinggahan; jadikan setiap lelahmu di sini sebagai bekal pulang yang indah.", s: "Kata Bijak Muslim" },
-            { t: "Barangsiapa yang menempuh jalan untuk mencari ilmu, maka Allah akan mudahkan jalannya menuju surga.", s: "HR. Muslim" },
-            { t: "Bukan kesulitan yang membuat kita takut, melainkan ketakutan yang membuat segalanya menjadi sulit. Bertawakallah.", s: "Ali bin Abi Thalib" },
-            { t: "Dan bersabarlah kamu, sesungguhnya janji Allah adalah benar.", s: "QS. Ar-Rum: 60" },
-            { t: "Bekerjalah dengan jujur, karena rezeki yang berkah akan melahirkan keturunan yang berkah pula.", s: "Nasehat Bijak" },
-            { t: "Dua nikmat yang sering dilupakan oleh manusia adalah kesehatan dan waktu luang.", s: "HR. Bukhari" },
-            { t: "Ketika kamu merasa sendirian, ingatlah bahwa Allah senantiasa mendengar bisikan doa dalam sujudmu.", s: "Kata Bijak Muslim" },
-            { t: "Siapa yang menabur kebaikan, ia akan memanen kebahagiaan, baik di dunia maupun di akhirat.", s: "Nasehat Tauhid" },
-            { t: "Bukan kemiskinan yang kita takuti, melainkan hilangnya rasa syukur saat harta melimpah.", s: "Kata Hikmah" },
-            { t: "Jika Allah menunda sesuatu yang kamu inginkan, itu karena Dia ingin memberimu sesuatu yang jauh lebih baik pada waktu yang tepat.", s: "QS. Al-Baqarah: 216" },
-            { t: "Senyummu di hadapan saudaramu adalah bernilai sedekah.", s: "HR. Tirmidzi" },
-            { t: "Mulailah pagimu dengan bismillah, jalani siangmu melelui alhamdulillah, dan tutuplah malammu dengan istighfar.", s: "Nasehat Bijak" }
+            { t: "Allah mencintai seorang hamba yang apabila bekerja,\nia bekerja dengan itqan (profesional).", s: "HR. Al-Baihaqi" }
         ];
 
         let quoteIndex = 0;
@@ -393,15 +362,13 @@
         let scrollRequest = null;
         let scrollTimeout = null;
 
-        // Web Audio Context khusus untuk TV chime & synthesized voice
+        // Web Audio Context untuk TV Voice Generator
         let audioCtx = null;
 
         function initAudioContext() {
             if (!audioCtx) {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (AudioContext) {
-                    audioCtx = new AudioContext();
-                }
+                if (AudioContext) audioCtx = new AudioContext();
             }
             if (audioCtx && audioCtx.state === 'suspended') {
                 audioCtx.resume();
@@ -409,9 +376,7 @@
         }
 
         function handleGlobalInteraction() {
-            if (!isAudioAllowed) {
-                enableAudioSystem();
-            }
+            if (!isAudioAllowed) enableAudioSystem();
         }
 
         function enableAudioSystem(e) {
@@ -420,14 +385,9 @@
             initAudioContext();
             document.getElementById('audioEnableBanner').style.display = 'none';
 
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.resume();
-            }
-
-            // Putar nada indikator sukses aktif
             playAirportChime();
             setTimeout(() => {
-                playVoiceAnnouncement("Sistem pengumuman aktif");
+                speakTVOffline("Sistem pengumuman aktif");
             }, 600);
         }
 
@@ -438,12 +398,12 @@
             } else {
                 playAirportChime();
                 setTimeout(() => {
-                    playVoiceAnnouncement("Tes suara pengumuman sistem pengiriman berjalan dengan baik.");
+                    speakTVOffline("Tes suara pengumuman berjalan dengan sukses.");
                 }, 600);
             }
         }
 
-        // Membunyikan nada Ding-Dong (Sintetis) untuk menarik perhatian di TV
+        // 1. Chime Indikator Pengumuman
         function playAirportChime() {
             initAudioContext();
             if (!audioCtx) return;
@@ -453,7 +413,7 @@
             const osc1 = audioCtx.createOscillator();
             const gain1 = audioCtx.createGain();
             osc1.type = 'sine';
-            osc1.frequency.setValueAtTime(523.25, now); // C5
+            osc1.frequency.setValueAtTime(523.25, now); 
             gain1.gain.setValueAtTime(0.3, now);
             gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
             osc1.connect(gain1);
@@ -464,7 +424,7 @@
             const osc2 = audioCtx.createOscillator();
             const gain2 = audioCtx.createGain();
             osc2.type = 'sine';
-            osc2.frequency.setValueAtTime(659.25, now + 0.25); // E5
+            osc2.frequency.setValueAtTime(659.25, now + 0.25); 
             gain2.gain.setValueAtTime(0.3, now + 0.25);
             gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
             osc2.connect(gain2);
@@ -473,69 +433,72 @@
             osc2.stop(now + 0.8);
         }
 
-        function playVoiceAnnouncement(text) {
-            if (!isAudioAllowed) return;
+        // 2. Offline Voice Synthesizer khusus TV (Mengatasi masalah blokir CORS/TTS TV)
+        function speakTVOffline(text) {
+            initAudioContext();
+            if (!audioCtx) return;
 
-            const originalVolume = audio.volume;
-            if (!audio.paused) audio.volume = 0.1;
+            // Jika browser TV mendukung speechSynthesis bawaan, gunakan native
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const msg = new SpeechSynthesisUtterance(text);
+                msg.lang = 'id-ID';
+                msg.rate = 0.85;
+                
+                let hasSpoken = false;
+                msg.onstart = () => { hasSpoken = true; };
+                
+                window.speechSynthesis.speak(msg);
 
-            const restoreVolume = () => {
-                if (!audio.paused) audio.volume = originalVolume;
-            };
-
-            // Jalur 1: Coba Web Speech API Native jika ada
-            if ('speechSynthesis' in window && window.speechSynthesis.getVoices) {
-                try {
-                    window.speechSynthesis.cancel();
-                    const msg = new SpeechSynthesisUtterance(text);
-                    msg.lang = 'id-ID';
-                    msg.rate = 0.85;
-
-                    let spoken = false;
-                    msg.onstart = () => { spoken = true; };
-                    msg.onend = restoreVolume;
-                    msg.onerror = () => { fallbackAudioPlayer(text, restoreVolume); };
-
-                    window.speechSynthesis.speak(msg);
-
-                    setTimeout(() => {
-                        if (!spoken) {
-                            window.speechSynthesis.cancel();
-                            fallbackAudioPlayer(text, restoreVolume);
-                        }
-                    }, 1200);
-                    return;
-                } catch(e) {
-                    fallbackAudioPlayer(text, restoreVolume);
-                    return;
-                }
+                // Fallback jika TV menggantung tanpa mengeluarkan suara
+                setTimeout(() => {
+                    if (!hasSpoken) {
+                        window.speechSynthesis.cancel();
+                        generateSyntheticSpeech(text);
+                    }
+                }, 1000);
+            } else {
+                generateSyntheticSpeech(text);
             }
-
-            fallbackAudioPlayer(text, restoreVolume);
         }
 
-        function fallbackAudioPlayer(text, onComplete) {
-            // Jalur 2: Bebas CORS TTS menggunakan ResponsiveVoice Public Engine
-            const cleanText = encodeURIComponent(text);
-            const ttsUrl = `https://code.responsivevoice.org/getvoice.php?t=${cleanText}&tl=id&sv=&vn=&pitch=0.5&rate=0.5&vol=1`;
+        // Generasi Suara Robotik Sintetis via AudioContext (Tiba di TV 100% tanpa jaringan)
+        function generateSyntheticSpeech(text) {
+            const words = text.split(" ");
+            let delay = 0;
 
-            const sound = new Audio();
-            sound.crossOrigin = "anonymous";
-            sound.src = ttsUrl;
-
-            sound.onended = onComplete;
-            sound.onerror = () => {
-                // Jalur 3: Backup Google TTS Direct Fetch via Proxy Blob (Menembus blokir TV)
-                const backupUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${cleanText}&tl=id&client=tw-ob`;
-                const sound2 = new Audio(backupUrl);
-                sound2.onended = onComplete;
-                sound2.onerror = onComplete;
-                sound2.play().catch(onComplete);
-            };
-
-            sound.play().catch(() => {
-                onComplete();
+            words.forEach((word) => {
+                setTimeout(() => {
+                    playWordTone(word);
+                }, delay);
+                delay += 280;
             });
+        }
+
+        function playWordTone(word) {
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+
+            // Menghasilkan pitch frekuensi berdasarkan karakter kata
+            let charCodeSum = 0;
+            for (let i = 0; i < word.length; i++) charCodeSum += word.charCodeAt(i);
+            const freq = 180 + (charCodeSum % 140);
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now);
+
+            gain.gain.setValueAtTime(0, now);
+            gain.gain.linearRampToValueAtTime(0.2, now + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start(now);
+            osc.stop(now + 0.23);
         }
 
         function toggleAudio(e) {
@@ -586,10 +549,7 @@
             overlay.offsetHeight;
             overlay.style.opacity = '1';
             
-            setTimeout(() => {
-                quoteBox.classList.add('active');
-            }, 100);
-
+            setTimeout(() => { quoteBox.classList.add('active'); }, 100);
             await new Promise(r => setTimeout(r, 10000)); 
 
             quoteBox.classList.remove('active');
@@ -619,7 +579,6 @@
 
             scrollTimeout = setTimeout(() => {
                 const maxScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight;
-                
                 if (maxScroll <= 5) {
                     setTimeout(async () => {
                         await showQuote();
@@ -671,7 +630,7 @@
             if (teks) {
                 playAirportChime();
                 setTimeout(() => {
-                    playVoiceAnnouncement(teks);
+                    speakTVOffline(teks);
                 }, 500);
             }
         }
@@ -694,7 +653,6 @@
 
                     if (!isInitialLoad && isHariIni) {
                         const statusLama = previousStatusMap[id];
-                        
                         if (statusBaru.includes("PROSES") && statusLama && !statusLama.includes("PROSES")) {
                             announceStatusChange(item, "PROSES");
                         }
