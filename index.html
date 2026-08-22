@@ -122,6 +122,22 @@
             justify-content: center;
         }
 
+        .test-audio-btn {
+            background: #2563eb;
+            color: #ffffff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .test-audio-btn:hover {
+            background: #1d4ed8;
+        }
+
         /* Scroll Area & Table */
         #scrollContainer {
             flex: 1;
@@ -278,6 +294,7 @@
             <p id="targetDate">MENGAMBIL DATA...</p>
         </div>
         <div class="header-controls">
+            <button class="test-audio-btn" onclick="testSound(event)">🔊 CEK SUARA</button>
             <div class="audio-control">
                 <button class="audio-btn" id="playPauseBtn" onclick="toggleAudio(event)">▶</button>
                 <span id="audio-status" style="font-size: 12px; font-weight: bold;">STOP</span>
@@ -400,6 +417,15 @@
             playVoiceAnnouncement("Sistem suara pengumuman aktif.");
         }
 
+        function testSound(e) {
+            if(e) e.stopPropagation();
+            if (!isAudioAllowed) {
+                enableAudioSystem();
+            } else {
+                playVoiceAnnouncement("Tes suara pengumuman sistem pengiriman.");
+            }
+        }
+
         function playVoiceAnnouncement(text) {
             if (!isAudioAllowed) return;
 
@@ -410,37 +436,65 @@
                 if (!audio.paused) audio.volume = originalVolume;
             };
 
-            if ('speechSynthesis' in window) {
+            // Deteksi browser TV (sering bermasalah pada Web Speech API)
+            const isTVBrowser = /TV|SmartTV|AndroidTV|GoogleTV|HbbTV|NetCast|WebOS/i.test(navigator.userAgent);
+
+            if (isTVBrowser || !('speechSynthesis' in window)) {
+                playAlternativeTTS(text, restoreVolume);
+                return;
+            }
+
+            try {
                 window.speechSynthesis.cancel();
                 
                 const msg = new SpeechSynthesisUtterance(text);
                 msg.lang = 'id-ID';
-                msg.rate = 0.9;
+                msg.rate = 0.85;
                 msg.pitch = 1.0;
 
+                let hasSpoken = false;
+
+                msg.onstart = () => { hasSpoken = true; };
                 msg.onend = restoreVolume;
                 msg.onerror = () => {
                     restoreVolume();
-                    fallbackGoogleTTS(text, restoreVolume);
+                    playAlternativeTTS(text, restoreVolume);
                 };
 
                 window.speechSynthesis.speak(msg);
-            } else {
-                fallbackGoogleTTS(text, restoreVolume);
+
+                // Timeout Guard jika browser TV menggantung tanpa mengeluarkan suara
+                setTimeout(() => {
+                    if (!hasSpoken && window.speechSynthesis.speaking) {
+                        window.speechSynthesis.cancel();
+                        playAlternativeTTS(text, restoreVolume);
+                    }
+                }, 1500);
+
+            } catch (e) {
+                playAlternativeTTS(text, restoreVolume);
             }
         }
 
-        function fallbackGoogleTTS(text, callback) {
-            const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=id&client=tw-ob`;
-            
-            ttsAudio.src = ttsUrl;
-            ttsAudio.onended = callback;
-            ttsAudio.onerror = callback;
+        function playAlternativeTTS(text, callback) {
+            const encodedText = encodeURIComponent(text);
+            const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=id&client=tw-ob`;
 
-            ttsAudio.play().catch(err => {
-                console.log("Gagal memutar audio TTS:", err);
+            ttsAudio.src = ttsUrl;
+            
+            ttsAudio.onended = () => { callback(); };
+            ttsAudio.onerror = (e) => {
+                console.warn("Gagal memutar audio pengumuman di TV:", e);
                 callback();
-            });
+            };
+
+            const playPromise = ttsAudio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(err => {
+                    console.log("Autoplay pengumuman terhalang kebijakan TV:", err);
+                    callback();
+                });
+            }
         }
 
         function toggleAudio(e) {
