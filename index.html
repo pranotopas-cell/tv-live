@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>LIVE SCHEDULE</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://code.responsivevoice.org/responsivevoice.js?key=FREE"></script>
+
     <style>
         :root {
             --bg-airport: #0a0f1d;
@@ -228,42 +230,55 @@
 
         let previousStatusMap = {};
         let isInitialLoad = true;
+        let isAudioAllowed = false;
 
-        // FUNGSI MEMUTAR SUARA SUARA GOOGLE AUDIO MP3 LANGSUNG (BEBAS BUG/LEBIH STABIL)
-        function playGoogleVoice(text) {
+        function getWIBDateString() {
+            const d = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Jakarta"}));
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+
+        function playVoiceAnnouncement(text) {
+            if (!isAudioAllowed) return;
+
             const originalVolume = audio.volume;
             if (!audio.paused) audio.volume = 0.1;
 
-            const restoreVolume = () => {
-                if (!audio.paused) audio.volume = originalVolume;
-            };
-
-            const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=id&client=tw-ob`;
-            const voiceAudio = new Audio(ttsUrl);
-
-            voiceAudio.play().then(() => {
-                voiceAudio.onended = restoreVolume;
-                voiceAudio.onerror = restoreVolume;
-            }).catch(err => {
-                console.warn("Mencoba cara ke-2 (Web Speech API):", err);
-                // Fallback ke browser speech API jika audio terblokir
+            const speakFallback = () => {
                 if ('speechSynthesis' in window) {
                     window.speechSynthesis.cancel();
                     const msg = new SpeechSynthesisUtterance(text);
                     msg.lang = 'id-ID';
-                    msg.onend = restoreVolume;
-                    msg.onerror = restoreVolume;
+                    msg.rate = 0.9;
+                    msg.onend = () => { if (!audio.paused) audio.volume = originalVolume; };
+                    msg.onerror = () => { if (!audio.paused) audio.volume = originalVolume; };
                     window.speechSynthesis.speak(msg);
-                } else {
-                    restoreVolume();
                 }
-            });
+            };
+
+            if (window.responsiveVoice && typeof responsiveVoice.speak === 'function') {
+                try {
+                    responsiveVoice.speak(text, "Indonesian Female", {
+                        pitch: 1,
+                        rate: 0.9,
+                        volume: 1,
+                        onend: () => { if (!audio.paused) audio.volume = originalVolume; },
+                        onerror: () => speakFallback()
+                    });
+                } catch (e) {
+                    speakFallback();
+                }
+            } else {
+                speakFallback();
+            }
         }
 
-        // TOMBOL AKTIFKAN AUDIO DARI USER INTERACTION
         function enableAudioSystem() {
+            isAudioAllowed = true;
             document.getElementById('audioEnableBanner').style.display = 'none';
-            playGoogleVoice("Sistem pengumuman suara telah aktif.");
+            playVoiceAnnouncement("Sistem pengumuman suara telah aktif.");
         }
 
         function toggleAudio() {
@@ -384,27 +399,26 @@
 
         function getWIB() { return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Jakarta"})); }
 
-        // PERAKITAN KALIMAT SUARA (TANPA NOPOL)
         function announceStatusChange(item, statusType) {
-            const sopir = item.sopir || 'Tanpa Nama';
+            const sopir = item.sopir || 'Sopir';
             const tujuan = item.delivery_to || 'Tujuan';
 
             let teks = "";
-            if (statusType === "PROSES") {
-                teks = `Pemberitahuan. Driver ${sopir}, tujuan ${tujuan}, saat ini sedang dalam status PROSES.`;
-            } else if (statusType === "DELIVERED") {
-                teks = `Pemberitahuan. Driver ${sopir}, tujuan ${tujuan}, status telah DELIVERED.`;
+            if (statusType.includes("PROSES")) {
+                teks = `Pemberitahuan. Driver ${sopir}, tujuan ${tujuan}, status PROSES.`;
+            } else if (statusType.includes("DELIVERED")) {
+                teks = `Pemberitahuan. Driver ${sopir}, tujuan ${tujuan}, status DELIVERED.`;
             }
 
             if (teks) {
-                playGoogleVoice(teks);
+                playVoiceAnnouncement(teks);
             }
         }
 
         async function loadDashboard() {
             try {
                 const hariIni = getWIB();
-                const isoHariIni = hariIni.toISOString().split('T')[0];
+                const isoHariIni = getWIBDateString();
                 document.getElementById('targetDate').innerText = hariIni.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
 
                 const { data, error } = await _supabase.from('data_pengiriman').select('*').gte('tanggal', isoHariIni);
@@ -412,7 +426,6 @@
                 
                 const currentData = data || [];
 
-                // DETEKSI PERUBAHAN STATUS
                 currentData.forEach(item => {
                     const id = item.id || (item.sopir + '_' + item.tanggal + '_' + item.delivery_to);
                     const statusBaru = (item.status || "").toUpperCase();
@@ -437,6 +450,36 @@
                 console.error("Gagal:", err.message); 
                 startAutoScroll();
             }
+        }
+
+        // REALTIME LISTENER SUPABASE UNTUK PERUBAHAN STATUS INSTAN
+        function setupRealtimeListener() {
+            _supabase
+                .channel('realtime_pengiriman')
+                .on(
+                    'postgres_changes',
+                    { event: '*', schema: 'public', table: 'data_pengiriman' },
+                    (payload) => {
+                        if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
+                            const item = payload.new;
+                            const isoHariIni = getWIBDateString();
+                            const id = item.id || (item.sopir + '_' + item.tanggal + '_' + item.delivery_to);
+                            const statusBaru = (item.status || "").toUpperCase();
+                            const statusLama = previousStatusMap[id];
+
+                            if (item.tanggal === isoHariIni) {
+                                if (statusBaru.includes("PROSES") && statusLama && !statusLama.includes("PROSES")) {
+                                    announceStatusChange(item, "PROSES");
+                                } else if (statusBaru.includes("DELIVERED") && statusLama && !statusLama.includes("DELIVERED")) {
+                                    announceStatusChange(item, "DELIVERED");
+                                }
+                            }
+                            previousStatusMap[id] = statusBaru;
+                        }
+                        loadDashboard();
+                    }
+                )
+                .subscribe();
         }
 
         async function renderData(data) {
@@ -499,6 +542,7 @@
         }, 1000);
 
         loadDashboard();
+        setupRealtimeListener();
     </script>
 </body>
 </html>
