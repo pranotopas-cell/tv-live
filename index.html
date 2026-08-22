@@ -330,7 +330,9 @@
         </div>
     </div>
 
+    <!-- Elemen Audio Utama -->
     <audio id="murottalAudio" crossorigin="anonymous"></audio>
+    <audio id="announcementAudio" crossorigin="anonymous"></audio>
 
     <script>
         const SUPABASE_URL = 'https://ntaectphgoelmhzrkatp.supabase.co';
@@ -347,6 +349,7 @@
 
         let quoteIndex = 0;
         const audio = document.getElementById('murottalAudio');
+        const annAudio = document.getElementById('announcementAudio');
 
         const streamSources = [
             "https://live.mp3quran.net/makkah",
@@ -362,7 +365,6 @@
         let scrollRequest = null;
         let scrollTimeout = null;
 
-        // Web Audio Context untuk TV Voice Generator
         let audioCtx = null;
 
         function initAudioContext() {
@@ -385,9 +387,12 @@
             initAudioContext();
             document.getElementById('audioEnableBanner').style.display = 'none';
 
+            // Pancing elemen audio pengumuman agar diizinkan oleh OS TV
+            annAudio.play().then(() => annAudio.pause()).catch(() => {});
+
             playAirportChime();
             setTimeout(() => {
-                speakTVOffline("Sistem pengumuman aktif");
+                speakTVRealVoice("Sistem pengumuman aktif");
             }, 600);
         }
 
@@ -398,12 +403,12 @@
             } else {
                 playAirportChime();
                 setTimeout(() => {
-                    speakTVOffline("Tes suara pengumuman berjalan dengan sukses.");
+                    speakTVRealVoice("Tes suara pengumuman pengiriman barang.");
                 }, 600);
             }
         }
 
-        // 1. Chime Indikator Pengumuman
+        // Nada Chime Penerbangan
         function playAirportChime() {
             initAudioContext();
             if (!audioCtx) return;
@@ -433,72 +438,37 @@
             osc2.stop(now + 0.8);
         }
 
-        // 2. Offline Voice Synthesizer khusus TV (Mengatasi masalah blokir CORS/TTS TV)
-        function speakTVOffline(text) {
-            initAudioContext();
-            if (!audioCtx) return;
+        // FUNGSI UTAMA SUARA MANUSIA (BEBAS BLOKIR CORS TV & INDONESIA REAL VOICE)
+        function speakTVRealVoice(text) {
+            if (!isAudioAllowed) return;
 
-            // Jika browser TV mendukung speechSynthesis bawaan, gunakan native
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const msg = new SpeechSynthesisUtterance(text);
-                msg.lang = 'id-ID';
-                msg.rate = 0.85;
-                
-                let hasSpoken = false;
-                msg.onstart = () => { hasSpoken = true; };
-                
-                window.speechSynthesis.speak(msg);
+            const originalVolume = audio.volume;
+            if (!audio.paused) audio.volume = 0.1; // Pelankan Murottal saat ada suara pengumuman
 
-                // Fallback jika TV menggantung tanpa mengeluarkan suara
-                setTimeout(() => {
-                    if (!hasSpoken) {
-                        window.speechSynthesis.cancel();
-                        generateSyntheticSpeech(text);
-                    }
-                }, 1000);
-            } else {
-                generateSyntheticSpeech(text);
-            }
-        }
+            const restoreVolume = () => {
+                if (!audio.paused) audio.volume = originalVolume;
+            };
 
-        // Generasi Suara Robotik Sintetis via AudioContext (Tiba di TV 100% tanpa jaringan)
-        function generateSyntheticSpeech(text) {
-            const words = text.split(" ");
-            let delay = 0;
+            const encodedText = encodeURIComponent(text);
+            
+            // Menggunakan Endpoint CDN TTS Publik yang paling stabil di Browser Smart TV
+            const voiceUrl = `https://api.voicerss.org/?key=e34d7d3c01284a73b9d8858e6e580e07&hl=id-id&c=MP3&f=16khz_16bit_mono&src=${encodedText}`;
 
-            words.forEach((word) => {
-                setTimeout(() => {
-                    playWordTone(word);
-                }, delay);
-                delay += 280;
+            annAudio.src = voiceUrl;
+
+            annAudio.onended = restoreVolume;
+            annAudio.onerror = (err) => {
+                console.warn("API 1 Gagal, Mencoba Backup API...", err);
+                // Backup API Google TTS Proxy khusus TV
+                const backupUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=id&client=tw-ob`;
+                annAudio.src = backupUrl;
+                annAudio.play().catch(restoreVolume);
+            };
+
+            annAudio.play().catch((err) => {
+                console.error("Autoplay TV Terhalang:", err);
+                restoreVolume();
             });
-        }
-
-        function playWordTone(word) {
-            if (!audioCtx) return;
-            const now = audioCtx.currentTime;
-
-            // Menghasilkan pitch frekuensi berdasarkan karakter kata
-            let charCodeSum = 0;
-            for (let i = 0; i < word.length; i++) charCodeSum += word.charCodeAt(i);
-            const freq = 180 + (charCodeSum % 140);
-
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(freq, now);
-
-            gain.gain.setValueAtTime(0, now);
-            gain.gain.linearRampToValueAtTime(0.2, now + 0.05);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
-
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-
-            osc.start(now);
-            osc.stop(now + 0.23);
         }
 
         function toggleAudio(e) {
@@ -630,7 +600,7 @@
             if (teks) {
                 playAirportChime();
                 setTimeout(() => {
-                    speakTVOffline(teks);
+                    speakTVRealVoice(teks);
                 }, 500);
             }
         }
