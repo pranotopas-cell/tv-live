@@ -126,16 +126,16 @@
             background: #2563eb;
             color: #ffffff;
             border: none;
-            padding: 6px 12px;
+            padding: 8px 16px;
             border-radius: 12px;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: bold;
             cursor: pointer;
-            transition: background 0.2s;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
         }
 
-        .test-audio-btn:hover {
-            background: #1d4ed8;
+        .test-audio-btn:active {
+            transform: scale(0.95);
         }
 
         /* Scroll Area & Table */
@@ -332,7 +332,6 @@
 
     <!-- Element Audio Universal -->
     <audio id="murottalAudio" crossorigin="anonymous"></audio>
-    <audio id="ttsAudio" crossorigin="anonymous"></audio>
 
     <script>
         const SUPABASE_URL = 'https://ntaectphgoelmhzrkatp.supabase.co';
@@ -374,12 +373,11 @@
             { t: "Bukan kemiskinan yang kita takuti, melainkan hilangnya rasa syukur saat harta melimpah.", s: "Kata Hikmah" },
             { t: "Jika Allah menunda sesuatu yang kamu inginkan, itu karena Dia ingin memberimu sesuatu yang jauh lebih baik pada waktu yang tepat.", s: "QS. Al-Baqarah: 216" },
             { t: "Senyummu di hadapan saudaramu adalah bernilai sedekah.", s: "HR. Tirmidzi" },
-            { t: "Mulailah pagimu dengan bismillah, jalani siangmu dengan alhamdulillah, dan tutuplah malammu dengan istighfar.", s: "Nasehat Bijak" }
+            { t: "Mulailah pagimu dengan bismillah, jalani siangmu melelui alhamdulillah, dan tutuplah malammu dengan istighfar.", s: "Nasehat Bijak" }
         ];
 
         let quoteIndex = 0;
         const audio = document.getElementById('murottalAudio');
-        const ttsAudio = document.getElementById('ttsAudio');
 
         const streamSources = [
             "https://live.mp3quran.net/makkah",
@@ -395,6 +393,21 @@
         let scrollRequest = null;
         let scrollTimeout = null;
 
+        // Web Audio Context khusus untuk TV chime & synthesized voice
+        let audioCtx = null;
+
+        function initAudioContext() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    audioCtx = new AudioContext();
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
         function handleGlobalInteraction() {
             if (!isAudioAllowed) {
                 enableAudioSystem();
@@ -404,17 +417,18 @@
         function enableAudioSystem(e) {
             if(e) e.stopPropagation();
             isAudioAllowed = true;
+            initAudioContext();
             document.getElementById('audioEnableBanner').style.display = 'none';
 
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.resume();
             }
 
-            ttsAudio.play().then(() => {
-                ttsAudio.pause();
-            }).catch(() => {});
-
-            playVoiceAnnouncement("Sistem suara pengumuman aktif.");
+            // Putar nada indikator sukses aktif
+            playAirportChime();
+            setTimeout(() => {
+                playVoiceAnnouncement("Sistem pengumuman aktif");
+            }, 600);
         }
 
         function testSound(e) {
@@ -422,79 +436,106 @@
             if (!isAudioAllowed) {
                 enableAudioSystem();
             } else {
-                playVoiceAnnouncement("Tes suara pengumuman sistem pengiriman.");
+                playAirportChime();
+                setTimeout(() => {
+                    playVoiceAnnouncement("Tes suara pengumuman sistem pengiriman berjalan dengan baik.");
+                }, 600);
             }
+        }
+
+        // Membunyikan nada Ding-Dong (Sintetis) untuk menarik perhatian di TV
+        function playAirportChime() {
+            initAudioContext();
+            if (!audioCtx) return;
+
+            const now = audioCtx.currentTime;
+            
+            const osc1 = audioCtx.createOscillator();
+            const gain1 = audioCtx.createGain();
+            osc1.type = 'sine';
+            osc1.frequency.setValueAtTime(523.25, now); // C5
+            gain1.gain.setValueAtTime(0.3, now);
+            gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+            osc1.connect(gain1);
+            gain1.connect(audioCtx.destination);
+            osc1.start(now);
+            osc1.stop(now + 0.5);
+
+            const osc2 = audioCtx.createOscillator();
+            const gain2 = audioCtx.createGain();
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(659.25, now + 0.25); // E5
+            gain2.gain.setValueAtTime(0.3, now + 0.25);
+            gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+            osc2.connect(gain2);
+            gain2.connect(audioCtx.destination);
+            osc2.start(now + 0.25);
+            osc2.stop(now + 0.8);
         }
 
         function playVoiceAnnouncement(text) {
             if (!isAudioAllowed) return;
 
             const originalVolume = audio.volume;
-            if (!audio.paused) audio.volume = 0.15;
+            if (!audio.paused) audio.volume = 0.1;
 
             const restoreVolume = () => {
                 if (!audio.paused) audio.volume = originalVolume;
             };
 
-            // Deteksi browser TV (sering bermasalah pada Web Speech API)
-            const isTVBrowser = /TV|SmartTV|AndroidTV|GoogleTV|HbbTV|NetCast|WebOS/i.test(navigator.userAgent);
+            // Jalur 1: Coba Web Speech API Native jika ada
+            if ('speechSynthesis' in window && window.speechSynthesis.getVoices) {
+                try {
+                    window.speechSynthesis.cancel();
+                    const msg = new SpeechSynthesisUtterance(text);
+                    msg.lang = 'id-ID';
+                    msg.rate = 0.85;
 
-            if (isTVBrowser || !('speechSynthesis' in window)) {
-                playAlternativeTTS(text, restoreVolume);
-                return;
+                    let spoken = false;
+                    msg.onstart = () => { spoken = true; };
+                    msg.onend = restoreVolume;
+                    msg.onerror = () => { fallbackAudioPlayer(text, restoreVolume); };
+
+                    window.speechSynthesis.speak(msg);
+
+                    setTimeout(() => {
+                        if (!spoken) {
+                            window.speechSynthesis.cancel();
+                            fallbackAudioPlayer(text, restoreVolume);
+                        }
+                    }, 1200);
+                    return;
+                } catch(e) {
+                    fallbackAudioPlayer(text, restoreVolume);
+                    return;
+                }
             }
 
-            try {
-                window.speechSynthesis.cancel();
-                
-                const msg = new SpeechSynthesisUtterance(text);
-                msg.lang = 'id-ID';
-                msg.rate = 0.85;
-                msg.pitch = 1.0;
-
-                let hasSpoken = false;
-
-                msg.onstart = () => { hasSpoken = true; };
-                msg.onend = restoreVolume;
-                msg.onerror = () => {
-                    restoreVolume();
-                    playAlternativeTTS(text, restoreVolume);
-                };
-
-                window.speechSynthesis.speak(msg);
-
-                // Timeout Guard jika browser TV menggantung tanpa mengeluarkan suara
-                setTimeout(() => {
-                    if (!hasSpoken && window.speechSynthesis.speaking) {
-                        window.speechSynthesis.cancel();
-                        playAlternativeTTS(text, restoreVolume);
-                    }
-                }, 1500);
-
-            } catch (e) {
-                playAlternativeTTS(text, restoreVolume);
-            }
+            fallbackAudioPlayer(text, restoreVolume);
         }
 
-        function playAlternativeTTS(text, callback) {
-            const encodedText = encodeURIComponent(text);
-            const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=id&client=tw-ob`;
+        function fallbackAudioPlayer(text, onComplete) {
+            // Jalur 2: Bebas CORS TTS menggunakan ResponsiveVoice Public Engine
+            const cleanText = encodeURIComponent(text);
+            const ttsUrl = `https://code.responsivevoice.org/getvoice.php?t=${cleanText}&tl=id&sv=&vn=&pitch=0.5&rate=0.5&vol=1`;
 
-            ttsAudio.src = ttsUrl;
-            
-            ttsAudio.onended = () => { callback(); };
-            ttsAudio.onerror = (e) => {
-                console.warn("Gagal memutar audio pengumuman di TV:", e);
-                callback();
+            const sound = new Audio();
+            sound.crossOrigin = "anonymous";
+            sound.src = ttsUrl;
+
+            sound.onended = onComplete;
+            sound.onerror = () => {
+                // Jalur 3: Backup Google TTS Direct Fetch via Proxy Blob (Menembus blokir TV)
+                const backupUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${cleanText}&tl=id&client=tw-ob`;
+                const sound2 = new Audio(backupUrl);
+                sound2.onended = onComplete;
+                sound2.onerror = onComplete;
+                sound2.play().catch(onComplete);
             };
 
-            const playPromise = ttsAudio.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(err => {
-                    console.log("Autoplay pengumuman terhalang kebijakan TV:", err);
-                    callback();
-                });
-            }
+            sound.play().catch(() => {
+                onComplete();
+            });
         }
 
         function toggleAudio(e) {
@@ -628,7 +669,10 @@
             }
 
             if (teks) {
-                playVoiceAnnouncement(teks);
+                playAirportChime();
+                setTimeout(() => {
+                    playVoiceAnnouncement(teks);
+                }, 500);
             }
         }
 
