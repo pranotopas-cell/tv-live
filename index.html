@@ -234,7 +234,7 @@
 
         #quoteSource {
             font-size: 20px;
-            color: var(--text-blue-soft);
+            color: var(--text-gold);
             font-weight: bold;
         }
 
@@ -273,7 +273,7 @@
 
     <!-- Audio Enable Banner -->
     <div id="audioEnableBanner" onclick="enableAudioSystem()">
-        🔊 Aktifkan Suara Pengumuman
+        🔊 Klik di sini untuk mengaktifkan Fitur Suara Pengumuman
     </div>
 
     <!-- Header Section -->
@@ -410,7 +410,7 @@
             await playAirportChime();
 
             // Pesan keselamatan yang ditambahkan setelah pengumuman
-            const safetyMessage = " Tetap jaga kualitas dan kuantitas pengiriman, serta selalu utamakan keselamatan dan gunakan Alat pelindung diri selama proses bongkar.Terima kasih .";
+            const safetyMessage = " Tetap jaga kualitas dan kuantitas prngiriman,serta utamakan keselamatan dan selalu gunakan alat pelindung diri saat proses bongkar bbm.Terima kasih.";
             const fullText = text + safetyMessage;
 
             const speakFallback = () => {
@@ -717,7 +717,7 @@
                             <div class="nopol-block">${row.nopol || '-'}</div>
                             <div class="sopir-name">${row.sopir || '-'}</div>
                         </div>
-                        <div style="font-size:15px; color:var(--text-gold-soft); margin-left:2px;">LOCATION : ${row.lokasi || '-'}</div>
+                        <div style="font-size:15px; color:var(--text-blue-soft); margin-left:2px;">LOCATION : ${row.lokasi || '-'}</div>
                     </td>
                     <td style="text-align:center; font-weight:bold; color:var(--text-gold-soft); font-size:18px;">${row.jumlah_keluar || '0'}</td>
                     <td>
