@@ -273,7 +273,7 @@
 
     <!-- Audio Enable Banner -->
     <div id="audioEnableBanner" onclick="enableAudioSystem()">
-        🔊 mengaktifkan Fitur Suara 
+        🔊 Mengaktifkan Fitur Suara 
     </div>
 
     <!-- Header Section -->
@@ -363,7 +363,6 @@
             { t: "Mulailah pagimu dengan bismillah, jalani siangmu dengan alhamdulillah, dan tutuplah malammu dengan istighfar.", s: "Nasehat Bijak" }
         ];
 
-
         let quoteIndex = 0;
         const audio = document.getElementById('murottalAudio');
         const streamSources = [
@@ -387,7 +386,7 @@
             return `${yyyy}-${mm}-${dd}`;
         }
 
-        // Fungsi untuk membunyikan suara chime/ding-dong ala bandara menggunakan Web Audio API
+        // Fungsi Chime Bandara Autentik (Harmoni Nada Sol-Mi-Do / F5 - D5 - A4 - F4)
         function playAirportChime() {
             return new Promise((resolve) => {
                 try {
@@ -398,10 +397,11 @@
                     }
                     const ctx = new AudioContext();
 
-                    // Nada 1: C5 (523.25 Hz), Nada 2: G4 (392.00 Hz)
                     const notes = [
-                        { freq: 523.25, time: 0, duration: 0.6 },
-                        { freq: 392.00, time: 0.5, duration: 1.2 }
+                        { freq: 698.46, time: 0.00, duration: 0.45 }, // F5
+                        { freq: 587.33, time: 0.35, duration: 0.45 }, // D5
+                        { freq: 440.00, time: 0.70, duration: 0.45 }, // A4
+                        { freq: 349.23, time: 1.05, duration: 1.10 }  // F4
                     ];
 
                     notes.forEach(note => {
@@ -411,8 +411,8 @@
                         osc.type = 'sine';
                         osc.frequency.setValueAtTime(note.freq, ctx.currentTime + note.time);
 
-                        gain.gain.setValueAtTime(0.001, ctx.currentTime + note.time);
-                        gain.gain.exponentialRampToValueAtTime(0.3, ctx.currentTime + note.time + 0.05);
+                        gain.gain.setValueAtTime(0.0001, ctx.currentTime + note.time);
+                        gain.gain.exponentialRampToValueAtTime(0.4, ctx.currentTime + note.time + 0.03);
                         gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + note.time + note.duration);
 
                         osc.connect(gain);
@@ -425,7 +425,7 @@
                     setTimeout(() => {
                         ctx.close();
                         resolve();
-                    }, 1700);
+                    }, 2200);
                 } catch (e) {
                     console.error("Gagal memutar chime:", e);
                     resolve();
@@ -439,12 +439,18 @@
             const originalVolume = audio.volume;
             if (!audio.paused) audio.volume = 0.1;
 
-            // Memutar suara ding-dong terlebih dahulu
+            // 1. Memutar chime pembuka
             await playAirportChime();
 
             // Pesan keselamatan yang ditambahkan setelah pengumuman
-            const safetyMessage = " Tetap jaga kualitas dan kuantitas prngiriman,serta utamakan keselamatan dan selalu gunakan alat pelindung diri saat proses bongkar bbm.Terima kasih.";
+            const safetyMessage = " Tetap jaga kualitas dan kuantitas pengiriman, serta utamakan keselamatan dan selalu gunakan alat pelindung diri saat proses bongkar bbm. Terima kasih.";
             const fullText = text + safetyMessage;
+
+            const finishAnnouncement = async () => {
+                // 3. Memutar chime penutup setelah pengumuman selesai
+                await playAirportChime();
+                if (!audio.paused) audio.volume = originalVolume;
+            };
 
             const speakFallback = () => {
                 if ('speechSynthesis' in window) {
@@ -452,20 +458,23 @@
                     const msg = new SpeechSynthesisUtterance(fullText);
                     msg.lang = 'id-ID';
                     msg.rate = 0.9;
-                    msg.onend = () => { if (!audio.paused) audio.volume = originalVolume; };
-                    msg.onerror = () => { if (!audio.paused) audio.volume = originalVolume; };
+                    msg.onend = finishAnnouncement;
+                    msg.onerror = finishAnnouncement;
                     window.speechSynthesis.speak(msg);
+                } else {
+                    finishAnnouncement();
                 }
             };
 
+            // 2. Memutar pengumuman suara
             if (window.responsiveVoice && typeof responsiveVoice.speak === 'function') {
                 try {
                     responsiveVoice.speak(fullText, "Indonesian Female", {
                         pitch: 1,
                         rate: 0.9,
                         volume: 1,
-                        onend: () => { if (!audio.paused) audio.volume = originalVolume; },
-                        onerror: () => speakFallback()
+                        onend: finishAnnouncement,
+                        onerror: speakFallback
                     });
                 } catch (e) {
                     speakFallback();
@@ -478,7 +487,7 @@
         function enableAudioSystem() {
             isAudioAllowed = true;
             document.getElementById('audioEnableBanner').style.display = 'none';
-            playVoiceAnnouncement("Sistem pengumuman suara telah aktif.");
+            playVoiceAnnouncement("Mohon perhatian. Sistem pengumuman suara telah aktif.");
         }
 
         function toggleAudio() {
@@ -581,17 +590,16 @@
         function startAutoScroll() {
             stopAutoScroll();
 
-            // Cek apakah konten melebihi area layar, jika tidak perlu di-scroll, berikan delay lalu tampilkan quote
             if (scrollContainer.scrollHeight <= scrollContainer.clientHeight) {
                 setTimeout(async () => {
                     await showQuote();
                     loadDashboard();
-                }, 10000);
+                }, 20000);
                 return;
             }
 
             isScrolling = true;
-            const scrollSpeed = 0.8; 
+            const scrollSpeed = 0.4; 
 
             function step() {
                 if (!isScrolling) return;
@@ -603,7 +611,6 @@
                     stopAutoScroll();
                     setTimeout(async () => {
                         await showQuote(); 
-                        // Smooth reset posisi scroll ke 0 sebelum reload data
                         scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
                         setTimeout(() => { 
                             loadDashboard(); 
@@ -626,14 +633,15 @@
         function getWIB() { return new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" })); }
 
         function announceStatusChange(item, statusType) {
+            const nopol = item.nopol || 'Tanpa Nopol';
             const sopir = item.sopir || 'Sopir';
             const tujuan = item.delivery_to || 'Tujuan';
 
             let teks = "";
             if (statusType.includes("PROSES")) {
-                teks = `Pemberitahuan. Driver ${sopir}, tujuan ${tujuan}, status PROSES.`;
+                teks = `Mohon perhatian, kendaraan nomor polisi ${nopol}. Driver ${sopir}, tujuan ${tujuan}, status PROSES.`;
             } else if (statusType.includes("DELIVERED")) {
-                teks = `Pemberitahuan. Driver ${sopir}, tujuan ${tujuan}, status DELIVERED.`;
+                teks = `Mohon perhatian, kendaraan nomor polisi ${nopol}. Driver ${sopir}, tujuan ${tujuan}, status DELIVERED.`;
             }
 
             if (teks) {
