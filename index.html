@@ -573,7 +573,7 @@
             wrapText(qSrc);
             
             await animateIn(overlay);
-            await new Promise(r => setTimeout(r, 7000)); 
+            await new Promise(r => setTimeout(r, 15000)); 
             await animateOut(overlay);
         }
 
@@ -594,7 +594,7 @@
                 setTimeout(async () => {
                     await showQuote();
                     loadDashboard();
-                }, 20000);
+                }, 10000);
                 return;
             }
 
