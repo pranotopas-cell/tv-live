@@ -8,6 +8,9 @@
     <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+    <!-- Engine TTS Khusus Browser TV / HiTV Browser -->
+    <script src="https://code.responsivevoice.org/responsivevoice.js?key=FREE"></script>
+
     <style>
         :root {
             --bg-main: #0b0f19;
@@ -36,7 +39,7 @@
             flex-direction: column;
         }
 
-        /* Modal Pemicu Audio TV */
+        /* Modal Pemicu Izin Audio TV */
         #tvAudioModal {
             position: fixed;
             top: 0;
@@ -153,7 +156,6 @@
             justify-content: center;
         }
 
-        /* Banner Suara (Kondisional) */
         #audioEnableBanner {
             background-color: var(--text-gold);
             color: #000;
@@ -324,7 +326,7 @@
     <!-- Modal Aktivasi Audio Remote TV -->
     <div id="tvAudioModal">
         <h2>SISTEM PENGUMUMAN SUARA DASHBOARD</h2>
-        <p>Silakan tekan tombol <b style="color: var(--text-gold);">OK / ENTER</b> pada Remote Control TV Anda untuk mengaktifkan Suara Pengumuman Otomatis.</p>
+        <p>Silakan tekan tombol <b style="color: var(--text-gold);">OK / ENTER</b> pada Remote TV Anda untuk mengaktifkan Suara Pengumuman Otomatis.</p>
         <button id="btnEnableTV">AKTIFKAN SUARA (TEKAN OK)</button>
     </div>
 
@@ -376,7 +378,6 @@
     </div>
 
     <audio id="murottalAudio" preload="none"></audio>
-    <!-- Element Audio Khusus Suara Pengumuman HiTV -->
     <audio id="ttsAudioPlayer" preload="auto"></audio>
 
     <script>
@@ -450,7 +451,7 @@
                 isAudioAllowed = true;
                 if (modal) modal.style.display = 'none';
 
-                // Buka Izin Audio global untuk HiTV Browser
+                // Buka AudioContext hardware
                 try {
                     const AudioCtx = window.AudioContext || window.webkitAudioContext;
                     if (AudioCtx) {
@@ -459,7 +460,7 @@
                     }
                 } catch(e){}
 
-                // Uji Coba Suara Pertama
+                // Tes Panggilan Audio
                 playVoiceAnnouncement("Sistem pengumuman suara telah diaktifkan.");
             }
 
@@ -480,14 +481,12 @@
             return `${yyyy}-${mm}-${dd}`;
         }
 
-        // Tone Bel Bandara Synthesizer
+        // Tone Bel Bandara Synthesizer (100% Bunyi di Hardware Apapun)
         function playAirportChime() {
             return new Promise((resolve) => {
                 try {
                     const ctx = globalAudioCtx || new (window.AudioContext || window.webkitAudioContext)();
-                    if (ctx.state === 'suspended') {
-                        ctx.resume();
-                    }
+                    if (ctx.state === 'suspended') ctx.resume();
 
                     const notes = [
                         { freq: 698.46, time: 0.00, duration: 0.45 }, 
@@ -514,9 +513,7 @@
                         osc.stop(ctx.currentTime + note.time + note.duration);
                     });
 
-                    setTimeout(() => {
-                        resolve();
-                    }, 2200);
+                    setTimeout(resolve, 2200);
                 } catch (e) {
                     console.error("Gagal memutar chime:", e);
                     resolve();
@@ -524,7 +521,7 @@
             });
         }
 
-        // PENGUMUMAN SUARA UNTUK HITV BROWSER
+        // SISTEM ENGINE SUARA MULTI-FALLBACK KHUSUS HITV BROWSER
         async function playVoiceAnnouncement(text) {
             if (!isAudioAllowed) return;
 
@@ -534,34 +531,50 @@
             // Memutar Chime Pembuka
             await playAirportChime();
 
-            const safetyMessage = ". Utamakan keselamatan kerja dan gunakan APD saat bertugas. Terima kasih.";
+            const safetyMessage = ". Utamakan keselamatan kerja dan gunakan APD saat bertugas.";
             const fullText = text + safetyMessage;
 
-            // URL Audio Stream Server Bebas Blokir CORS
-            const ttsUrl = "https://api.streamelements.com/kappa/v2/speech?voice=Indonesian%20Female&text=" + encodeURIComponent(fullText);
+            // OPSI 1: ResponsiveVoice JS (Mesin Paling Stabil untuk TV)
+            if (window.responsiveVoice && responsiveVoice.voiceSupport()) {
+                responsiveVoice.speak(fullText, "Indonesian Female", {
+                    pitch: 1,
+                    rate: 0.85,
+                    onend: async function() {
+                        await playAirportChime();
+                        if (!audio.paused) audio.volume = originalVolume;
+                    },
+                    onerror: function() {
+                        fallbackGoogleTTS(fullText, originalVolume);
+                    }
+                });
+            } else {
+                // OPSI 2: Google TTS Direct Stream Fallback
+                fallbackGoogleTTS(fullText, originalVolume);
+            }
+        }
 
+        function fallbackGoogleTTS(fullText, originalVolume) {
+            const googleTtsUrl = "https://translate.google.com/translate_tts?ie=UTF-8&q=" + 
+                                 encodeURIComponent(fullText) + 
+                                 "&tl=id&client=tw-ob";
             try {
                 ttsAudioPlayer.pause();
-                ttsAudioPlayer.src = ttsUrl;
+                ttsAudioPlayer.src = googleTtsUrl;
                 ttsAudioPlayer.load();
 
                 let playPromise = ttsAudioPlayer.play();
-                
                 if (playPromise !== undefined) {
                     playPromise.then(() => {
                         ttsAudioPlayer.onended = async () => {
                             await playAirportChime();
                             if (!audio.paused) audio.volume = originalVolume;
                         };
-                    }).catch(async (err) => {
-                        console.warn("HiTV Browser memblokir pengumuman external, memutar bel sebagai penanda.", err);
+                    }).catch(async () => {
                         await playAirportChime();
                         if (!audio.paused) audio.volume = originalVolume;
                     });
                 }
-            } catch (err) {
-                console.error("Error eksekusi TTS HiTV:", err);
-                await playAirportChime();
+            } catch (e) {
                 if (!audio.paused) audio.volume = originalVolume;
             }
         }
