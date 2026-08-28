@@ -518,19 +518,21 @@
             });
         }
 
-        // SISTEM ENGINE SUARA MULTI-FALLBACK MULTI-DEVICE (NATIVE TTS + GOOGLE TTS FALLBACK)
+        // ENGINE SUARA WEB SPEECH API DENGAN GOOGLE TTS FALLBACK
         function playVoiceAnnouncement(text) {
             if (!isAudioAllowed) return;
 
             const originalVolume = audio.volume;
             if (!audio.paused) audio.volume = 0.1;
 
-            const safetyMessage = ". Utamakan keselamatan kerja dan gunakan APD saat bertugas.";
-            const fullText = text + safetyMessage;
-
+            // Memutar Chime Pembuka
             playAirportChime().then(() => {
+                const safetyMessage = ". Utamakan keselamatan kerja dan gunakan APD saat bertugas.";
+                const fullText = text + safetyMessage;
+
+                // OPSI 1: Web Speech API (Paling Stabil di Android TV Browser)
                 if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel();
+                    window.speechSynthesis.cancel(); // Bersihkan antrean
 
                     const utterance = new SpeechSynthesisUtterance(fullText);
                     utterance.lang = 'id-ID';
@@ -542,13 +544,13 @@
                         if (!audio.paused) audio.volume = originalVolume;
                     };
 
-                    utterance.onerror = function (e) {
-                        console.warn("Native SpeechSynthesis gagal, menggunakan Google TTS Fallback", e);
+                    utterance.onerror = function () {
                         fallbackGoogleTTS(fullText, originalVolume);
                     };
 
                     window.speechSynthesis.speak(utterance);
                 } else {
+                    // OPSI 2: Fallback ke Google TTS Stream
                     fallbackGoogleTTS(fullText, originalVolume);
                 }
             });
@@ -560,7 +562,6 @@
                                  "&tl=id&client=tw-ob";
             try {
                 ttsAudioPlayer.pause();
-                ttsAudioPlayer.currentTime = 0;
                 ttsAudioPlayer.src = googleTtsUrl;
                 ttsAudioPlayer.load();
 
