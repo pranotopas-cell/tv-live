@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Live - Investama Kalimantan Energi</title>
     
-    <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
@@ -20,11 +19,7 @@
             --border-color: #1e293b;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             background-color: var(--bg-main);
@@ -36,201 +31,64 @@
             flex-direction: column;
         }
 
-        /* Modal Pemicu Audio TV Bro */
+        /* Overlay Tombol TV */
         #tvAudioModal {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
+            top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(11, 15, 25, 0.98);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            text-align: center;
-            padding: 20px;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            z-index: 9999; text-align: center; padding: 20px;
         }
 
-        #tvAudioModal h2 {
-            color: var(--text-gold);
-            margin-bottom: 15px;
-            font-size: 28px;
-            letter-spacing: 1px;
-        }
-
-        #tvAudioModal p {
-            color: var(--text-white-soft);
-            margin-bottom: 30px;
-            font-size: 18px;
-            max-width: 600px;
-            line-height: 1.5;
-        }
+        #tvAudioModal h2 { color: var(--text-gold); margin-bottom: 15px; font-size: 28px; }
+        #tvAudioModal p { color: var(--text-white-soft); margin-bottom: 30px; font-size: 18px; max-width: 600px; }
 
         #btnEnableTV {
-            padding: 18px 45px;
-            font-size: 22px;
-            font-weight: bold;
-            background: var(--text-gold);
-            color: #000;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
+            padding: 18px 45px; font-size: 22px; font-weight: bold;
+            background: var(--text-gold); color: #000;
+            border: none; border-radius: 8px; cursor: pointer;
             outline: 4px solid #ffffff;
-            transition: transform 0.2s;
         }
 
-        #btnEnableTV:focus, #btnEnableTV:hover {
-            transform: scale(1.08);
-            background: #ffffff;
-            color: #000;
-        }
+        #btnEnableTV:focus { background: #ffffff; color: #000; transform: scale(1.05); }
 
-        /* Header Layout */
         header {
             background-color: var(--bg-card);
             border-bottom: 2px solid var(--border-color);
-            padding: 15px 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 15px 25px; display: flex;
+            justify-content: space-between; align-items: center;
             z-index: 10;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
 
-        .header-title h1 {
-            color: var(--text-gold);
-            font-size: 24px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
+        .header-title h1 { color: var(--text-gold); font-size: 24px; text-transform: uppercase; }
+        .header-title p { color: var(--text-white-soft); font-size: 14px; margin-top: 4px; }
+        .clock-time { font-size: 26px; font-weight: bold; color: var(--text-gold); font-family: monospace; }
 
-        .header-title p {
-            color: var(--text-white-soft);
-            font-size: 14px;
-            margin-top: 4px;
-        }
+        #scrollContainer { flex: 1; overflow-y: auto; padding: 20px 25px; }
+        #scrollContainer::-webkit-scrollbar { display: none; }
 
-        .header-controls {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .clock-block {
-            text-align: right;
-        }
-
-        .clock-time {
-            font-size: 26px;
-            font-weight: bold;
-            color: var(--text-gold);
-            font-family: monospace;
-        }
-
-        .audio-control {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(255,255,255,0.05);
-            padding: 6px 12px;
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
-        }
-
-        .audio-btn {
-            background: var(--text-gold);
-            border: none;
-            color: #000;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Scroll Area & Table */
-        #scrollContainer {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px 25px;
-            scroll-behavior: smooth;
-        }
-
-        #scrollContainer::-webkit-scrollbar {
-            display: none;
-        }
-        #scrollContainer {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
+        table { width: 100%; border-collapse: collapse; }
         th {
-            background-color: var(--bg-card);
-            color: var(--text-white-soft);
-            text-transform: uppercase;
-            font-size: 13px;
-            letter-spacing: 1px;
-            padding: 12px 16px;
-            text-align: left;
-            position: sticky;
-            top: 0;
-            z-index: 5;
+            background-color: var(--bg-card); color: var(--text-white-soft);
+            text-transform: uppercase; font-size: 13px; padding: 12px 16px;
+            text-align: left; position: sticky; top: 0; z-index: 5;
             border-bottom: 2px solid var(--border-color);
         }
 
-        td {
-            padding: 14px 16px;
-            border-bottom: 1px solid var(--border-color);
-            vertical-align: middle;
-        }
-
-        tr:nth-child(even) {
-            background-color: rgba(255, 255, 255, 0.02);
-        }
+        td { padding: 14px 16px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+        tr:nth-child(even) { background-color: rgba(255, 255, 255, 0.02); }
 
         .date-divider {
-            background-color: #1e293b;
-            color: var(--text-gold);
-            font-weight: bold;
-            font-size: 14px;
-            letter-spacing: 1px;
-            padding: 8px 16px;
+            background-color: #1e293b; color: var(--text-gold);
+            font-weight: bold; font-size: 14px; padding: 8px 16px;
             border-left: 4px solid var(--text-gold);
         }
 
-        .flight-cell {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 4px;
-        }
+        .flight-cell { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+        .nopol-block { background-color: var(--text-gold); color: #000; font-weight: bold; padding: 3px 8px; border-radius: 4px; font-size: 14px; }
+        .sopir-name { font-weight: bold; font-size: 16px; color: var(--text-white); }
 
-        .nopol-block {
-            background-color: var(--text-gold);
-            color: #000;
-            font-weight: bold;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-
-        .sopir-name {
-            font-weight: bold;
-            font-size: 16px;
-            color: var(--text-white);
-        }
-
-        /* Status Colors */
         .st-proses { color: #f59e0b; }
         .st-langsir { color: #3b82f6; }
         .st-terjadwal { color: #94a3b8; }
@@ -239,100 +97,41 @@
         .st-ngisi { color: #06b6d4; }
         .st-delivered { color: #10b981; }
 
-        /* Quote Overlay Animation */
         #quoteOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: rgba(11, 15, 25, 0.96);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 40px;
-            text-align: center;
-            z-index: 100;
-            opacity: 0;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: rgba(11, 15, 25, 0.96); display: none;
+            flex-direction: column; justify-content: center; align-items: center;
+            padding: 40px; text-align: center; z-index: 100; opacity: 0;
             transition: opacity 0.8s ease;
         }
 
-        .quote-box {
-            max-width: 800px;
-        }
-
-        #quoteText {
-            font-size: 28px;
-            line-height: 1.6;
-            color: var(--text-white);
-            margin-bottom: 20px;
-            font-style: italic;
-        }
-
-        #quoteSource {
-            font-size: 20px;
-            color: var(--text-gold);
-            font-weight: bold;
-        }
-
-        .word-wrapper {
-            display: inline-block;
-            white-space: nowrap;
-            margin-right: 8px;
-        }
-
-        .letter-wrapper {
-            display: inline-block;
-            overflow: hidden;
-            vertical-align: bottom;
-        }
-
-        .letter {
-            display: inline-block;
-            transform: translateY(100%);
-            opacity: 0;
-            transition: transform 0.4s cubic-bezier(0.1, 0.7, 0.1, 1), opacity 0.4s ease;
-        }
-
-        .letter.in {
-            transform: translateY(0%);
-            opacity: 1;
-        }
-
-        .letter.out {
-            transform: translateY(-100%);
-            opacity: 0;
-        }
+        #quoteText { font-size: 28px; line-height: 1.6; color: var(--text-white); margin-bottom: 20px; font-style: italic; }
+        #quoteSource { font-size: 20px; color: var(--text-gold); font-weight: bold; }
+        .word-wrapper { display: inline-block; white-space: nowrap; margin-right: 8px; }
+        .letter-wrapper { display: inline-block; overflow: hidden; vertical-align: bottom; }
+        .letter { display: inline-block; transform: translateY(100%); opacity: 0; transition: transform 0.4s ease, opacity 0.4s ease; }
+        .letter.in { transform: translateY(0%); opacity: 1; }
+        .letter.out { transform: translateY(-100%); opacity: 0; }
     </style>
 </head>
 <body>
 
-    <!-- Modal Aktivasi Suara Remote TV -->
     <div id="tvAudioModal">
-        <h2>SISTEM PENGUMUMAN DASHBOARD TV BRO</h2>
-        <p>Aplikasi TV Bro memerlukan izin akses audio. Silakan tekan tombol <b style="color: var(--text-gold);">OK / ENTER</b> di Remote TV Anda.</p>
-        <button id="btnEnableTV">AKTIFKAN SUARA SEKARANG (TEKAN OK)</button>
+        <h2>SISTEM PENGUMUMAN HARDWARE AUDIO</h2>
+        <p>Tekan tombol <b style="color: var(--text-gold);">OK / ENTER</b> pada Remote TV Anda untuk mengaktifkan pemutar suara internal.</p>
+        <button id="btnEnableTV">AKTIFKAN SUARA TV</button>
     </div>
 
-    <!-- Header Section -->
     <header>
         <div class="header-title">
             <h1>Dashboard Pengiriman INVESTAMA KALIMANTAN ENERGI GROUP</h1>
             <p id="targetDate">MENGAMBIL DATA...</p>
         </div>
-        <div class="header-controls">
-            <div class="audio-control">
-                <button class="audio-btn" id="playPauseBtn" onclick="toggleAudio()">▶</button>
-                <span id="audio-status" style="font-size: 12px; font-weight: bold;">STOP</span>
-            </div>
-            <div class="clock-block">
-                <div class="clock-time" id="clock">00:00:00</div>
-            </div>
+        <div class="clock-block">
+            <div class="clock-time" id="clock">00:00:00</div>
         </div>
     </header>
 
-    <!-- Table & Scroll Container -->
     <div id="scrollContainer">
         <table>
             <thead>
@@ -343,22 +142,16 @@
                     <th style="width: 20%; text-align: right;">Status Pengiriman</th>
                 </tr>
             </thead>
-            <tbody id="tableBody">
-                <!-- Data dari Supabase -->
-            </tbody>
+            <tbody id="tableBody"></tbody>
         </table>
     </div>
 
-    <!-- Quote Overlay -->
     <div id="quoteOverlay">
         <div class="quote-box">
             <div id="quoteText"></div>
             <div id="quoteSource"></div>
         </div>
     </div>
-
-    <audio id="murottalAudio" preload="none"></audio>
-    <audio id="ttsAudioPlayer" preload="auto"></audio>
 
     <script>
         const SUPABASE_URL = 'https://ntaectphgoelmhzrkatp.supabase.co';
@@ -368,206 +161,263 @@
         const quotes = [
             { t: "Sesungguhnya sesudah kesulitan itu ada kemudahan.", s: "QS. Al-Insyirah: 6" },
             { t: "Bekerjalah untuk duniamu seolah hidup selamanya,\nberamallah untuk akhiratmu seolah mati besok.", s: "Ali bin Abi Thalib" },
-            { t: "Sebaik-baik manusia adalah yang paling bermanfaat bagi orang lain.", s: "HR. Ahmad" },
-            { t: "Barangsiapa bertaqwa kepada Allah,\nniscaya Dia akan membukakan jalan keluar baginya.", s: "QS. At-Talaq: 2" },
-            { t: "Allah mencintai seorang hamba yang apabila bekerja,\nia bekerja dengan itqan (profesional).", s: "HR. Al-Baihaqi" },
-            { t: "Niatkan kerjamu sebagai ibadah, maka lelahmu menjadi pahala.", s: "Kata Bijak Muslim" },
-            { t: "Rezeki sudah diatur, tugas kita hanyalah menjemputnya dengan cara yang baik.", s: "Nasehat Tauhid" },
-            { t: "Tangan di atas lebih baik daripada tangan di bawah.", s: "HR. Bukhari & Muslim" },
-            { t: "Mencari rezeki halal adalah wajib setelah ibadah fardhu.", s: "HR. Ath-Thabrani" },
-            { t: "Janganlah kamu berputus asa dari rahmat Allah.", s: "QS. Az-Zumar: 53"}
+            { t: "Sebaik-baik manusia adalah yang paling bermanfaat bagi orang lain.", s: "HR. Ahmad" }
         ];
 
         let quoteIndex = 0;
-        const audio = document.getElementById('murottalAudio');
-        const ttsAudioPlayer = document.getElementById('ttsAudioPlayer');
-
-        const streamSources = [
-            "https://live.mp3quran.net/makkah",
-            "https://live.mp3quran.net/madinah",
-            "https://qurango.net/radio/mix"
-        ];
-        let currentSourceIndex = 0;
-
         let previousStatusMap = {};
         let isInitialLoad = true;
         let isAudioAllowed = false;
         let isScrolling = false;
         let scrollRequest = null;
-        let globalAudioCtx = null;
+        let audioCtx = null;
+
+        // Buka Kunci Web Audio API Langsung di Mesin TV
+        function initNativeAudio() {
+            try {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContextClass();
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+            } catch (e) {
+                console.error("Web Audio API tidak didukung:", e);
+            }
+        }
+
+        // 1. SOUND GENERATOR INTERNAL: Panggilan Nada Bel Bandara (Tanpa File)
+        function playChimeInternal() {
+            return new Promise((resolve) => {
+                if (!audioCtx) initNativeAudio();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                const notes = [
+                    { f: 554.37, t: 0.0, d: 0.5 }, // C#5
+                    { f: 659.25, t: 0.3, d: 0.5 }, // E5
+                    { f: 830.61, t: 0.6, d: 0.5 }, // G#5
+                    { f: 987.77, t: 0.9, d: 0.8 }  // B5
+                ];
+
+                notes.forEach(n => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(n.f, audioCtx.currentTime + n.t);
+
+                    gain.gain.setValueAtTime(0.001, audioCtx.currentTime + n.t);
+                    gain.gain.exponentialRampToValueAtTime(0.3, audioCtx.currentTime + n.t + 0.05);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + n.t + n.d);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    osc.start(audioCtx.currentTime + n.t);
+                    osc.stop(audioCtx.currentTime + n.t + n.d);
+                });
+
+                setTimeout(resolve, 1800);
+            });
+        }
+
+        // 2. SYNTHESIZER VOICE INTERNAL: Generator Suara Morse & Pola Sinyal Informasi
+        function playInternalSignalBeep(count = 3) {
+            return new Promise((resolve) => {
+                if (!audioCtx) initNativeAudio();
+
+                for (let i = 0; i < count; i++) {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(880, audioCtx.currentTime + (i * 0.25));
+
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime + (i * 0.25));
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + (i * 0.25) + 0.15);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    osc.start(audioCtx.currentTime + (i * 0.25));
+                    osc.stop(audioCtx.currentTime + (i * 0.25) + 0.15);
+                }
+
+                setTimeout(resolve, count * 250 + 200);
+            });
+        }
+
+        // BACA SUARA DARI MESIN LOKAL (Fallback Otomatis)
+        async function triggerHardwareAnnouncement(text) {
+            if (!isAudioAllowed) return;
+
+            // Step 1: Membunyikan Bell Internal Hardware
+            await playChimeInternal();
+
+            // Step 2: Coba jalankan Speech Synthesis Internal Mesin
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utter = new SpeechSynthesisUtterance(text);
+                utter.lang = 'id-ID';
+                utter.rate = 0.85;
+
+                utter.onend = async () => {
+                    await playChimeInternal();
+                };
+
+                utter.onerror = async () => {
+                    // Jika TTS gagal di Android TV, bunyikan sinyal nada internal khusus
+                    await playInternalSignalBeep(4);
+                };
+
+                window.speechSynthesis.speak(utter);
+            } else {
+                // Jika browser TV sama sekali tidak ada modul TTS, gunakan indikator bunyi alarm hardware
+                await playInternalSignalBeep(4);
+            }
+        }
 
         document.addEventListener("DOMContentLoaded", function() {
             const modal = document.getElementById('tvAudioModal');
             const btn = document.getElementById('btnEnableTV');
             if (btn) btn.focus();
 
-            function activateAudio() {
+            function activate() {
                 isAudioAllowed = true;
+                initNativeAudio();
                 if (modal) modal.style.display = 'none';
-
-                // Inisialisasi Audio Context
-                try {
-                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                    if (AudioCtx) {
-                        globalAudioCtx = new AudioCtx();
-                        globalAudioCtx.resume();
-                    }
-                } catch(e){}
-
-                // Bunyikan TES SUARA pertama kali
-                playVoiceAnnouncement("Suara pengumuman telah aktif di TV Bro.");
+                
+                // Tes Suara Pertama Kali
+                triggerHardwareAnnouncement("Sistem pengumuman TV berhasil diaktifkan.");
             }
 
-            if (btn) btn.addEventListener('click', activateAudio);
-
+            if (btn) btn.addEventListener('click', activate);
             document.addEventListener('keydown', function(e) {
                 if ((e.key === "Enter" || e.keyCode === 13) && modal && modal.style.display !== 'none') {
-                    activateAudio();
+                    activate();
                 }
             });
         });
 
         function getWIBDateString() {
             const d = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
-            const yyyy = d.getFullYear();
-            const mm = String(d.getMonth() + 1).padStart(2, '0');
-            const dd = String(d.getDate()).padStart(2, '0');
-            return `${yyyy}-${mm}-${dd}`;
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         }
 
-        // 100% Bunyi di Hardware Apapun Tanpa Kuota Internet (Synthesizer Chime)
-        function playAirportChime() {
-            return new Promise((resolve) => {
-                try {
-                    const ctx = globalAudioCtx || new (window.AudioContext || window.webkitAudioContext)();
-                    if (ctx.state === 'suspended') ctx.resume();
+        function getWIB() { return new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" })); }
 
-                    const notes = [
-                        { freq: 698.46, time: 0.00, duration: 0.40 }, 
-                        { freq: 587.33, time: 0.30, duration: 0.40 }, 
-                        { freq: 440.00, time: 0.60, duration: 0.40 }, 
-                        { freq: 349.23, time: 0.90, duration: 0.90 }  
-                    ];
+        function announceStatusChange(item, statusType) {
+            const nopol = item.nopol || 'Tanpa Nopol';
+            const sopir = item.sopir || 'Sopir';
+            const tujuan = item.delivery_to || 'Tujuan';
 
-                    notes.forEach(note => {
-                        const osc = ctx.createOscillator();
-                        const gain = ctx.createGain();
+            let teks = "";
+            if (statusType.includes("PROSES")) {
+                teks = `Perhatian, armada ${nopol}, driver ${sopir}, tujuan ${tujuan}, status PROSES. Utamakan keselamatan kerja.`;
+            } else if (statusType.includes("DELIVERED")) {
+                teks = `Perhatian, armada ${nopol}, driver ${sopir}, tujuan ${tujuan}, status DELIVERED. Terima kasih.`;
+            }
 
-                        osc.type = 'sine';
-                        osc.frequency.setValueAtTime(note.freq, ctx.currentTime + note.time);
-
-                        gain.gain.setValueAtTime(0.0001, ctx.currentTime + note.time);
-                        gain.gain.exponentialRampToValueAtTime(0.5, ctx.currentTime + note.time + 0.03);
-                        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + note.time + note.duration);
-
-                        osc.connect(gain);
-                        gain.connect(ctx.destination);
-
-                        osc.start(ctx.currentTime + note.time);
-                        osc.stop(ctx.currentTime + note.time + note.duration);
-                    });
-
-                    setTimeout(resolve, 1900);
-                } catch (e) {
-                    console.error("Gagal memutar chime:", e);
-                    resolve();
-                }
-            });
-        }
-
-        // ENGINE PENGUMUMAN KHUSUS TV BRO (PJS Speech API Fallback)
-        async function playVoiceAnnouncement(text) {
-            if (!isAudioAllowed) return;
-
-            const originalVolume = audio.volume;
-            if (!audio.paused) audio.volume = 0.1;
-
-            // Bunyi bel bandara terlebih dahulu
-            await playAirportChime();
-
-            const safetyMessage = ". Utamakan keselamatan kerja dan gunakan APD saat bertugas.";
-            const fullText = text + safetyMessage;
-
-            // METODE 1: Web Speech API Bawaan Android WebView (Jika Didukung TV)
-            if ('speechSynthesis' in window && window.speechSynthesis) {
-                window.speechSynthesis.cancel();
-                const utter = new SpeechSynthesisUtterance(fullText);
-                utter.lang = 'id-ID';
-                utter.rate = 0.85;
-
-                utter.onend = async () => {
-                    await playAirportChime();
-                    if (!audio.paused) audio.volume = originalVolume;
-                };
-
-                utter.onerror = () => {
-                    playViaAudioStream(fullText, originalVolume);
-                };
-
-                window.speechSynthesis.speak(utter);
-            } else {
-                // METODE 2: Direct Audio Proxy Streaming (Sangat Kompatibel)
-                playViaAudioStream(fullText, originalVolume);
+            if (teks) {
+                triggerHardwareAnnouncement(teks);
             }
         }
 
-        function playViaAudioStream(fullText, originalVolume) {
-            // URL Stream Audio TTS Khusus TV Browser
-            const streamUrl = "https://translate.google.com/translate_tts?ie=UTF-8&q=" + 
-                              encodeURIComponent(fullText) + 
-                              "&tl=id&client=tw-ob";
-
+        async function loadDashboard() {
             try {
-                ttsAudioPlayer.pause();
-                ttsAudioPlayer.src = streamUrl;
-                ttsAudioPlayer.load();
+                const hariIni = getWIB();
+                const isoHariIni = getWIBDateString();
+                document.getElementById('targetDate').innerText = hariIni.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
 
-                let playPromise = ttsAudioPlayer.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        ttsAudioPlayer.onended = async () => {
-                            await playAirportChime();
-                            if (!audio.paused) audio.volume = originalVolume;
-                        };
-                    }).catch(async (err) => {
-                        console.warn("Audio diblokir browser, membunyikan Bel Fallback", err);
-                        await playAirportChime();
-                        if (!audio.paused) audio.volume = originalVolume;
-                    });
-                }
-            } catch (e) {
-                if (!audio.paused) audio.volume = originalVolume;
+                const { data, error } = await _supabase.from('data_pengiriman').select('*').gte('tanggal', isoHariIni);
+                if (error) throw error;
+                
+                const currentData = data || [];
+
+                currentData.forEach(item => {
+                    const id = item.id || (item.sopir + '_' + item.tanggal + '_' + item.delivery_to);
+                    const statusBaru = (item.status || "").toUpperCase();
+                    const isHariIni = (item.tanggal === isoHariIni);
+
+                    if (!isInitialLoad && isHariIni) {
+                        const statusLama = previousStatusMap[id];
+                        if (statusBaru.includes("PROSES") && statusLama && !statusLama.includes("PROSES")) {
+                            announceStatusChange(item, "PROSES");
+                        } else if (statusBaru.includes("DELIVERED") && statusLama && !statusLama.includes("DELIVERED")) {
+                            announceStatusChange(item, "DELIVERED");
+                        }
+                    }
+                    previousStatusMap[id] = statusBaru;
+                });
+
+                isInitialLoad = false;
+                renderData(currentData);
+            } catch (err) { 
+                console.error("Gagal memuat:", err.message); 
+                startAutoScroll();
             }
         }
 
-        function toggleAudio() {
-            const btn = document.getElementById('playPauseBtn');
-            const statusLabel = document.getElementById('audio-status');
-            if (audio.paused) { playCurrentSource(); } 
-            else { audio.pause(); btn.innerText = "▶"; statusLabel.innerText = "STOP"; }
+        function setupRealtimeListener() {
+            _supabase
+                .channel('realtime_pengiriman')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'data_pengiriman' }, (payload) => {
+                    if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
+                        const item = payload.new;
+                        const isoHariIni = getWIBDateString();
+                        const id = item.id || (item.sopir + '_' + item.tanggal + '_' + item.delivery_to);
+                        const statusBaru = (item.status || "").toUpperCase();
+                        const statusLama = previousStatusMap[id];
+
+                        if (item.tanggal === isoHariIni) {
+                            if (statusBaru.includes("PROSES") && statusLama && !statusLama.includes("PROSES")) {
+                                announceStatusChange(item, "PROSES");
+                            } else if (statusBaru.includes("DELIVERED") && statusLama && !statusLama.includes("DELIVERED")) {
+                                announceStatusChange(item, "DELIVERED");
+                            }
+                        }
+                        previousStatusMap[id] = statusBaru;
+                    }
+                    loadDashboard();
+                })
+                .subscribe();
         }
 
-        function playCurrentSource() {
-            const btn = document.getElementById('playPauseBtn');
-            const statusLabel = document.getElementById('audio-status');
-            statusLabel.innerText = "CONNECTING...";
-            audio.src = streamSources[currentSourceIndex];
-            audio.play().then(() => {
-                btn.innerText = "⏸";
-                statusLabel.innerText = "QUR'AN LIVE";
-            }).catch(() => tryNextSource());
+        function stopAutoScroll() {
+            if (scrollRequest) { cancelAnimationFrame(scrollRequest); scrollRequest = null; }
+            isScrolling = false;
         }
 
-        function tryNextSource() {
-            currentSourceIndex = (currentSourceIndex + 1) % streamSources.length;
-            playCurrentSource();
+        function startAutoScroll() {
+            stopAutoScroll();
+            const scrollContainer = document.getElementById('scrollContainer');
+            if (scrollContainer.scrollHeight <= scrollContainer.clientHeight) {
+                setTimeout(async () => { await showQuote(); loadDashboard(); }, 10000);
+                return;
+            }
+
+            isScrolling = true;
+            function step() {
+                if (!isScrolling) return;
+                const currentPos = scrollContainer.scrollTop + scrollContainer.clientHeight + 2;
+                if (currentPos >= scrollContainer.scrollHeight) {
+                    stopAutoScroll();
+                    setTimeout(async () => {
+                        await showQuote(); 
+                        scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+                        setTimeout(() => { loadDashboard(); }, 500); 
+                    }, 1000);
+                    return; 
+                }
+                scrollContainer.scrollTop += 0.6;
+                scrollRequest = requestAnimationFrame(step);
+            }
+            setTimeout(() => { if (isScrolling) scrollRequest = requestAnimationFrame(step); }, 3000); 
         }
 
         function wrapText(element) {
             const text = element.textContent;
             element.innerHTML = '';
-            const words = text.split(' ');
-            words.forEach((word) => {
+            text.split(' ').forEach((word) => {
                 if (!word) return;
                 const wordSpan = document.createElement('span');
                 wordSpan.className = 'word-wrapper';
@@ -612,171 +462,25 @@
             const overlay = document.getElementById('quoteOverlay');
             const qTxt = document.getElementById('quoteText');
             const qSrc = document.getElementById('quoteSource');
-            
             const q = quotes[quoteIndex];
             quoteIndex = (quoteIndex + 1) % quotes.length;
 
             qTxt.textContent = q.t;
             qSrc.textContent = q.s;
-            
-            wrapText(qTxt);
-            wrapText(qSrc);
+            wrapText(qTxt); wrapText(qSrc);
             
             await animateIn(overlay);
-            await new Promise(r => setTimeout(r, 15000)); 
+            await new Promise(r => setTimeout(r, 12000)); 
             await animateOut(overlay);
-        }
-
-        const scrollContainer = document.getElementById('scrollContainer');
-        
-        function stopAutoScroll() {
-            if (scrollRequest) {
-                cancelAnimationFrame(scrollRequest);
-                scrollRequest = null;
-            }
-            isScrolling = false;
-        }
-
-        function startAutoScroll() {
-            stopAutoScroll();
-
-            if (scrollContainer.scrollHeight <= scrollContainer.clientHeight) {
-                setTimeout(async () => {
-                    await showQuote();
-                    loadDashboard();
-                }, 10000);
-                return;
-            }
-
-            isScrolling = true;
-            const scrollSpeed = 0.6; 
-
-            function step() {
-                if (!isScrolling) return;
-
-                const currentPos = scrollContainer.scrollTop + scrollContainer.clientHeight + 2;
-                const maxPos = scrollContainer.scrollHeight;
-
-                if (currentPos >= maxPos) {
-                    stopAutoScroll();
-                    setTimeout(async () => {
-                        await showQuote(); 
-                        scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
-                        setTimeout(() => { 
-                            loadDashboard(); 
-                        }, 500); 
-                    }, 1000);
-                    return; 
-                }
-
-                scrollContainer.scrollTop += scrollSpeed;
-                scrollRequest = requestAnimationFrame(step);
-            }
-
-            setTimeout(() => { 
-                if (isScrolling) {
-                    scrollRequest = requestAnimationFrame(step); 
-                }
-            }, 3000); 
-        }
-
-        function getWIB() { return new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" })); }
-
-        function announceStatusChange(item, statusType) {
-            const nopol = item.nopol || 'Tanpa Nopol';
-            const sopir = item.sopir || 'Sopir';
-            const tujuan = item.delivery_to || 'Tujuan';
-
-            let teks = "";
-            if (statusType.includes("PROSES")) {
-                teks = `Mohon perhatian, kendaraan nomor polisi ${nopol}. Driver ${sopir}, tujuan ${tujuan}, status PROSES.`;
-            } else if (statusType.includes("DELIVERED")) {
-                teks = `Mohon perhatian, kendaraan nomor polisi ${nopol}. Driver ${sopir}, tujuan ${tujuan}, status DELIVERED.`;
-            }
-
-            if (teks) {
-                playVoiceAnnouncement(teks);
-            }
-        }
-
-        async function loadDashboard() {
-            try {
-                const hariIni = getWIB();
-                const isoHariIni = getWIBDateString();
-                document.getElementById('targetDate').innerText = hariIni.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
-
-                const { data, error } = await _supabase.from('data_pengiriman').select('*').gte('tanggal', isoHariIni);
-                if (error) throw error;
-                
-                const currentData = data || [];
-
-                currentData.forEach(item => {
-                    const id = item.id || (item.sopir + '_' + item.tanggal + '_' + item.delivery_to);
-                    const statusBaru = (item.status || "").toUpperCase();
-                    const isHariIni = (item.tanggal === isoHariIni);
-
-                    if (!isInitialLoad && isHariIni) {
-                        const statusLama = previousStatusMap[id];
-                        
-                        if (statusBaru.includes("PROSES") && statusLama && !statusLama.includes("PROSES")) {
-                            announceStatusChange(item, "PROSES");
-                        }
-                        else if (statusBaru.includes("DELIVERED") && statusLama && !statusLama.includes("DELIVERED")) {
-                            announceStatusChange(item, "DELIVERED");
-                        }
-                    }
-                    previousStatusMap[id] = statusBaru;
-                });
-
-                isInitialLoad = false;
-                renderData(currentData);
-            } catch (err) { 
-                console.error("Gagal:", err.message); 
-                startAutoScroll();
-            }
-        }
-
-        function setupRealtimeListener() {
-            _supabase
-                .channel('realtime_pengiriman')
-                .on(
-                    'postgres_changes',
-                    { event: '*', schema: 'public', table: 'data_pengiriman' },
-                    (payload) => {
-                        if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
-                            const item = payload.new;
-                            const isoHariIni = getWIBDateString();
-                            const id = item.id || (item.sopir + '_' + item.tanggal + '_' + item.delivery_to);
-                            const statusBaru = (item.status || "").toUpperCase();
-                            const statusLama = previousStatusMap[id];
-
-                            if (item.tanggal === isoHariIni) {
-                                if (statusBaru.includes("PROSES") && statusLama && !statusLama.includes("PROSES")) {
-                                    announceStatusChange(item, "PROSES");
-                                } else if (statusBaru.includes("DELIVERED") && statusLama && !statusLama.includes("DELIVERED")) {
-                                    announceStatusChange(item, "DELIVERED");
-                                }
-                            }
-                            previousStatusMap[id] = statusBaru;
-                        }
-                        loadDashboard();
-                    }
-                )
-                .subscribe();
         }
 
         async function renderData(data) {
             stopAutoScroll();
-
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
             
-            const priority = { "PROSES": 1, "LANGSIR": 2, "TERJADWAL": 3, "OPER": 4, "NGISI ": 5, "TUNGGU": 6, "DELIVERED": 7 };
-
-            data.sort((a, b) => {
-                if(a.tanggal !== b.tanggal) return a.tanggal.localeCompare(b.tanggal);
-                return (priority[a.status?.toUpperCase()] || 99) - (priority[b.status?.toUpperCase()] || 99);
-            });
+            const priority = { "PROSES": 1, "LANGSIR": 2, "TERJADWAL": 3, "OPER": 4, "NGISI": 5, "TUNGGU": 6, "DELIVERED": 7 };
+            data.sort((a, b) => (priority[a.status?.toUpperCase()] || 99) - (priority[b.status?.toUpperCase()] || 99));
 
             let currentTanggal = "";
             for (let row of data) {
@@ -787,13 +491,12 @@
                     const dateStr = dateObj.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
                     
                     const divider = document.createElement('tr');
-                    divider.innerHTML = `<td colspan="4" class="date-divider">${dateStr} </td>`;
+                    divider.innerHTML = `<td colspan="4" class="date-divider">${dateStr}</td>`;
                     tbody.appendChild(divider);
                 }
 
                 const tr = document.createElement('tr');
                 const st = (row.status || "").toUpperCase();
-                
                 let cls = "st-terjadwal";
                 if (st.includes("PROSES")) cls = "st-proses";
                 else if (st.includes("LANGSIR")) cls = "st-langsir";
@@ -808,25 +511,24 @@
                             <div class="nopol-block">${row.nopol || '-'}</div>
                             <div class="sopir-name">${row.sopir || '-'}</div>
                         </div>
-                        <div style="font-size:15px; color:var(--text-blue-soft); margin-left:2px;">LOCATION : ${row.lokasi || '-'}</div>
+                        <div style="font-size:15px; color:var(--text-blue-soft);">LOCATION : ${row.lokasi || '-'}</div>
                     </td>
                     <td style="text-align:center; font-weight:bold; color:var(--text-gold-soft); font-size:18px;">${row.jumlah_keluar || '0'}</td>
                     <td>
-                        <div style="color:var(--text-white-soft); font-weight:bold; font-size:16px; margin-bottom:4px;">${row.delivery_to || '-'}</div>
-                        <div style="color:var(--text-blue-soft); font-size:14px; font-weight:600; text-transform:uppercase;">DEPO : ${row.supplier || '-'}</div>
+                        <div style="color:var(--text-white-soft); font-weight:bold; font-size:16px;">${row.delivery_to || '-'}</div>
+                        <div style="color:var(--text-blue-soft); font-size:14px; font-weight:600;">DEPO : ${row.supplier || '-'}</div>
                     </td>
-                    <td class="${cls}" style="text-align:right; font-size:16px; font-weight:bold; letter-spacing:1px;">${st}</td>
+                    <td class="${cls}" style="text-align:right; font-size:16px; font-weight:bold;">${st}</td>
                 `;
                 tbody.appendChild(tr);
             }
 
-            scrollContainer.scrollTop = 0;
+            document.getElementById('scrollContainer').scrollTop = 0;
             startAutoScroll();
         }
 
         setInterval(() => {
-            const now = getWIB();
-            document.getElementById('clock').innerText = now.toTimeString().split(' ')[0];
+            document.getElementById('clock').innerText = getWIB().toTimeString().split(' ')[0];
         }, 1000);
 
         loadDashboard();
