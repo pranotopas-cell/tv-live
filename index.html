@@ -530,21 +530,14 @@
         async function playVoiceAnnouncement(text) {
             if (!isAudioAllowed) return;
 
-            // Fitur Pemulihan Bug Web Speech API (Freeze/Pause) Android TV
-            if ('speechSynthesis' in window) {
-                if (window.speechSynthesis.paused || window.speechSynthesis.pending) {
-                    window.speechSynthesis.cancel();
-                    window.speechSynthesis.resume();
-                }
-            }
-
+            // Kecilkan volume background musik jika sedang berputar
             const originalVolume = audio.volume;
             if (!audio.paused) audio.volume = 0.1;
 
             // Memutar chime pembuka
             await playAirportChime();
 
-            const safetyMessage = " Tetap jaga kualitas dan kuantitas pengiriman, serta utamakan keselamatan dan selalu gunakan alat pelindung diri saat bertugas , terima kasih.";
+            const safetyMessage = " Tetap jaga kualitas dan kuantitas pengiriman, serta utamakan keselamatan dan selalu gunakan alat pelindung diri saat bertugas, terima kasih.";
             const fullText = text + safetyMessage;
 
             const finishAnnouncement = async () => {
@@ -552,41 +545,44 @@
                 if (!audio.paused) audio.volume = originalVolume;
             };
 
-            // Implementasi Native TTS Browser & TV
-            const speakNative = () => {
+            // FUNGSI UTAMA: Google Translate TTS Fallback (Konsisten untuk Android TV & Laptop)
+            const playGoogleTTS = (txt) => {
+                const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(txt)}&tl=id&client=tw-ob`;
+                const ttsAudio = new Audio(url);
+                ttsAudio.volume = 1.0;
+                
+                ttsAudio.onended = finishAnnouncement;
+                ttsAudio.onerror = () => {
+                    console.error("Google TTS Fail, fallback ke Native TTS");
+                    speakNativeFallback(txt);
+                };
+
+                ttsAudio.play().catch(e => {
+                    console.error("Google TTS Play blocked:", e);
+                    speakNativeFallback(txt);
+                });
+            };
+
+            // FALLBACK: Native Speech Synthesis
+            const speakNativeFallback = (txt) => {
                 if ('speechSynthesis' in window) {
                     window.speechSynthesis.cancel();
                     
-                    const msg = new SpeechSynthesisUtterance(fullText);
+                    const msg = new SpeechSynthesisUtterance(txt);
                     msg.lang = 'id-ID';
-                    msg.rate = 0.85; // Diperlambat sedikit untuk kejelasan speaker TV
+                    msg.rate = 0.85; 
                     msg.pitch = 1;
 
-                    const voices = window.speechSynthesis.getVoices();
-                    const idVoice = voices.find(v => v.lang.includes('id') || v.lang.includes('ID'));
-                    if (idVoice) msg.voice = idVoice;
-
                     msg.onend = finishAnnouncement;
-                    msg.onerror = (e) => {
-                        console.error("Native Speech Error:", e);
-                        finishAnnouncement();
-                    };
+                    msg.onerror = () => finishAnnouncement();
 
                     window.speechSynthesis.speak(msg);
-
-                    // Pemulihan otomatis jika WebView TV menahan giliran pemutaran
-                    setTimeout(() => {
-                        if (window.speechSynthesis.speaking && window.speechSynthesis.paused) {
-                            window.speechSynthesis.resume();
-                        }
-                    }, 500);
-
                 } else {
                     finishAnnouncement();
                 }
             };
 
-            // Mencoba ResponsiveVoice, beralih ke Native jika terjadi kendala
+            // Prioritaskan ResponsiveVoice jika ada, jika tidak / error langsung gunakan Google TTS
             if (window.responsiveVoice && typeof responsiveVoice.speak === 'function') {
                 try {
                     responsiveVoice.speak(fullText, "Indonesian Female", {
@@ -594,13 +590,13 @@
                         rate: 0.85,
                         volume: 1,
                         onend: finishAnnouncement,
-                        onerror: speakNative
+                        onerror: () => playGoogleTTS(fullText)
                     });
                 } catch (e) {
-                    speakNative();
+                    playGoogleTTS(fullText);
                 }
             } else {
-                speakNative();
+                playGoogleTTS(fullText);
             }
         }
 
