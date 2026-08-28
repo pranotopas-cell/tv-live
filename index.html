@@ -122,7 +122,6 @@
             scroll-behavior: smooth;
         }
 
-        /* Sembunyikan scrollbar untuk tampilan layar TV / Display Dashboard */
         #scrollContainer::-webkit-scrollbar {
             display: none;
         }
@@ -238,7 +237,6 @@
             font-weight: bold;
         }
 
-        /* Typography Letter Animation Wrappers */
         .word-wrapper {
             display: inline-block;
             white-space: nowrap;
@@ -285,7 +283,7 @@
         <div class="header-controls">
             <div class="audio-control">
                 <button class="audio-btn" id="playPauseBtn" onclick="toggleAudio()">▶</button>
-                <span id="audio-status" style="font-size: 12px; font-weight: bold;">STOP</span>
+                <span id="audio-status" style="font-size: 12px; font-weight: bold;">BERHENTI</span>
             </div>
             <div class="clock-block">
                 <div class="clock-time" id="clock">00:00:00</div>
@@ -305,7 +303,7 @@
                 </tr>
             </thead>
             <tbody id="tableBody">
-                <!-- Data dari Supabase akan di-render di sini -->
+                <!-- Data dari Supabase -->
             </tbody>
         </table>
     </div>
@@ -327,7 +325,7 @@
 
         const quotes = [
             { t: "Sesungguhnya sesudah kesulitan itu ada kemudahan.", s: "QS. Al-Insyirah: 6" },
-            { t: "Bekerjalah untuk duniamu seolah hidup selamanya ,\nberamallah untuk akhiratmu seolah mati besok.", s: "Ali bin Abi Thalib" },
+            { t: "Bekerjalah untuk duniamu seolah hidup selamanya,\nberamallah untuk akhiratmu seolah mati besok.", s: "Ali bin Abi Thalib" },
             { t: "Sebaik-baik manusia adalah yang paling bermanfaat bagi orang lain.", s: "HR. Ahmad" }
         ];
 
@@ -354,7 +352,7 @@
             return `${yyyy}-${mm}-${dd}`;
         }
 
-        // Fungsi untuk membunyikan suara chime/ding-dong ala bandara menggunakan Web Audio API
+        // Chime nada ding-dong ala bandara
         function playAirportChime() {
             return new Promise((resolve) => {
                 try {
@@ -365,7 +363,6 @@
                     }
                     const ctx = new AudioContext();
 
-                    // Nada 1: C5 (523.25 Hz), Nada 2: G4 (392.00 Hz)
                     const notes = [
                         { freq: 523.25, time: 0, duration: 0.8 },
                         { freq: 392.00, time: 0.5, duration: 1.2 }
@@ -406,11 +403,10 @@
             const originalVolume = audio.volume;
             if (!audio.paused) audio.volume = 0.1;
 
-            // Memutar suara ding-dong terlebih dahulu
             await playAirportChime();
 
-            // Pesan keselamatan yang ditambahkan setelah pengumuman
-            const safetyMessage = " Tetap jaga kualitas dan kuantitas, serta selalu utamakan penggunaan APD atau safety.";
+            // Pesan keselamatan full Bahasa Indonesia
+            const safetyMessage = " Tetap jaga kualitas dan kuantitas, serta selalu utamakan penggunaan alat pelindung diri atau keselamatan kerja.";
             const fullText = text + safetyMessage;
 
             const speakFallback = () => {
@@ -452,13 +448,13 @@
             const btn = document.getElementById('playPauseBtn');
             const statusLabel = document.getElementById('audio-status');
             if (audio.paused) { playCurrentSource(); } 
-            else { audio.pause(); btn.innerText = "▶"; statusLabel.innerText = "STOP"; }
+            else { audio.pause(); btn.innerText = "▶"; statusLabel.innerText = "BERHENTI"; }
         }
 
         function playCurrentSource() {
             const btn = document.getElementById('playPauseBtn');
             const statusLabel = document.getElementById('audio-status');
-            statusLabel.innerText = "CONNECTING...";
+            statusLabel.innerText = "MENGHUBUNGKAN...";
             audio.src = streamSources[currentSourceIndex];
             audio.play().then(() => {
                 btn.innerText = "⏸";
@@ -548,7 +544,6 @@
         function startAutoScroll() {
             stopAutoScroll();
 
-            // Cek apakah konten melebihi area layar, jika tidak perlu di-scroll, berikan delay lalu tampilkan quote
             if (scrollContainer.scrollHeight <= scrollContainer.clientHeight) {
                 setTimeout(async () => {
                     await showQuote();
@@ -570,7 +565,6 @@
                     stopAutoScroll();
                     setTimeout(async () => {
                         await showQuote(); 
-                        // Smooth reset posisi scroll ke 0 sebelum reload data
                         scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
                         setTimeout(() => { 
                             loadDashboard(); 
@@ -592,20 +586,12 @@
 
         function getWIB() { return new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" })); }
 
-        function announceStatusChange(item, statusType) {
-            const sopir = item.sopir || 'Sopir';
+        // Fungsi Pengumuman Suara untuk SEMUA perubahan status
+        function announceStatusChange(item, statusBaru) {
+            const sopir = item.sopir || 'Pengemudi';
             const tujuan = item.delivery_to || 'Tujuan';
-
-            let teks = "";
-            if (statusType.includes("PROSES")) {
-                teks = `Pemberitahuan. Driver ${sopir}, tujuan ${tujuan}, status PROSES.`;
-            } else if (statusType.includes("DELIVERED")) {
-                teks = `Pemberitahuan. Driver ${sopir}, tujuan ${tujuan}, status DELIVERED.`;
-            }
-
-            if (teks) {
-                playVoiceAnnouncement(teks);
-            }
+            const teks = `Pemberitahuan. Driver ${sopir}, tujuan ${tujuan}, status ${statusBaru}.`;
+            playVoiceAnnouncement(teks);
         }
 
         async function loadDashboard() {
@@ -626,12 +612,9 @@
 
                     if (!isInitialLoad && isHariIni) {
                         const statusLama = previousStatusMap[id];
-                        
-                        if (statusBaru.includes("PROSES") && statusLama && !statusLama.includes("PROSES")) {
-                            announceStatusChange(item, "PROSES");
-                        }
-                        else if (statusBaru.includes("DELIVERED") && statusLama && !statusLama.includes("DELIVERED")) {
-                            announceStatusChange(item, "DELIVERED");
+                        // Umumkan perubahan jika status berubah dari nilai sebelumnya
+                        if (statusLama && statusLama !== statusBaru) {
+                            announceStatusChange(item, statusBaru);
                         }
                     }
                     previousStatusMap[id] = statusBaru;
@@ -660,10 +643,8 @@
                             const statusLama = previousStatusMap[id];
 
                             if (item.tanggal === isoHariIni) {
-                                if (statusBaru.includes("PROSES") && statusLama && !statusLama.includes("PROSES")) {
-                                    announceStatusChange(item, "PROSES");
-                                } else if (statusBaru.includes("DELIVERED") && statusLama && !statusLama.includes("DELIVERED")) {
-                                    announceStatusChange(item, "DELIVERED");
+                                if (statusLama && statusLama !== statusBaru) {
+                                    announceStatusChange(item, statusBaru);
                                 }
                             }
                             previousStatusMap[id] = statusBaru;
@@ -680,11 +661,11 @@
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
             
-            const priority = { "PROSES": 1, "LANGSIR": 2, "TERJADWAL": 3, "OPER": 4, "NGISI ": 5, "TUNGGU": 6, "DELIVERED": 7 };
+            const priority = { "PROSES": 1, "LANGSIR": 2, "TERJADWAL": 3, "OPER": 4, "NGISI": 5, "TUNGGU": 6, "DELIVERED": 7 };
 
             data.sort((a, b) => {
                 if(a.tanggal !== b.tanggal) return a.tanggal.localeCompare(b.tanggal);
-                return (priority[a.status?.toUpperCase()] || 99) - (priority[b.status?.toUpperCase()] || 99);
+                return (priority[a.status?.toUpperCase().trim()] || 99) - (priority[b.status?.toUpperCase().trim()] || 99);
             });
 
             let currentTanggal = "";
@@ -701,7 +682,7 @@
                 }
 
                 const tr = document.createElement('tr');
-                const st = (row.status || "").toUpperCase();
+                const st = (row.status || "").toUpperCase().trim();
                 
                 let cls = "st-terjadwal";
                 if (st.includes("PROSES")) cls = "st-proses";
@@ -717,7 +698,7 @@
                             <div class="nopol-block">${row.nopol || '-'}</div>
                             <div class="sopir-name">${row.sopir || '-'}</div>
                         </div>
-                        <div style="font-size:15px; color:var(--text-blue-soft); margin-left:2px;">LOCATION : ${row.lokasi || '-'}</div>
+                        <div style="font-size:15px; color:var(--text-blue-soft); margin-left:2px;">LOKASI : ${row.lokasi || '-'}</div>
                     </td>
                     <td style="text-align:center; font-weight:bold; color:var(--text-gold-soft); font-size:18px;">${row.jumlah_keluar || '0'}</td>
                     <td>
