@@ -435,32 +435,40 @@
         let isAudioAllowed = false;
         let isScrolling = false;
         let scrollRequest = null;
+        let keepAliveInterval = null;
 
         // Inisialisasi awal modal pemicu audio TV
         document.addEventListener("DOMContentLoaded", function() {
             const modal = document.getElementById('tvAudioModal');
             const btn = document.getElementById('btnEnableTV');
             
-            // Auto Focus tombol untuk Remote Control TV
             if (btn) btn.focus();
 
             function activateAudio() {
                 isAudioAllowed = true;
                 if (modal) modal.style.display = 'none';
 
-                // Buka/Aktivkan AudioContext & TTS Engine TV
                 if ('speechSynthesis' in window) {
                     window.speechSynthesis.getVoices();
                     window.speechSynthesis.resume();
                 }
 
-                // Pengujian Suara Pertama Kali
+                // Keep Alive Ping untuk cegah WebView TV tidur (stuck)
+                if (!keepAliveInterval) {
+                    keepAliveInterval = setInterval(() => {
+                        if ('speechSynthesis' in window) {
+                            if (window.speechSynthesis.paused) {
+                                window.speechSynthesis.resume();
+                            }
+                        }
+                    }, 5000);
+                }
+
                 playVoiceAnnouncement("Sistem pengumuman suara telah berhasil diaktifkan.");
             }
 
             if (btn) btn.addEventListener('click', activateAudio);
 
-            // Handler tombol Enter/OK Remote Control
             document.addEventListener('keydown', function(e) {
                 if (e.key === "Enter" && modal && modal.style.display !== 'none') {
                     activateAudio();
@@ -492,10 +500,10 @@
                     }
 
                     const notes = [
-                        { freq: 698.46, time: 0.00, duration: 0.45 }, // F5
-                        { freq: 587.33, time: 0.35, duration: 0.45 }, // D5
-                        { freq: 440.00, time: 0.70, duration: 0.45 }, // A4
-                        { freq: 349.23, time: 1.05, duration: 1.10 }  // F4
+                        { freq: 698.46, time: 0.00, duration: 0.45 },
+                        { freq: 587.33, time: 0.35, duration: 0.45 },
+                        { freq: 440.00, time: 0.70, duration: 0.45 },
+                        { freq: 349.23, time: 1.05, duration: 1.10 }
                     ];
 
                     notes.forEach(note => {
@@ -527,24 +535,39 @@
             });
         }
 
+        // Helper Format Teks untuk ejaan TV yang jernih dan stabil
+        function formatTextForTV(text) {
+            if (!text) return "";
+            return text
+                .replace(/([A-Za-z]+)(\d+)/g, "$1 $2") // Pisahkan huruf & angka (Contoh: KT1234 -> KT 1234)
+                .replace(/(\d+)([A-Za-z]+)/g, "$1 $2")
+                .split('')
+                .map(char => {
+                    // Beri spasi khusus pada huruf nopol agar dieja satu per satu (tidak kaku/cedal)
+                    if (/[a-zA-Z]/.test(char) && text.length <= 12) {
+                        return char + " ";
+                    }
+                    return char;
+                })
+                .join('')
+                .replace(/\s+/g, ' ');
+        }
+
         async function playVoiceAnnouncement(text) {
             if (!isAudioAllowed) return;
 
-            // Fitur Pemulihan Bug Web Speech API (Freeze/Pause) Android TV
+            // Reset engine TTS TV jika sedang hang/paused
             if ('speechSynthesis' in window) {
-                if (window.speechSynthesis.paused || window.speechSynthesis.pending) {
-                    window.speechSynthesis.cancel();
-                    window.speechSynthesis.resume();
-                }
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.resume();
             }
 
             const originalVolume = audio.volume;
             if (!audio.paused) audio.volume = 0.1;
 
-            // Memutar chime pembuka
             await playAirportChime();
 
-            const safetyMessage = " Tetap jaga kualitas dan kuantitas pengiriman, serta utamakan keselamatan dan selalu gunakan alat pelindung diri saat bertugas , terima kasih.";
+            const safetyMessage = " Utamakan selalu keselamatan kerja, dan gunakan alat pelindung diri. Terima kasih.";
             const fullText = text + safetyMessage;
 
             const finishAnnouncement = async () => {
@@ -552,15 +575,14 @@
                 if (!audio.paused) audio.volume = originalVolume;
             };
 
-            // Implementasi Native TTS Browser & TV
             const speakNative = () => {
                 if ('speechSynthesis' in window) {
                     window.speechSynthesis.cancel();
                     
                     const msg = new SpeechSynthesisUtterance(fullText);
                     msg.lang = 'id-ID';
-                    msg.rate = 0.85; // Diperlambat sedikit untuk kejelasan speaker TV
-                    msg.pitch = 1;
+                    msg.rate = 0.9; // Kecepatan ideal untuk TV
+                    msg.pitch = 1.0;
 
                     const voices = window.speechSynthesis.getVoices();
                     const idVoice = voices.find(v => v.lang.includes('id') || v.lang.includes('ID'));
@@ -574,24 +596,25 @@
 
                     window.speechSynthesis.speak(msg);
 
-                    // Pemulihan otomatis jika WebView TV menahan giliran pemutaran
-                    setTimeout(() => {
-                        if (window.speechSynthesis.speaking && window.speechSynthesis.paused) {
+                    // Auto Resume untuk Android TV WebView Freeze Bug
+                    const resumeTimer = setInterval(() => {
+                        if (window.speechSynthesis.speaking) {
                             window.speechSynthesis.resume();
+                        } else {
+                            clearInterval(resumeTimer);
                         }
-                    }, 500);
+                    }, 1000);
 
                 } else {
                     finishAnnouncement();
                 }
             };
 
-            // Mencoba ResponsiveVoice, beralih ke Native jika terjadi kendala
             if (window.responsiveVoice && typeof responsiveVoice.speak === 'function') {
                 try {
                     responsiveVoice.speak(fullText, "Indonesian Female", {
                         pitch: 1,
-                        rate: 0.85,
+                        rate: 0.88,
                         volume: 1,
                         onend: finishAnnouncement,
                         onerror: speakNative
@@ -759,32 +782,32 @@
 
         function getWIB() { return new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" })); }
 
-        // FUNGSI LOGIKA MEMBACA SEMUA PERUBAHAN STATUS PENGIRIMAN
+        // FUNGSI LOGIKA MEMBACA PERUBAHAN STATUS PENGIRIMAN (DENGAN EJAAN DIPERBAIKI)
         function announceStatusChange(item, statusBaru) {
-            const nopol = item.nopol || 'Tanpa Nopol';
+            const rawNopol = item.nopol || 'Tanpa Nopol';
+            const nopol = formatTextForTV(rawNopol); // Pengejaan Nopol Diperjelas
             const sopir = item.sopir || 'Sopir';
             const tujuan = item.delivery_to || 'Tujuan';
             const stUpper = (statusBaru || "").toUpperCase();
 
             let teks = "";
-            
-            // Logika membaca setiap status perubahan
+
             if (stUpper.includes("PROSES")) {
-                teks = `Mohon perhatian, kendaraan nomor polisi ${nopol}. Driver ${sopir}, tujuan ${tujuan}, status PROSES pengiriman.`;
+                teks = `Mohon perhatian, kendaraan nomor polisi ${nopol}. Pengemudi ${sopir}, tujuan ${tujuan}, status PROSES pengiriman.`;
             } else if (stUpper.includes("DELIVERED")) {
-                teks = `Mohon perhatian, pengiriman unit nomor polisi ${nopol}. Driver ${sopir}, tujuan ${tujuan}, telah selesai dan terkonfirmasi DELIVERED.`;
+                teks = `Mohon perhatian, pengiriman unit nomor polisi ${nopol}. Pengemudi ${sopir}, tujuan ${tujuan}, telah selesai dan terkonfirmasi DELIVERED.`;
             } else if (stUpper.includes("LANGSIR")) {
-                teks = `Informasi, kendaraan nomor polisi ${nopol}. Driver ${sopir}, status LANGSIR.`;
+                teks = `Informasi, kendaraan nomor polisi ${nopol}. Pengemudi ${sopir}, status LANGSIR.`;
             } else if (stUpper.includes("OPER")) {
-                teks = `Informasi, kendaraan nomor polisi ${nopol}. Driver ${sopir}, status OPER pengiriman.`;
+                teks = `Informasi, kendaraan nomor polisi ${nopol}. Pengemudi ${sopir}, status OPER pengiriman.`;
             } else if (stUpper.includes("NGISI")) {
-                teks = `Informasi, kendaraan nomor polisi ${nopol}. Driver ${sopir}, status NGISI BBM.`;
+                teks = `Informasi, kendaraan nomor polisi ${nopol}. Pengemudi ${sopir}, status NGISI BBM.`;
             } else if (stUpper.includes("TUNGGU")) {
-                teks = `Informasi, kendaraan nomor polisi ${nopol}. Driver ${sopir}, status TUNGGU antrean.`;
+                teks = `Informasi, kendaraan nomor polisi ${nopol}. Pengemudi ${sopir}, status TUNGGU antrean.`;
             } else if (stUpper.includes("TERJADWAL")) {
-                teks = `Informasi, kendaraan nomor polisi ${nopol}. Driver ${sopir}, status TERJADWAL.`;
+                teks = `Informasi, kendaraan nomor polisi ${nopol}. Pengemudi ${sopir}, status TERJADWAL.`;
             } else {
-                teks = `Mohon perhatian, kendaraan nomor polisi ${nopol}. Driver ${sopir}, status diperbarui menjadi ${statusBaru}.`;
+                teks = `Mohon perhatian, kendaraan nomor polisi ${nopol}. Pengemudi ${sopir}, status diperbarui menjadi ${statusBaru}.`;
             }
 
             if (teks) {
@@ -810,8 +833,6 @@
 
                     if (!isInitialLoad && isHariIni) {
                         const statusLama = previousStatusMap[id];
-                        
-                        // Uji jika terjadi perubahan status dari sebelumnya
                         if (statusLama && statusLama !== statusBaru) {
                             announceStatusChange(item, statusBaru);
                         }
@@ -842,11 +863,9 @@
                             const statusLama = previousStatusMap[id];
 
                             if (item.tanggal === isoHariIni) {
-                                // Membaca setiap ada perubahan status dari database
                                 if (statusLama && statusLama !== statusBaru) {
                                     announceStatusChange(item, statusBaru);
                                 } else if (!statusLama) {
-                                    // Pemicu jika ada baris data baru ditambahkan
                                     announceStatusChange(item, statusBaru);
                                 }
                             }
