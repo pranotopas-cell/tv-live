@@ -8,9 +8,6 @@
     <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- Engine TTS Khusus Browser TV / HiTV Browser -->
-    <script src="https://code.responsivevoice.org/responsivevoice.js?key=FREE"></script>
-
     <style>
         :root {
             --bg-main: #0b0f19;
@@ -521,54 +518,67 @@
             });
         }
 
-        // SISTEM ENGINE SUARA DIOPTIMALKAN UNTUK BROWSER ANDROID TV
-        async function playVoiceAnnouncement(text) {
+        // ENGINE SUARA WEB SPEECH API DENGAN GOOGLE TTS FALLBACK
+        function playVoiceAnnouncement(text) {
             if (!isAudioAllowed) return;
 
             const originalVolume = audio.volume;
             if (!audio.paused) audio.volume = 0.1;
 
             // Memutar Chime Pembuka
-            await playAirportChime();
+            playAirportChime().then(() => {
+                const safetyMessage = ". Utamakan keselamatan kerja dan gunakan APD saat bertugas.";
+                const fullText = text + safetyMessage;
 
-            const safetyMessage = ". Utamakan keselamatan kerja dan gunakan APD saat bertugas.";
-            const fullText = text + safetyMessage;
+                // OPSI 1: Web Speech API (Paling Stabil di Android TV Browser)
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel(); // Bersihkan antrean
 
-            // Menggunakan Stream TTS Google Audio yang optimal untuk WebView/TV Browser
-            playGoogleTTSStream(fullText, () => {
-                playAirportChime().then(() => {
-                    if (!audio.paused) audio.volume = originalVolume;
-                });
+                    const utterance = new SpeechSynthesisUtterance(fullText);
+                    utterance.lang = 'id-ID';
+                    utterance.rate = 0.85;
+                    utterance.pitch = 1.0;
+
+                    utterance.onend = async function () {
+                        await playAirportChime();
+                        if (!audio.paused) audio.volume = originalVolume;
+                    };
+
+                    utterance.onerror = function () {
+                        fallbackGoogleTTS(fullText, originalVolume);
+                    };
+
+                    window.speechSynthesis.speak(utterance);
+                } else {
+                    // OPSI 2: Fallback ke Google TTS Stream
+                    fallbackGoogleTTS(fullText, originalVolume);
+                }
             });
         }
 
-        function playGoogleTTSStream(text, onEndedCallback) {
-            const cleanText = encodeURIComponent(text);
-            const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${cleanText}&tl=id&client=tw-ob`;
+        function fallbackGoogleTTS(fullText, originalVolume) {
+            const googleTtsUrl = "https://translate.google.com/translate_tts?ie=UTF-8&q=" + 
+                                 encodeURIComponent(fullText) + 
+                                 "&tl=id&client=tw-ob";
+            try {
+                ttsAudioPlayer.pause();
+                ttsAudioPlayer.src = googleTtsUrl;
+                ttsAudioPlayer.load();
 
-            ttsAudioPlayer.pause();
-            ttsAudioPlayer.src = ttsUrl;
-            ttsAudioPlayer.load();
-
-            if (globalAudioCtx && globalAudioCtx.state === 'suspended') {
-                globalAudioCtx.resume();
-            }
-
-            ttsAudioPlayer.onended = () => {
-                if (onEndedCallback) onEndedCallback();
-            };
-
-            ttsAudioPlayer.onerror = (e) => {
-                console.error("Gagal memutar audio TTS:", e);
-                if (onEndedCallback) onEndedCallback();
-            };
-
-            const playPromise = ttsAudioPlayer.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                    console.warn("Autoplay terhalang browser TV:", error);
-                    document.getElementById('audioEnableBanner').style.display = 'block';
-                });
+                let playPromise = ttsAudioPlayer.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        ttsAudioPlayer.onended = async () => {
+                            await playAirportChime();
+                            if (!audio.paused) audio.volume = originalVolume;
+                        };
+                    }).catch(async () => {
+                        await playAirportChime();
+                        if (!audio.paused) audio.volume = originalVolume;
+                    });
+                }
+            } catch (e) {
+                if (!audio.paused) audio.volume = originalVolume;
             }
         }
 
