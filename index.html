@@ -7,8 +7,6 @@
     
     <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Engine Suara Internal ResponsiveVoice (Support Bahasa Indonesia) -->
-    <script src="https://code.responsivevoice.org/responsivevoice.js?key=FREE_KEY"></script>
 
     <style>
         :root {
@@ -34,6 +32,7 @@
             flex-direction: column;
         }
 
+        /* Overlay Tombol TV */
         #tvAudioModal {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -119,8 +118,8 @@
 <body>
 
     <div id="tvAudioModal">
-        <h2>SISTEM PENGUMUMAN SUARA BAHASA INDONESIA</h2>
-        <p>Aplikasi butuh izin audio TV. Tekan tombol <b style="color: var(--text-gold);">OK / ENTER</b> di Remote TV Anda.</p>
+        <h2>SISTEM PENGUMUMAN AUDIO LIVE</h2>
+        <p>Tekan tombol <b style="color: var(--text-gold);">OK / ENTER</b> di Remote TV Anda untuk mengaktifkan pemutar suara otomatis.</p>
         <button id="btnEnableTV">AKTIFKAN SUARA TV SEKARANG</button>
     </div>
 
@@ -174,7 +173,8 @@
         let scrollRequest = null;
         let audioCtx = null;
 
-        function playChime() {
+        // Sound Generator Internal (Nada Bel Bandara)
+        function playChimeInternal() {
             return new Promise((resolve) => {
                 try {
                     if (!audioCtx) {
@@ -186,19 +186,23 @@
                     const notes = [
                         { f: 554.37, t: 0.0, d: 0.4 },
                         { f: 659.25, t: 0.25, d: 0.4 },
-                        { f: 830.61, t: 0.50, d: 0.5 }
+                        { f: 830.61, t: 0.50, d: 0.6 }
                     ];
 
                     notes.forEach(n => {
                         const osc = audioCtx.createOscillator();
                         const gain = audioCtx.createGain();
+
                         osc.type = 'sine';
                         osc.frequency.setValueAtTime(n.f, audioCtx.currentTime + n.t);
+
                         gain.gain.setValueAtTime(0.001, audioCtx.currentTime + n.t);
                         gain.gain.exponentialRampToValueAtTime(0.3, audioCtx.currentTime + n.t + 0.05);
                         gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + n.t + n.d);
+
                         osc.connect(gain);
                         gain.connect(audioCtx.destination);
+
                         osc.start(audioCtx.currentTime + n.t);
                         osc.stop(audioCtx.currentTime + n.t + n.d);
                     });
@@ -208,26 +212,22 @@
             });
         }
 
-        // FUNGSI UTAMA BERSUARA
-        async function speakIndonesian(text) {
+        // SISTEM Bicarakan Teks via Aliran Audio Cloud (MP3 Direct)
+        async function playVoiceStream(text) {
             if (!isAudioAllowed) return;
 
-            // 1. Bunyikan nada Bel Bandara
-            await playChime();
+            // 1. Jalankan Nada Bel Chime
+            await playChimeInternal();
 
-            // 2. Gunakan ResponsiveVoice Engine (Pasti Keluar Bahasa Indonesia)
-            if (window.responsiveVoice) {
-                responsiveVoice.speak(text, "Indonesian Female", {
-                    pitch: 1,
-                    rate: 0.85,
-                    volume: 1
-                });
-            } else if ('speechSynthesis' in window) {
-                const utter = new SpeechSynthesisUtterance(text);
-                utter.lang = 'id-ID';
-                utter.rate = 0.85;
-                window.speechSynthesis.speak(utter);
-            }
+            // 2. Minta berkas MP3 ucapan wanita bahasa Indonesia dari Server Google Cloud
+            const googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=id&client=tw-ob`;
+            
+            const audio = new Audio(googleTtsUrl);
+            audio.volume = 1.0;
+            
+            audio.play().catch(e => {
+                console.error("Gagal memutar stream suara:", e);
+            });
         }
 
         document.addEventListener("DOMContentLoaded", function() {
@@ -239,12 +239,8 @@
                 isAudioAllowed = true;
                 if (modal) modal.style.display = 'none';
 
-                if (window.responsiveVoice) {
-                    responsiveVoice.init();
-                }
-
-                // Pengujian Suara
-                speakIndonesian("Sistem pengumuman suara telah aktif.");
+                // Tes Suara Saat Aktif
+                playVoiceStream("Sistem pengumuman suara telah diaktifkan.");
             }
 
             if (btn) btn.addEventListener('click', activate);
@@ -269,13 +265,13 @@
 
             let teks = "";
             if (statusType.includes("PROSES")) {
-                teks = `Panggilan untuk nomor polisi ${nopol}. Driver ${sopir}, tujuan ${tujuan}, status PROSES. Utamakan keselamatan kerja.`;
+                teks = `Perhatian, armada ${nopol}, driver ${sopir}, tujuan ${tujuan}, status PROSES. Utamakan keselamatan kerja.`;
             } else if (statusType.includes("DELIVERED")) {
-                teks = `Panggilan untuk nomor polisi ${nopol}. Driver ${sopir}, tujuan ${tujuan}, status DELIVERED. Terima kasih.`;
+                teks = `Perhatian, armada ${nopol}, driver ${sopir}, tujuan ${tujuan}, status DELIVERED. Terima kasih.`;
             }
 
             if (teks) {
-                speakIndonesian(teks);
+                playVoiceStream(teks);
             }
         }
 
