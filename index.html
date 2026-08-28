@@ -376,7 +376,6 @@
     </div>
 
     <audio id="murottalAudio" crossorigin="anonymous"></audio>
-    <audio id="ttsAudioPlayer" crossorigin="anonymous"></audio>
 
     <script>
         const SUPABASE_URL = 'https://ntaectphgoelmhzrkatp.supabase.co';
@@ -423,7 +422,6 @@
 
         let quoteIndex = 0;
         const audio = document.getElementById('murottalAudio');
-        const ttsAudioPlayer = document.getElementById('ttsAudioPlayer');
 
         const streamSources = [
             "https://live.mp3quran.net/makkah",
@@ -437,6 +435,24 @@
         let isAudioAllowed = false;
         let isScrolling = false;
         let scrollRequest = null;
+        let selectedVoice = null;
+
+        // Trik Khusus Android TV: Mengisi Daftar Suara (Voices)
+        function initVoices() {
+            if ('speechSynthesis' in window) {
+                const voices = window.speechSynthesis.getVoices();
+                // Cari suara Bahasa Indonesia
+                selectedVoice = voices.find(v => v.lang.includes('id') || v.lang.includes('ID'));
+                if (!selectedVoice && voices.length > 0) {
+                    selectedVoice = voices[0]; // Fallback ke suara default jika ID tidak ada
+                }
+            }
+        }
+
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = initVoices;
+            initVoices();
+        }
 
         document.addEventListener("DOMContentLoaded", function() {
             const modal = document.getElementById('tvAudioModal');
@@ -448,14 +464,20 @@
                 isAudioAllowed = true;
                 if (modal) modal.style.display = 'none';
 
+                // Buka Kunci AudioContext & SpeechSynthesis
                 const AudioCtx = window.AudioContext || window.webkitAudioContext;
                 if (AudioCtx) {
                     const ctx = new AudioCtx();
                     ctx.resume();
                 }
 
-                // Pengujian Suara Pertama Kali
-                playVoiceAnnouncement("Sistem pengumuman suara berhasil diaktifkan.");
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.resume();
+                    initVoices();
+                }
+
+                // Tes Pengumuman Pertama
+                playVoiceAnnouncement("Sistem pengumuman suara telah aktif.");
             }
 
             if (btn) btn.addEventListener('click', activateAudio);
@@ -526,55 +548,56 @@
             });
         }
 
-        // FUNGSI TTS BARU (SOUND OF TEXT PROXY ENGINE) - Bebas CORS & Pasti Bunyi di TV
-        async function fetchTtsAudioUrl(text) {
-            try {
-                const response = await fetch("https://soundoftext.com/static/sounds/indonesian.json", { method: "HEAD" });
-                // Menggunakan SoundOfText API Service
-                const res = await fetch("https://soundoftext.com/api/v1/requests", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ engine: "Google", data: { text: text, voice: "id-ID" } })
-                });
-                const data = await res.json();
-                if (data.success && data.id) {
-                    return `https://soundoftext.com/static/sounds/${data.id}.mp3`;
-                }
-            } catch (err) {
-                console.warn("SoundOfText API gagal, beralih ke engine cadangan.");
-            }
-            // Engine Cadangan Direct Audio Stream
-            return `https://api.streamelements.com/kappa/v2/speech?voice=Indonesian%20Female&text=${encodeURIComponent(text)}`;
-        }
-
+        // PENGUMUMAN SUARA UNTUK SMART TV / ANDROID TV
         async function playVoiceAnnouncement(text) {
             if (!isAudioAllowed) return;
 
             const originalVolume = audio.volume;
             if (!audio.paused) audio.volume = 0.1;
 
-            // Memutar Chime
+            // Memutar Chime Pembuka
             await playAirportChime();
 
-            const safetyMessage = " Tetap jaga kualitas pengiriman, dan gunakan APD saat bongkar BBM. Terima kasih.";
+            const safetyMessage = " Utamakan keselamatan kerja dan gunakan alat pelindung diri. Terima kasih.";
             const fullText = text + safetyMessage;
 
-            try {
-                const audioUrl = await fetchTtsAudioUrl(fullText);
-                ttsAudioPlayer.src = audioUrl;
-                
-                ttsAudioPlayer.play().then(() => {
-                    ttsAudioPlayer.onended = async () => {
-                        await playAirportChime();
-                        if (!audio.paused) audio.volume = originalVolume;
-                    };
-                }).catch(async (e) => {
-                    console.error("Gagal memutar audio TTS:", e);
+            if ('speechSynthesis' in window) {
+                // Bersihkan antrean lama & paksa resume (Mencegah Bug Stuck di WebView TV)
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.resume();
+
+                const utterance = new SpeechSynthesisUtterance(fullText);
+                utterance.lang = 'id-ID';
+                utterance.rate = 0.85; // Kecepatan diperlambat agar jelas di TV
+                utterance.pitch = 1.0;
+
+                if (selectedVoice) {
+                    utterance.voice = selectedVoice;
+                }
+
+                utterance.onend = async () => {
                     await playAirportChime();
                     if (!audio.paused) audio.volume = originalVolume;
-                });
-            } catch (err) {
-                console.error("Error eksekusi TTS:", err);
+                };
+
+                utterance.onerror = async (err) => {
+                    console.error("SpeechSynthesis Error:", err);
+                    await playAirportChime();
+                    if (!audio.paused) audio.volume = originalVolume;
+                };
+
+                window.speechSynthesis.speak(utterance);
+
+                // Trik interval pemicu agar Android TV tidak menghentikan suara di tengah jalan
+                const resumeInterval = setInterval(() => {
+                    if (!window.speechSynthesis.speaking) {
+                        clearInterval(resumeInterval);
+                    } else {
+                        window.speechSynthesis.resume();
+                    }
+                }, 1000);
+
+            } else {
                 await playAirportChime();
                 if (!audio.paused) audio.volume = originalVolume;
             }
@@ -584,6 +607,11 @@
             isAudioAllowed = true;
             document.getElementById('audioEnableBanner').style.display = 'none';
             document.getElementById('tvAudioModal').style.display = 'none';
+            
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.resume();
+                initVoices();
+            }
             playVoiceAnnouncement("Sistem pengumuman suara telah aktif.");
         }
 
