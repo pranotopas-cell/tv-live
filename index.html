@@ -122,7 +122,6 @@
             scroll-behavior: smooth;
         }
 
-        /* Sembunyikan scrollbar untuk tampilan layar TV / Display Dashboard */
         #scrollContainer::-webkit-scrollbar {
             display: none;
         }
@@ -378,6 +377,13 @@
         let isScrolling = false;
         let scrollRequest = null;
 
+        // Inisialisasi daftar voice bawaan untuk browser TV / Android Native
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                window.speechSynthesis.getVoices();
+            };
+        }
+
         function getWIBDateString() {
             const d = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
             const yyyy = d.getFullYear();
@@ -386,7 +392,7 @@
             return `${yyyy}-${mm}-${dd}`;
         }
 
-        // Fungsi Chime Bandara Autentik (Harmoni Nada Sol-Mi-Do / F5 - D5 - A4 - F4)
+        // Fungsi Chime Bandara Autentik
         function playAirportChime() {
             return new Promise((resolve) => {
                 try {
@@ -442,31 +448,42 @@
             // 1. Memutar chime pembuka
             await playAirportChime();
 
-            // Pesan keselamatan yang ditambahkan setelah pengumuman
             const safetyMessage = " Tetap jaga kualitas dan kuantitas pengiriman, serta utamakan keselamatan dan selalu gunakan alat pelindung diri saat proses bongkar bbm. Terima kasih.";
             const fullText = text + safetyMessage;
 
             const finishAnnouncement = async () => {
-                // 3. Memutar chime penutup setelah pengumuman selesai
+                // 3. Memutar chime penutup
                 await playAirportChime();
                 if (!audio.paused) audio.volume = originalVolume;
             };
 
-            const speakFallback = () => {
+            // Fallback menggunakan Web Speech API bawaan perangkat (Universal Browser/TV)
+            const speakNative = () => {
                 if ('speechSynthesis' in window) {
                     window.speechSynthesis.cancel();
                     const msg = new SpeechSynthesisUtterance(fullText);
                     msg.lang = 'id-ID';
                     msg.rate = 0.9;
+                    msg.pitch = 1;
+
+                    // Cari suara Bahasa Indonesia jika tersedia
+                    const voices = window.speechSynthesis.getVoices();
+                    const idVoice = voices.find(v => v.lang.includes('id') || v.lang.includes('ID'));
+                    if (idVoice) msg.voice = idVoice;
+
                     msg.onend = finishAnnouncement;
-                    msg.onerror = finishAnnouncement;
+                    msg.onerror = (e) => {
+                        console.error("Native Speech Error:", e);
+                        finishAnnouncement();
+                    };
+                    
                     window.speechSynthesis.speak(msg);
                 } else {
                     finishAnnouncement();
                 }
             };
 
-            // 2. Memutar pengumuman suara
+            // 2. Coba jalankan ResponsiveVoice, jika gagal beralih ke Native Browser TTS
             if (window.responsiveVoice && typeof responsiveVoice.speak === 'function') {
                 try {
                     responsiveVoice.speak(fullText, "Indonesian Female", {
@@ -474,19 +491,25 @@
                         rate: 0.9,
                         volume: 1,
                         onend: finishAnnouncement,
-                        onerror: speakFallback
+                        onerror: speakNative
                     });
                 } catch (e) {
-                    speakFallback();
+                    speakNative();
                 }
             } else {
-                speakFallback();
+                speakNative();
             }
         }
 
         function enableAudioSystem() {
             isAudioAllowed = true;
             document.getElementById('audioEnableBanner').style.display = 'none';
+            
+            // Pancing izin audio browser untuk memicu Web Audio API
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.getVoices();
+            }
+            
             playVoiceAnnouncement("Mohon perhatian. Sistem pengumuman suara telah aktif.");
         }
 
