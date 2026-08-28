@@ -8,9 +8,6 @@
     <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- Engine TTS Khusus Browser TV / HiTV Browser -->
-    <script src="https://code.responsivevoice.org/responsivevoice.js?key=FREE"></script>
-
     <style>
         :root {
             --bg-main: #0b0f19;
@@ -39,7 +36,7 @@
             flex-direction: column;
         }
 
-        /* Modal Pemicu Izin Audio TV */
+        /* Modal Pemicu Audio TV Bro */
         #tvAudioModal {
             position: fixed;
             top: 0;
@@ -72,20 +69,20 @@
         }
 
         #btnEnableTV {
-            padding: 16px 40px;
-            font-size: 20px;
+            padding: 18px 45px;
+            font-size: 22px;
             font-weight: bold;
             background: var(--text-gold);
             color: #000;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            outline: 3px solid #ffffff;
+            outline: 4px solid #ffffff;
             transition: transform 0.2s;
         }
 
         #btnEnableTV:focus, #btnEnableTV:hover {
-            transform: scale(1.05);
+            transform: scale(1.08);
             background: #ffffff;
             color: #000;
         }
@@ -154,17 +151,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-
-        #audioEnableBanner {
-            background-color: var(--text-gold);
-            color: #000;
-            text-align: center;
-            padding: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            z-index: 20;
-            display: none;
         }
 
         /* Scroll Area & Table */
@@ -290,7 +276,6 @@
             font-weight: bold;
         }
 
-        /* Typography Letter Animation Wrappers */
         .word-wrapper {
             display: inline-block;
             white-space: nowrap;
@@ -323,16 +308,11 @@
 </head>
 <body>
 
-    <!-- Modal Aktivasi Audio Remote TV -->
+    <!-- Modal Aktivasi Suara Remote TV -->
     <div id="tvAudioModal">
-        <h2>SISTEM PENGUMUMAN SUARA DASHBOARD</h2>
-        <p>Silakan tekan tombol <b style="color: var(--text-gold);">OK / ENTER</b> pada Remote TV Anda untuk mengaktifkan Suara Pengumuman Otomatis.</p>
-        <button id="btnEnableTV">AKTIFKAN SUARA (TEKAN OK)</button>
-    </div>
-
-    <!-- Audio Enable Banner -->
-    <div id="audioEnableBanner" onclick="enableAudioSystem()">
-        🔊 Klik di sini jika suara belum aktif
+        <h2>SISTEM PENGUMUMAN DASHBOARD TV BRO</h2>
+        <p>Aplikasi TV Bro memerlukan izin akses audio. Silakan tekan tombol <b style="color: var(--text-gold);">OK / ENTER</b> di Remote TV Anda.</p>
+        <button id="btnEnableTV">AKTIFKAN SUARA SEKARANG (TEKAN OK)</button>
     </div>
 
     <!-- Header Section -->
@@ -395,32 +375,7 @@
             { t: "Rezeki sudah diatur, tugas kita hanyalah menjemputnya dengan cara yang baik.", s: "Nasehat Tauhid" },
             { t: "Tangan di atas lebih baik daripada tangan di bawah.", s: "HR. Bukhari & Muslim" },
             { t: "Mencari rezeki halal adalah wajib setelah ibadah fardhu.", s: "HR. Ath-Thabrani" },
-            { t: "Janganlah kamu berputus asa dari rahmat Allah.", s: "QS. Az-Zumar: 53"},
-            { t: "Ridha Allah terletak pada ridha kedua orang tua.", s: "HR. Tirmidzi" },
-            { t: "Harta tidak akan berkurang karena sedekah.", s: "HR. Muslim" },
-            { t: "Dan barangsiapa yang bertawakal kepada Allah, niscaya Allah akan mencukupkan keperluannya.", s: "QS. At-Talaq: 3" },
-            { t: "Kekayaan bukanlah dengan banyaknya harta, namun kekayaan adalah hati yang selalu merasa cukup.", s: "HR. Bukhari" },
-            { t: "Jadikanlah sabar dan shalat sebagai penolongmu. Dan sesungguhnya yang demikian itu sungguh berat, kecuali bagi orang-orang yang khusyu.", s: "QS. Al-Baqarah: 45" },
-            { t: "Tidak ada satu subuh pun yang dialami hamba-hamba Allah melainkan malaikat turun dan berdoa: Ya Allah, berikanlah ganti bagi orang yang berinfak.", s: "HR. Bukhari" },
-            { t: "Mukmin yang kuat lebih baik dan lebih dicintai Allah daripada mukmin yang lemah.", s: "HR. Muslim" },
-            { t: "Sesungguhnya Allah tidak akan mengubah keadaan suatu kaum sebelum mereka mengubah keadaan diri mereka sendiri.", s: "QS. Ar-Ra'd: 11" },
-            { t: "Senyummu di hadapan saudaramu adalah sedekah.", s: "HR. Tirmidzi" },
-            { t: "Bersemangatlah atas hal-hal yang bermanfaat bagimu dan mintalah pertolongan kepada Allah, jangan menjadi lemah.", s: "HR. Muslim" },
-            { t: "Sesungguhnya bersama kesulitan ada kemudahan, maka melangkahlah dengan iman.", s: "QS. Al-Insyirah: 6" },
-            { t: "Jangan remehkan kebaikan sekecil apa pun, karena kita tidak pernah tahu kebaikan mana yang membawakan surga.", s: "HR. Muslim" },
-            { t: "Rezeki yang berkah bukan tentang seberapa banyak jumlahnya, melainkan seberapa tenang hati yang menerimanya.", s: "Nasehat Tauhid" },
-            { t: "Dunia ini hanya tempat persinggahan; jadikan setiap lelahmu di sini sebagai bekal pulang yang indah.", s: "Kata Bijak Muslim" },
-            { t: "Barangsiapa yang menempuh jalan untuk mencari ilmu, maka Allah akan mudahkan jalannya menuju surga.", s: "HR. Muslim" },
-            { t: "Bukan kesulitan yang membuat kita takut, melainkan ketakutan yang membuat segalanya menjadi sulit. Bertawakallah.", s: "Ali bin Abi Thalib" },
-            { t: "Dan bersabarlah kamu, sesungguhnya janji Allah adalah benar.", s: "QS. Ar-Rum: 60" },
-            { t: "Bekerjalah dengan jujur, karena rezeki yang berkah akan melahirkan keturunan yang berkah pula.", s: "Nasehat Bijak" },
-            { t: "Dua nikmat yang sering dilupakan oleh manusia adalah kesehatan dan waktu luang.", s: "HR. Bukhari" },
-            { t: "Ketika kamu merasa sendirian, ingatlah bahwa Allah senantiasa mendengar bisikan doa dalam sujudmu.", s: "Kata Bijak Muslim" },
-            { t: "Siapa yang menabur kebaikan, ia akan memanen kebahagiaan, baik di dunia maupun di akhirat.", s: "Nasehat Tauhid" },
-            { t: "Bukan kemiskinan yang kita takuti, melainkan hilangnya rasa syukur saat harta melimpah.", s: "Kata Hikmah" },
-            { t: "Jika Allah menunda sesuatu yang kamu inginkan, itu karena Dia ingin memberimu sesuatu yang jauh lebih baik pada waktu yang tepat.", s: "QS. Al-Baqarah: 216" },
-            { t: "Senyummu di hadapan saudaramu adalah bernilai sedekah.", s: "HR. Tirmidzi" },
-            { t: "Mulailah pagimu dengan bismillah, jalani siangmu dengan alhamdulillah, dan tutuplah malammu dengan istighfar.", s: "Nasehat Bijak" }
+            { t: "Janganlah kamu berputus asa dari rahmat Allah.", s: "QS. Az-Zumar: 53"}
         ];
 
         let quoteIndex = 0;
@@ -444,14 +399,13 @@
         document.addEventListener("DOMContentLoaded", function() {
             const modal = document.getElementById('tvAudioModal');
             const btn = document.getElementById('btnEnableTV');
-            
             if (btn) btn.focus();
 
             function activateAudio() {
                 isAudioAllowed = true;
                 if (modal) modal.style.display = 'none';
 
-                // Buka AudioContext hardware
+                // Inisialisasi Audio Context
                 try {
                     const AudioCtx = window.AudioContext || window.webkitAudioContext;
                     if (AudioCtx) {
@@ -460,14 +414,14 @@
                     }
                 } catch(e){}
 
-                // Tes Panggilan Audio
-                playVoiceAnnouncement("Sistem pengumuman suara telah diaktifkan.");
+                // Bunyikan TES SUARA pertama kali
+                playVoiceAnnouncement("Suara pengumuman telah aktif di TV Bro.");
             }
 
             if (btn) btn.addEventListener('click', activateAudio);
 
             document.addEventListener('keydown', function(e) {
-                if (e.key === "Enter" && modal && modal.style.display !== 'none') {
+                if ((e.key === "Enter" || e.keyCode === 13) && modal && modal.style.display !== 'none') {
                     activateAudio();
                 }
             });
@@ -481,7 +435,7 @@
             return `${yyyy}-${mm}-${dd}`;
         }
 
-        // Tone Bel Bandara Synthesizer (100% Bunyi di Hardware Apapun)
+        // 100% Bunyi di Hardware Apapun Tanpa Kuota Internet (Synthesizer Chime)
         function playAirportChime() {
             return new Promise((resolve) => {
                 try {
@@ -489,10 +443,10 @@
                     if (ctx.state === 'suspended') ctx.resume();
 
                     const notes = [
-                        { freq: 698.46, time: 0.00, duration: 0.45 }, 
-                        { freq: 587.33, time: 0.35, duration: 0.45 }, 
-                        { freq: 440.00, time: 0.70, duration: 0.45 }, 
-                        { freq: 349.23, time: 1.05, duration: 1.10 }  
+                        { freq: 698.46, time: 0.00, duration: 0.40 }, 
+                        { freq: 587.33, time: 0.30, duration: 0.40 }, 
+                        { freq: 440.00, time: 0.60, duration: 0.40 }, 
+                        { freq: 349.23, time: 0.90, duration: 0.90 }  
                     ];
 
                     notes.forEach(note => {
@@ -503,7 +457,7 @@
                         osc.frequency.setValueAtTime(note.freq, ctx.currentTime + note.time);
 
                         gain.gain.setValueAtTime(0.0001, ctx.currentTime + note.time);
-                        gain.gain.exponentialRampToValueAtTime(0.4, ctx.currentTime + note.time + 0.03);
+                        gain.gain.exponentialRampToValueAtTime(0.5, ctx.currentTime + note.time + 0.03);
                         gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + note.time + note.duration);
 
                         osc.connect(gain);
@@ -513,7 +467,7 @@
                         osc.stop(ctx.currentTime + note.time + note.duration);
                     });
 
-                    setTimeout(resolve, 2200);
+                    setTimeout(resolve, 1900);
                 } catch (e) {
                     console.error("Gagal memutar chime:", e);
                     resolve();
@@ -521,45 +475,51 @@
             });
         }
 
-        // SISTEM ENGINE SUARA MULTI-FALLBACK KHUSUS HITV BROWSER
+        // ENGINE PENGUMUMAN KHUSUS TV BRO (PJS Speech API Fallback)
         async function playVoiceAnnouncement(text) {
             if (!isAudioAllowed) return;
 
             const originalVolume = audio.volume;
             if (!audio.paused) audio.volume = 0.1;
 
-            // Memutar Chime Pembuka
+            // Bunyi bel bandara terlebih dahulu
             await playAirportChime();
 
             const safetyMessage = ". Utamakan keselamatan kerja dan gunakan APD saat bertugas.";
             const fullText = text + safetyMessage;
 
-            // OPSI 1: ResponsiveVoice JS (Mesin Paling Stabil untuk TV)
-            if (window.responsiveVoice && responsiveVoice.voiceSupport()) {
-                responsiveVoice.speak(fullText, "Indonesian Female", {
-                    pitch: 1,
-                    rate: 0.85,
-                    onend: async function() {
-                        await playAirportChime();
-                        if (!audio.paused) audio.volume = originalVolume;
-                    },
-                    onerror: function() {
-                        fallbackGoogleTTS(fullText, originalVolume);
-                    }
-                });
+            // METODE 1: Web Speech API Bawaan Android WebView (Jika Didukung TV)
+            if ('speechSynthesis' in window && window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+                const utter = new SpeechSynthesisUtterance(fullText);
+                utter.lang = 'id-ID';
+                utter.rate = 0.85;
+
+                utter.onend = async () => {
+                    await playAirportChime();
+                    if (!audio.paused) audio.volume = originalVolume;
+                };
+
+                utter.onerror = () => {
+                    playViaAudioStream(fullText, originalVolume);
+                };
+
+                window.speechSynthesis.speak(utter);
             } else {
-                // OPSI 2: Google TTS Direct Stream Fallback
-                fallbackGoogleTTS(fullText, originalVolume);
+                // METODE 2: Direct Audio Proxy Streaming (Sangat Kompatibel)
+                playViaAudioStream(fullText, originalVolume);
             }
         }
 
-        function fallbackGoogleTTS(fullText, originalVolume) {
-            const googleTtsUrl = "https://translate.google.com/translate_tts?ie=UTF-8&q=" + 
-                                 encodeURIComponent(fullText) + 
-                                 "&tl=id&client=tw-ob";
+        function playViaAudioStream(fullText, originalVolume) {
+            // URL Stream Audio TTS Khusus TV Browser
+            const streamUrl = "https://translate.google.com/translate_tts?ie=UTF-8&q=" + 
+                              encodeURIComponent(fullText) + 
+                              "&tl=id&client=tw-ob";
+
             try {
                 ttsAudioPlayer.pause();
-                ttsAudioPlayer.src = googleTtsUrl;
+                ttsAudioPlayer.src = streamUrl;
                 ttsAudioPlayer.load();
 
                 let playPromise = ttsAudioPlayer.play();
@@ -569,7 +529,8 @@
                             await playAirportChime();
                             if (!audio.paused) audio.volume = originalVolume;
                         };
-                    }).catch(async () => {
+                    }).catch(async (err) => {
+                        console.warn("Audio diblokir browser, membunyikan Bel Fallback", err);
                         await playAirportChime();
                         if (!audio.paused) audio.volume = originalVolume;
                     });
@@ -577,13 +538,6 @@
             } catch (e) {
                 if (!audio.paused) audio.volume = originalVolume;
             }
-        }
-
-        function enableAudioSystem() {
-            isAudioAllowed = true;
-            document.getElementById('audioEnableBanner').style.display = 'none';
-            document.getElementById('tvAudioModal').style.display = 'none';
-            playVoiceAnnouncement("Sistem pengumuman suara telah aktif.");
         }
 
         function toggleAudio() {
