@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Live - Investama Kalimantan Energi</title>
+    <title>Dashboard Live</title>
     
-    <!-- Supabase CDN -->
+    <!-- Supabase & ResponsiveVoice CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://code.responsivevoice.org/responsivevoice.js?key=FREE_KEY"></script>
 
     <style>
         :root {
@@ -36,7 +37,7 @@
             flex-direction: column;
         }
 
-        /* Modal Pemicu Izin Audio TV */
+        /* Modal Pemicu Audio TV */
         #tvAudioModal {
             position: fixed;
             top: 0;
@@ -115,7 +116,7 @@
         .header-controls {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 20px;
         }
 
         .clock-block {
@@ -151,14 +152,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.3s, color 0.3s;
         }
 
-        .audio-btn.disabled {
-            background: #ef4444 !important;
-            color: #ffffff !important;
-        }
-
+        /* Banner Suara (Kondisional) */
         #audioEnableBanner {
             background-color: var(--text-gold);
             color: #000;
@@ -329,7 +325,7 @@
     <!-- Modal Aktivasi Audio Remote TV -->
     <div id="tvAudioModal">
         <h2>SISTEM PENGUMUMAN SUARA DASHBOARD</h2>
-        <p>Silakan tekan tombol <b style="color: var(--text-gold);">OK / ENTER</b> pada Remote TV Anda untuk mengaktifkan Suara Pengumuman Otomatis.</p>
+        <p>Silakan tekan tombol <b style="color: var(--text-gold);">OK / ENTER</b> pada Remote Control TV Anda untuk mengaktifkan Suara Pengumuman Otomatis.</p>
         <button id="btnEnableTV">AKTIFKAN SUARA (TEKAN OK)</button>
     </div>
 
@@ -345,18 +341,10 @@
             <p id="targetDate">MENGAMBIL DATA...</p>
         </div>
         <div class="header-controls">
-            <!-- Tombol Murottal Live Stream -->
             <div class="audio-control">
                 <button class="audio-btn" id="playPauseBtn" onclick="toggleAudio()">▶</button>
                 <span id="audio-status" style="font-size: 12px; font-weight: bold;">STOP</span>
             </div>
-
-            <!-- Tombol Pengumuman Suara TV (Pengumuman On/Off) -->
-            <div class="audio-control">
-                <button class="audio-btn" id="announcementBtn" onclick="toggleAnnouncementSystem()">🔊</button>
-                <span id="announcement-status" style="font-size: 12px; font-weight: bold; color: #10b981;">VOICE ON</span>
-            </div>
-
             <div class="clock-block">
                 <div class="clock-time" id="clock">00:00:00</div>
             </div>
@@ -388,7 +376,7 @@
         </div>
     </div>
 
-    <audio id="murottalAudio" preload="none"></audio>
+    <audio id="murottalAudio" crossorigin="anonymous"></audio>
 
     <script>
         const SUPABASE_URL = 'https://ntaectphgoelmhzrkatp.supabase.co';
@@ -435,7 +423,6 @@
 
         let quoteIndex = 0;
         const audio = document.getElementById('murottalAudio');
-
         const streamSources = [
             "https://live.mp3quran.net/makkah",
             "https://live.mp3quran.net/madinah",
@@ -443,38 +430,37 @@
         ];
         let currentSourceIndex = 0;
 
-        // Penyimpanan Objek Data Sebelumnya untuk Membandingkan Perubahan
-        let previousDataMap = {};
+        let previousStatusMap = {};
         let isInitialLoad = true;
         let isAudioAllowed = false;
-        let isAnnouncementEnabled = true;
         let isScrolling = false;
         let scrollRequest = null;
-        let globalAudioCtx = null;
 
+        // Inisialisasi awal modal pemicu audio TV
         document.addEventListener("DOMContentLoaded", function() {
             const modal = document.getElementById('tvAudioModal');
             const btn = document.getElementById('btnEnableTV');
             
+            // Auto Focus tombol untuk Remote Control TV
             if (btn) btn.focus();
 
             function activateAudio() {
                 isAudioAllowed = true;
                 if (modal) modal.style.display = 'none';
 
-                try {
-                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                    if (AudioCtx) {
-                        globalAudioCtx = new AudioCtx();
-                        globalAudioCtx.resume();
-                    }
-                } catch(e){}
+                // Buka/Aktivkan AudioContext & TTS Engine TV
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.getVoices();
+                    window.speechSynthesis.resume();
+                }
 
-                playVoiceAnnouncement("Sistem pengumuman suara telah diaktifkan.");
+                // Pengujian Suara Pertama Kali
+                playVoiceAnnouncement("Sistem pengumuman suara telah berhasil diaktifkan.");
             }
 
             if (btn) btn.addEventListener('click', activateAudio);
 
+            // Handler tombol Enter/OK Remote Control
             document.addEventListener('keydown', function(e) {
                 if (e.key === "Enter" && modal && modal.style.display !== 'none') {
                     activateAudio();
@@ -490,18 +476,26 @@
             return `${yyyy}-${mm}-${dd}`;
         }
 
-        // Chime Bel Bandara Synthesizer LOKAL (Tidak Perlu Internet)
+        // Chime Bandara Synthesizer
         function playAirportChime() {
             return new Promise((resolve) => {
                 try {
-                    const ctx = globalAudioCtx || new (window.AudioContext || window.webkitAudioContext)();
-                    if (ctx.state === 'suspended') ctx.resume();
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (!AudioContext) {
+                        resolve();
+                        return;
+                    }
+                    const ctx = new AudioContext();
+
+                    if (ctx.state === 'suspended') {
+                        ctx.resume();
+                    }
 
                     const notes = [
-                        { freq: 698.46, time: 0.00, duration: 0.45 }, 
-                        { freq: 587.33, time: 0.35, duration: 0.45 }, 
-                        { freq: 440.00, time: 0.70, duration: 0.45 }, 
-                        { freq: 349.23, time: 1.05, duration: 1.10 }  
+                        { freq: 698.46, time: 0.00, duration: 0.45 }, // F5
+                        { freq: 587.33, time: 0.35, duration: 0.45 }, // D5
+                        { freq: 440.00, time: 0.70, duration: 0.45 }, // A4
+                        { freq: 349.23, time: 1.05, duration: 1.10 }  // F4
                     ];
 
                     notes.forEach(note => {
@@ -522,7 +516,10 @@
                         osc.stop(ctx.currentTime + note.time + note.duration);
                     });
 
-                    setTimeout(resolve, 2200);
+                    setTimeout(() => {
+                        ctx.close();
+                        resolve();
+                    }, 2200);
                 } catch (e) {
                     console.error("Gagal memutar chime:", e);
                     resolve();
@@ -530,70 +527,93 @@
             });
         }
 
-        function toggleAnnouncementSystem() {
-            const btn = document.getElementById('announcementBtn');
-            const statusLabel = document.getElementById('announcement-status');
+        async function playVoiceAnnouncement(text) {
+            if (!isAudioAllowed) return;
 
-            isAnnouncementEnabled = !isAnnouncementEnabled;
-
-            if (isAnnouncementEnabled) {
-                btn.classList.remove('disabled');
-                btn.innerText = "🔊";
-                statusLabel.innerText = "VOICE ON";
-                statusLabel.style.color = "#10b981";
-                
-                playVoiceAnnouncement("Pengumuman suara diaktifkan.");
-            } else {
-                btn.classList.add('disabled');
-                btn.innerText = "🔇";
-                statusLabel.innerText = "VOICE OFF";
-                statusLabel.style.color = "#ef4444";
-
-                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            // Fitur Pemulihan Bug Web Speech API (Freeze/Pause) Android TV
+            if ('speechSynthesis' in window) {
+                if (window.speechSynthesis.paused || window.speechSynthesis.pending) {
+                    window.speechSynthesis.cancel();
+                    window.speechSynthesis.resume();
+                }
             }
-        }
-
-        // ENGINE SUARA MURNI LOKAL (Bawaan Browser/OS - Tanpa Tergantung Server Web)
-        function playVoiceAnnouncement(text) {
-            if (!isAudioAllowed || !isAnnouncementEnabled) return;
 
             const originalVolume = audio.volume;
             if (!audio.paused) audio.volume = 0.1;
 
-            playAirportChime().then(() => {
-                if (!isAnnouncementEnabled) return;
+            // Memutar chime pembuka
+            await playAirportChime();
 
-                const safetyMessage = ". Utamakan keselamatan kerja dan gunakan APD saat bertugas.";
-                const fullText = text + safetyMessage;
+            const safetyMessage = " Tetap jaga kualitas dan kuantitas pengiriman, serta utamakan keselamatan dan selalu gunakan alat pelindung diri saat proses bongkar bbm. Terima kasih.";
+            const fullText = text + safetyMessage;
 
+            const finishAnnouncement = async () => {
+                await playAirportChime();
+                if (!audio.paused) audio.volume = originalVolume;
+            };
+
+            // Implementasi Native TTS Browser & TV
+            const speakNative = () => {
                 if ('speechSynthesis' in window) {
                     window.speechSynthesis.cancel();
+                    
+                    const msg = new SpeechSynthesisUtterance(fullText);
+                    msg.lang = 'id-ID';
+                    msg.rate = 0.85; // Diperlambat sedikit untuk kejelasan speaker TV
+                    msg.pitch = 1;
 
-                    const utterance = new SpeechSynthesisUtterance(fullText);
-                    utterance.lang = 'id-ID';
-                    utterance.rate = 0.85;
-                    utterance.pitch = 1.0;
+                    const voices = window.speechSynthesis.getVoices();
+                    const idVoice = voices.find(v => v.lang.includes('id') || v.lang.includes('ID'));
+                    if (idVoice) msg.voice = idVoice;
 
-                    utterance.onend = async function () {
-                        if (isAnnouncementEnabled) await playAirportChime();
-                        if (!audio.paused) audio.volume = originalVolume;
+                    msg.onend = finishAnnouncement;
+                    msg.onerror = (e) => {
+                        console.error("Native Speech Error:", e);
+                        finishAnnouncement();
                     };
 
-                    utterance.onerror = function () {
-                        if (!audio.paused) audio.volume = originalVolume;
-                    };
+                    window.speechSynthesis.speak(msg);
 
-                    window.speechSynthesis.speak(utterance);
+                    // Pemulihan otomatis jika WebView TV menahan giliran pemutaran
+                    setTimeout(() => {
+                        if (window.speechSynthesis.speaking && window.speechSynthesis.paused) {
+                            window.speechSynthesis.resume();
+                        }
+                    }, 500);
+
                 } else {
-                    if (!audio.paused) audio.volume = originalVolume;
+                    finishAnnouncement();
                 }
-            });
+            };
+
+            // Mencoba ResponsiveVoice, beralih ke Native jika terjadi kendala
+            if (window.responsiveVoice && typeof responsiveVoice.speak === 'function') {
+                try {
+                    responsiveVoice.speak(fullText, "Indonesian Female", {
+                        pitch: 1,
+                        rate: 0.85,
+                        volume: 1,
+                        onend: finishAnnouncement,
+                        onerror: speakNative
+                    });
+                } catch (e) {
+                    speakNative();
+                }
+            } else {
+                speakNative();
+            }
         }
 
         function enableAudioSystem() {
             isAudioAllowed = true;
             document.getElementById('audioEnableBanner').style.display = 'none';
             document.getElementById('tvAudioModal').style.display = 'none';
+            
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.getVoices();
+                window.speechSynthesis.resume();
+            }
+            
             playVoiceAnnouncement("Sistem pengumuman suara telah aktif.");
         }
 
@@ -739,46 +759,20 @@
 
         function getWIB() { return new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" })); }
 
-        // MENDETEKSI DAN MEMBACA APAPUN DETAIL PERUBAHAN DATA
-        function checkAndAnnounceDataChanges(newItem, oldItem) {
-            const nopol = newItem.nopol || 'Tanpa Nopol';
-            const sopir = newItem.sopir || 'Sopir';
+        function announceStatusChange(item, statusType) {
+            const nopol = item.nopol || 'Tanpa Nopol';
+            const sopir = item.sopir || 'Sopir';
+            const tujuan = item.delivery_to || 'Tujuan';
 
-            if (!oldItem) {
-                // Jika Data Baru Diinput
-                const msg = `Mohon perhatian, terdapat data pengiriman baru. Unit ${nopol}, driver ${sopir}, tujuan ${newItem.delivery_to || '-'}. Status ${newItem.status || '-'}.`;
-                playVoiceAnnouncement(msg);
-                return;
-            }
-
-            let changes = [];
-
-            if (oldItem.status !== newItem.status) {
-                changes.push(`status berubah dari ${oldItem.status || 'kosong'} menjadi ${newItem.status || 'kosong'}`);
-            }
-            if (oldItem.lokasi !== newItem.lokasi) {
-                changes.push(`lokasi diperbarui menjadi ${newItem.lokasi || 'kosong'}`);
-            }
-            if (oldItem.sopir !== newItem.sopir) {
-                changes.push(`driver diganti menjadi ${newItem.sopir || 'kosong'}`);
-            }
-            if (oldItem.nopol !== newItem.nopol) {
-                changes.push(`nomor polisi diganti menjadi ${newItem.nopol || 'kosong'}`);
-            }
-            if (oldItem.jumlah_keluar != newItem.jumlah_keluar) {
-                changes.push(`jumlah muatan berubah menjadi ${newItem.jumlah_keluar || '0'}`);
-            }
-            if (oldItem.delivery_to !== newItem.delivery_to) {
-                changes.push(`tujuan pengiriman diubah ke ${newItem.delivery_to || 'kosong'}`);
-            }
-            if (oldItem.supplier !== newItem.supplier) {
-                changes.push(`depo diubah ke ${newItem.supplier || 'kosong'}`);
+            let teks = "";
+            if (statusType.includes("PROSES")) {
+                teks = `Mohon perhatian, kendaraan nomor polisi ${nopol}. Driver ${sopir}, tujuan ${tujuan}, status PROSES.`;
+            } else if (statusType.includes("DELIVERED")) {
+                teks = `Mohon perhatian, kendaraan nomor polisi ${nopol}. Driver ${sopir}, tujuan ${tujuan}, status DELIVERED.`;
             }
 
-            if (changes.length > 0) {
-                const detailPesan = changes.join(", ");
-                const msg = `Mohon perhatian, pembaharuan data untuk unit ${nopol}, driver ${sopir}. Informasi ${detailPesan}.`;
-                playVoiceAnnouncement(msg);
+            if (teks) {
+                playVoiceAnnouncement(teks);
             }
         }
 
@@ -795,15 +789,20 @@
 
                 currentData.forEach(item => {
                     const id = item.id || (item.sopir + '_' + item.tanggal + '_' + item.delivery_to);
+                    const statusBaru = (item.status || "").toUpperCase();
                     const isHariIni = (item.tanggal === isoHariIni);
 
                     if (!isInitialLoad && isHariIni) {
-                        const oldItem = previousDataMap[id];
-                        checkAndAnnounceDataChanges(item, oldItem);
+                        const statusLama = previousStatusMap[id];
+                        
+                        if (statusBaru.includes("PROSES") && statusLama && !statusLama.includes("PROSES")) {
+                            announceStatusChange(item, "PROSES");
+                        }
+                        else if (statusBaru.includes("DELIVERED") && statusLama && !statusLama.includes("DELIVERED")) {
+                            announceStatusChange(item, "DELIVERED");
+                        }
                     }
-                    
-                    // Simpan Snapshot Lengkap Objek Data
-                    previousDataMap[id] = { ...item };
+                    previousStatusMap[id] = statusBaru;
                 });
 
                 isInitialLoad = false;
@@ -825,12 +824,17 @@
                             const item = payload.new;
                             const isoHariIni = getWIBDateString();
                             const id = item.id || (item.sopir + '_' + item.tanggal + '_' + item.delivery_to);
+                            const statusBaru = (item.status || "").toUpperCase();
+                            const statusLama = previousStatusMap[id];
 
                             if (item.tanggal === isoHariIni) {
-                                const oldItem = previousDataMap[id];
-                                checkAndAnnounceDataChanges(item, oldItem);
+                                if (statusBaru.includes("PROSES") && statusLama && !statusLama.includes("PROSES")) {
+                                    announceStatusChange(item, "PROSES");
+                                } else if (statusBaru.includes("DELIVERED") && statusLama && !statusLama.includes("DELIVERED")) {
+                                    announceStatusChange(item, "DELIVERED");
+                                }
                             }
-                            previousDataMap[id] = { ...item };
+                            previousStatusMap[id] = statusBaru;
                         }
                         loadDashboard();
                     }
