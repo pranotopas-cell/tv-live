@@ -389,7 +389,6 @@
     </div>
 
     <audio id="murottalAudio" preload="none"></audio>
-    <audio id="ttsAudioPlayer" preload="auto"></audio>
 
     <script>
         const SUPABASE_URL = 'https://ntaectphgoelmhzrkatp.supabase.co';
@@ -436,7 +435,6 @@
 
         let quoteIndex = 0;
         const audio = document.getElementById('murottalAudio');
-        const ttsAudioPlayer = document.getElementById('ttsAudioPlayer');
 
         const streamSources = [
             "https://live.mp3quran.net/makkah",
@@ -445,10 +443,11 @@
         ];
         let currentSourceIndex = 0;
 
-        let previousStatusMap = {};
+        // Penyimpanan Objek Data Sebelumnya untuk Membandingkan Perubahan
+        let previousDataMap = {};
         let isInitialLoad = true;
         let isAudioAllowed = false;
-        let isAnnouncementEnabled = true; // Status Sakelar Suara Pengumuman
+        let isAnnouncementEnabled = true;
         let isScrolling = false;
         let scrollRequest = null;
         let globalAudioCtx = null;
@@ -463,7 +462,6 @@
                 isAudioAllowed = true;
                 if (modal) modal.style.display = 'none';
 
-                // Buka AudioContext hardware
                 try {
                     const AudioCtx = window.AudioContext || window.webkitAudioContext;
                     if (AudioCtx) {
@@ -472,7 +470,6 @@
                     }
                 } catch(e){}
 
-                // Tes Panggilan Audio
                 playVoiceAnnouncement("Sistem pengumuman suara telah diaktifkan.");
             }
 
@@ -493,7 +490,7 @@
             return `${yyyy}-${mm}-${dd}`;
         }
 
-        // Tone Bel Bandara Synthesizer (100% Bunyi di Hardware Apapun)
+        // Chime Bel Bandara Synthesizer LOKAL (Tidak Perlu Internet)
         function playAirportChime() {
             return new Promise((resolve) => {
                 try {
@@ -533,7 +530,6 @@
             });
         }
 
-        // FUNGSI SAKELAR ON/OFF PENGUMUMAN SUARA
         function toggleAnnouncementSystem() {
             const btn = document.getElementById('announcementBtn');
             const statusLabel = document.getElementById('announcement-status');
@@ -554,28 +550,24 @@
                 statusLabel.style.color = "#ef4444";
 
                 if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-                if (ttsAudioPlayer) ttsAudioPlayer.pause();
             }
         }
 
-        // ENGINE SUARA WEB SPEECH API DENGAN GOOGLE TTS FALLBACK
+        // ENGINE SUARA MURNI LOKAL (Bawaan Browser/OS - Tanpa Tergantung Server Web)
         function playVoiceAnnouncement(text) {
-            // Cek apakah audio diizinkan DAN tombol sakelar pengumuman aktif
             if (!isAudioAllowed || !isAnnouncementEnabled) return;
 
             const originalVolume = audio.volume;
             if (!audio.paused) audio.volume = 0.1;
 
-            // Memutar Chime Pembuka
             playAirportChime().then(() => {
                 if (!isAnnouncementEnabled) return;
 
                 const safetyMessage = ". Utamakan keselamatan kerja dan gunakan APD saat bertugas.";
                 const fullText = text + safetyMessage;
 
-                // OPSI 1: Web Speech API (Paling Stabil di Android TV Browser)
                 if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel(); // Bersihkan antrean
+                    window.speechSynthesis.cancel();
 
                     const utterance = new SpeechSynthesisUtterance(fullText);
                     utterance.lang = 'id-ID';
@@ -588,42 +580,14 @@
                     };
 
                     utterance.onerror = function () {
-                        fallbackGoogleTTS(fullText, originalVolume);
+                        if (!audio.paused) audio.volume = originalVolume;
                     };
 
                     window.speechSynthesis.speak(utterance);
                 } else {
-                    // OPSI 2: Fallback ke Google TTS Stream
-                    fallbackGoogleTTS(fullText, originalVolume);
+                    if (!audio.paused) audio.volume = originalVolume;
                 }
             });
-        }
-
-        function fallbackGoogleTTS(fullText, originalVolume) {
-            if (!isAnnouncementEnabled) return;
-            const googleTtsUrl = "https://translate.google.com/translate_tts?ie=UTF-8&q=" + 
-                                 encodeURIComponent(fullText) + 
-                                 "&tl=id&client=tw-ob";
-            try {
-                ttsAudioPlayer.pause();
-                ttsAudioPlayer.src = googleTtsUrl;
-                ttsAudioPlayer.load();
-
-                let playPromise = ttsAudioPlayer.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        ttsAudioPlayer.onended = async () => {
-                            if (isAnnouncementEnabled) await playAirportChime();
-                            if (!audio.paused) audio.volume = originalVolume;
-                        };
-                    }).catch(async () => {
-                        if (isAnnouncementEnabled) await playAirportChime();
-                        if (!audio.paused) audio.volume = originalVolume;
-                    });
-                }
-            } catch (e) {
-                if (!audio.paused) audio.volume = originalVolume;
-            }
         }
 
         function enableAudioSystem() {
@@ -775,20 +739,46 @@
 
         function getWIB() { return new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" })); }
 
-        function announceStatusChange(item, statusType) {
-            const nopol = item.nopol || 'Tanpa Nopol';
-            const sopir = item.sopir || 'Sopir';
-            const tujuan = item.delivery_to || 'Tujuan';
+        // MENDETEKSI DAN MEMBACA APAPUN DETAIL PERUBAHAN DATA
+        function checkAndAnnounceDataChanges(newItem, oldItem) {
+            const nopol = newItem.nopol || 'Tanpa Nopol';
+            const sopir = newItem.sopir || 'Sopir';
 
-            let teks = "";
-            if (statusType.includes("PROSES")) {
-                teks = `Mohon perhatian, kendaraan nomor polisi ${nopol}. Driver ${sopir}, tujuan ${tujuan}, status PROSES.`;
-            } else if (statusType.includes("DELIVERED")) {
-                teks = `Mohon perhatian, kendaraan nomor polisi ${nopol}. Driver ${sopir}, tujuan ${tujuan}, status DELIVERED.`;
+            if (!oldItem) {
+                // Jika Data Baru Diinput
+                const msg = `Mohon perhatian, terdapat data pengiriman baru. Unit ${nopol}, driver ${sopir}, tujuan ${newItem.delivery_to || '-'}. Status ${newItem.status || '-'}.`;
+                playVoiceAnnouncement(msg);
+                return;
             }
 
-            if (teks) {
-                playVoiceAnnouncement(teks);
+            let changes = [];
+
+            if (oldItem.status !== newItem.status) {
+                changes.push(`status berubah dari ${oldItem.status || 'kosong'} menjadi ${newItem.status || 'kosong'}`);
+            }
+            if (oldItem.lokasi !== newItem.lokasi) {
+                changes.push(`lokasi diperbarui menjadi ${newItem.lokasi || 'kosong'}`);
+            }
+            if (oldItem.sopir !== newItem.sopir) {
+                changes.push(`driver diganti menjadi ${newItem.sopir || 'kosong'}`);
+            }
+            if (oldItem.nopol !== newItem.nopol) {
+                changes.push(`nomor polisi diganti menjadi ${newItem.nopol || 'kosong'}`);
+            }
+            if (oldItem.jumlah_keluar != newItem.jumlah_keluar) {
+                changes.push(`jumlah muatan berubah menjadi ${newItem.jumlah_keluar || '0'}`);
+            }
+            if (oldItem.delivery_to !== newItem.delivery_to) {
+                changes.push(`tujuan pengiriman diubah ke ${newItem.delivery_to || 'kosong'}`);
+            }
+            if (oldItem.supplier !== newItem.supplier) {
+                changes.push(`depo diubah ke ${newItem.supplier || 'kosong'}`);
+            }
+
+            if (changes.length > 0) {
+                const detailPesan = changes.join(", ");
+                const msg = `Mohon perhatian, pembaharuan data untuk unit ${nopol}, driver ${sopir}. Informasi ${detailPesan}.`;
+                playVoiceAnnouncement(msg);
             }
         }
 
@@ -805,20 +795,15 @@
 
                 currentData.forEach(item => {
                     const id = item.id || (item.sopir + '_' + item.tanggal + '_' + item.delivery_to);
-                    const statusBaru = (item.status || "").toUpperCase();
                     const isHariIni = (item.tanggal === isoHariIni);
 
                     if (!isInitialLoad && isHariIni) {
-                        const statusLama = previousStatusMap[id];
-                        
-                        if (statusBaru.includes("PROSES") && statusLama && !statusLama.includes("PROSES")) {
-                            announceStatusChange(item, "PROSES");
-                        }
-                        else if (statusBaru.includes("DELIVERED") && statusLama && !statusLama.includes("DELIVERED")) {
-                            announceStatusChange(item, "DELIVERED");
-                        }
+                        const oldItem = previousDataMap[id];
+                        checkAndAnnounceDataChanges(item, oldItem);
                     }
-                    previousStatusMap[id] = statusBaru;
+                    
+                    // Simpan Snapshot Lengkap Objek Data
+                    previousDataMap[id] = { ...item };
                 });
 
                 isInitialLoad = false;
@@ -840,17 +825,12 @@
                             const item = payload.new;
                             const isoHariIni = getWIBDateString();
                             const id = item.id || (item.sopir + '_' + item.tanggal + '_' + item.delivery_to);
-                            const statusBaru = (item.status || "").toUpperCase();
-                            const statusLama = previousStatusMap[id];
 
                             if (item.tanggal === isoHariIni) {
-                                if (statusBaru.includes("PROSES") && statusLama && !statusLama.includes("PROSES")) {
-                                    announceStatusChange(item, "PROSES");
-                                } else if (statusBaru.includes("DELIVERED") && statusLama && !statusLama.includes("DELIVERED")) {
-                                    announceStatusChange(item, "DELIVERED");
-                                }
+                                const oldItem = previousDataMap[id];
+                                checkAndAnnounceDataChanges(item, oldItem);
                             }
-                            previousStatusMap[id] = statusBaru;
+                            previousDataMap[id] = { ...item };
                         }
                         loadDashboard();
                     }
