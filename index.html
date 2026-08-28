@@ -759,16 +759,32 @@
 
         function getWIB() { return new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" })); }
 
-        function announceStatusChange(item, statusType) {
+        // FUNGSI LOGIKA MEMBACA SEMUA PERUBAHAN STATUS PENGIRIMAN
+        function announceStatusChange(item, statusBaru) {
             const nopol = item.nopol || 'Tanpa Nopol';
             const sopir = item.sopir || 'Sopir';
             const tujuan = item.delivery_to || 'Tujuan';
+            const stUpper = (statusBaru || "").toUpperCase();
 
             let teks = "";
-            if (statusType.includes("PROSES")) {
-                teks = `Mohon perhatian, kendaraan nomor polisi ${nopol}. Driver ${sopir}, tujuan ${tujuan}, status PROSES.`;
-            } else if (statusType.includes("DELIVERED")) {
-                teks = `Mohon perhatian, kendaraan nomor polisi ${nopol}. Driver ${sopir}, tujuan ${tujuan}, status DELIVERED.`;
+            
+            // Logika membaca setiap status perubahan
+            if (stUpper.includes("PROSES")) {
+                teks = `Mohon perhatian, kendaraan nomor polisi ${nopol}. Driver ${sopir}, tujuan ${tujuan}, status PROSES pengiriman.`;
+            } else if (stUpper.includes("DELIVERED")) {
+                teks = `Mohon perhatian, pengiriman unit nomor polisi ${nopol}. Driver ${sopir}, tujuan ${tujuan}, telah selesai dan terkonfirmasi DELIVERED.`;
+            } else if (stUpper.includes("LANGSIR")) {
+                teks = `Informasi, kendaraan nomor polisi ${nopol}. Driver ${sopir}, status LANGSIR.`;
+            } else if (stUpper.includes("OPER")) {
+                teks = `Informasi, kendaraan nomor polisi ${nopol}. Driver ${sopir}, status OPER pengiriman.`;
+            } else if (stUpper.includes("NGISI")) {
+                teks = `Informasi, kendaraan nomor polisi ${nopol}. Driver ${sopir}, status NGISI BBM.`;
+            } else if (stUpper.includes("TUNGGU")) {
+                teks = `Informasi, kendaraan nomor polisi ${nopol}. Driver ${sopir}, status TUNGGU antrean.`;
+            } else if (stUpper.includes("TERJADWAL")) {
+                teks = `Informasi, kendaraan nomor polisi ${nopol}. Driver ${sopir}, status TERJADWAL.`;
+            } else {
+                teks = `Mohon perhatian, kendaraan nomor polisi ${nopol}. Driver ${sopir}, status diperbarui menjadi ${statusBaru}.`;
             }
 
             if (teks) {
@@ -795,11 +811,9 @@
                     if (!isInitialLoad && isHariIni) {
                         const statusLama = previousStatusMap[id];
                         
-                        if (statusBaru.includes("PROSES") && statusLama && !statusLama.includes("PROSES")) {
-                            announceStatusChange(item, "PROSES");
-                        }
-                        else if (statusBaru.includes("DELIVERED") && statusLama && !statusLama.includes("DELIVERED")) {
-                            announceStatusChange(item, "DELIVERED");
+                        // Uji jika terjadi perubahan status dari sebelumnya
+                        if (statusLama && statusLama !== statusBaru) {
+                            announceStatusChange(item, statusBaru);
                         }
                     }
                     previousStatusMap[id] = statusBaru;
@@ -828,10 +842,12 @@
                             const statusLama = previousStatusMap[id];
 
                             if (item.tanggal === isoHariIni) {
-                                if (statusBaru.includes("PROSES") && statusLama && !statusLama.includes("PROSES")) {
-                                    announceStatusChange(item, "PROSES");
-                                } else if (statusBaru.includes("DELIVERED") && statusLama && !statusLama.includes("DELIVERED")) {
-                                    announceStatusChange(item, "DELIVERED");
+                                // Membaca setiap ada perubahan status dari database
+                                if (statusLama && statusLama !== statusBaru) {
+                                    announceStatusChange(item, statusBaru);
+                                } else if (!statusLama) {
+                                    // Pemicu jika ada baris data baru ditambahkan
+                                    announceStatusChange(item, statusBaru);
                                 }
                             }
                             previousStatusMap[id] = statusBaru;
