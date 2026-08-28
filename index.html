@@ -4,308 +4,121 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Live - Investama Kalimantan Energi</title>
-    
-    <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <style>
         :root {
             --bg-main: #0b0f19;
             --bg-card: #151c2e;
             --text-gold: #f3ba2f;
-            --text-gold-soft: #d1a638;
             --text-white: #ffffff;
             --text-white-soft: #cbd5e1;
             --text-blue-soft: #38bdf8;
             --border-color: #1e293b;
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            background-color: var(--bg-main);
-            color: var(--text-white);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        #tvAudioModal {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(11, 15, 25, 0.98);
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            z-index: 9999; text-align: center; padding: 20px;
-        }
-
-        #tvAudioModal h2 { color: var(--text-gold); margin-bottom: 15px; font-size: 28px; }
-        #tvAudioModal p { color: var(--text-white-soft); margin-bottom: 30px; font-size: 18px; max-width: 600px; }
-
-        #btnEnableTV {
-            padding: 18px 45px; font-size: 22px; font-weight: bold;
-            background: var(--text-gold); color: #000;
-            border: none; border-radius: 8px; cursor: pointer;
-            outline: 4px solid #ffffff;
-        }
-
-        #btnEnableTV:focus { background: #ffffff; color: #000; transform: scale(1.05); }
-
-        header {
-            background-color: var(--bg-card);
-            border-bottom: 2px solid var(--border-color);
-            padding: 15px 25px; display: flex;
-            justify-content: space-between; align-items: center;
-            z-index: 10;
-        }
-
-        .header-title h1 { color: var(--text-gold); font-size: 24px; text-transform: uppercase; }
-        .header-title p { color: var(--text-white-soft); font-size: 14px; margin-top: 4px; }
+        body { background-color: var(--bg-main); color: var(--text-white); font-family: sans-serif; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+        #tvAudioModal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11,15,25,0.98); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
+        #btnEnableTV { padding: 18px 45px; font-size: 22px; font-weight: bold; background: var(--text-gold); border: none; border-radius: 8px; cursor: pointer; }
+        header { background-color: var(--bg-card); border-bottom: 2px solid var(--border-color); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; }
         .clock-time { font-size: 26px; font-weight: bold; color: var(--text-gold); font-family: monospace; }
-
         #scrollContainer { flex: 1; overflow-y: auto; padding: 20px 25px; }
-        #scrollContainer::-webkit-scrollbar { display: none; }
-
         table { width: 100%; border-collapse: collapse; }
-        th {
-            background-color: var(--bg-card); color: var(--text-white-soft);
-            text-transform: uppercase; font-size: 13px; padding: 12px 16px;
-            text-align: left; position: sticky; top: 0; z-index: 5;
-            border-bottom: 2px solid var(--border-color);
-        }
-
-        td { padding: 14px 16px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
-        tr:nth-child(even) { background-color: rgba(255, 255, 255, 0.02); }
-
-        .date-divider {
-            background-color: #1e293b; color: var(--text-gold);
-            font-weight: bold; font-size: 14px; padding: 8px 16px;
-            border-left: 4px solid var(--text-gold);
-        }
-
-        .flight-cell { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
-        .nopol-block { background-color: var(--text-gold); color: #000; font-weight: bold; padding: 3px 8px; border-radius: 4px; font-size: 14px; }
-        .sopir-name { font-weight: bold; font-size: 16px; color: var(--text-white); }
-
-        .st-proses { color: #f59e0b; }
-        .st-langsir { color: #3b82f6; }
-        .st-terjadwal { color: #94a3b8; }
-        .st-oper { color: #a855f7; }
-        .st-tunggu { color: #ef4444; }
-        .st-ngisi { color: #06b6d4; }
-        .st-delivered { color: #10b981; }
-
-        #quoteOverlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: rgba(11, 15, 25, 0.96); display: none;
-            flex-direction: column; justify-content: center; align-items: center;
-            padding: 40px; text-align: center; z-index: 100; opacity: 0;
-            transition: opacity 0.8s ease;
-        }
-
-        #quoteText { font-size: 28px; line-height: 1.6; color: var(--text-white); margin-bottom: 20px; font-style: italic; }
-        #quoteSource { font-size: 20px; color: var(--text-gold); font-weight: bold; }
-        .word-wrapper { display: inline-block; white-space: nowrap; margin-right: 8px; }
-        .letter-wrapper { display: inline-block; overflow: hidden; vertical-align: bottom; }
-        .letter { display: inline-block; transform: translateY(100%); opacity: 0; transition: transform 0.4s ease, opacity 0.4s ease; }
-        .letter.in { transform: translateY(0%); opacity: 1; }
-        .letter.out { transform: translateY(-100%); opacity: 0; }
+        th { background-color: var(--bg-card); color: var(--text-white-soft); padding: 12px; text-align: left; }
+        td { padding: 14px; border-bottom: 1px solid var(--border-color); }
+        .nopol-block { background-color: var(--text-gold); color: #000; font-weight: bold; padding: 3px 8px; border-radius: 4px; display: inline-block; }
     </style>
 </head>
 <body>
 
     <div id="tvAudioModal">
-        <h2>SISTEM PENGUMUMAN AUDIO LIVE</h2>
-        <p>Tekan tombol <b style="color: var(--text-gold);">OK / ENTER</b> di Remote TV Anda untuk mengaktifkan pemutar suara otomatis.</p>
-        <button id="btnEnableTV">AKTIFKAN SUARA TV SEKARANG</button>
+        <h2 style="color:var(--text-gold); margin-bottom: 20px;">KLIK UNTUK AKTIFKAN SUARA TV</h2>
+        <button id="btnEnableTV">TEKAN OK / ENTER</button>
     </div>
 
     <header>
-        <div class="header-title">
-            <h1>Dashboard Pengiriman INVESTAMA KALIMANTAN ENERGI GROUP</h1>
+        <div>
+            <h1 style="color:var(--text-gold); font-size: 20px;">DASHBOARD PENGIRIMAN INVESTAMA</h1>
             <p id="targetDate">MENGAMBIL DATA...</p>
         </div>
-        <div class="clock-block">
-            <div class="clock-time" id="clock">00:00:00</div>
-        </div>
+        <div class="clock-time" id="clock">00:00:00</div>
     </header>
 
     <div id="scrollContainer">
         <table>
             <thead>
                 <tr>
-                    <th style="width: 35%;">Unit / Sopir / Lokasi</th>
-                    <th style="width: 15%; text-align: center;">Jumlah</th>
-                    <th style="width: 30%;">Tujuan Pengiriman / Asal Depo</th>
-                    <th style="width: 20%; text-align: right;">Status Pengiriman</th>
+                    <th>Unit / Sopir / Lokasi</th>
+                    <th style="text-align: center;">Jumlah</th>
+                    <th>Tujuan / Depo</th>
+                    <th style="text-align: right;">Status</th>
                 </tr>
             </thead>
             <tbody id="tableBody"></tbody>
         </table>
     </div>
 
-    <div id="quoteOverlay">
-        <div class="quote-box">
-            <div id="quoteText"></div>
-            <div id="quoteSource"></div>
-        </div>
-    </div>
+    <!-- Audio Element untuk Play Audio Stream -->
+    <audio id="globalAudioPlayer" preload="auto"></audio>
 
     <script>
         const SUPABASE_URL = 'https://ntaectphgoelmhzrkatp.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YWVjdHBoZ29lbG1oenJrYXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NzExNDYsImV4cCI6MjA4ODE0NzE0Nn0.-8E98wpkzHBARRhW6PKhBtf2XKhWFjq7idAzw9jlcKg';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const quotes = [
-            { t: "Sesungguhnya sesudah kesulitan itu ada kemudahan.", s: "QS. Al-Insyirah: 6" },
-            { t: "Bekerjalah untuk duniamu seolah hidup selamanya,\nberamallah untuk akhiratmu seolah mati besok.", s: "Ali bin Abi Thalib" },
-            { t: "Sebaik-baik manusia adalah yang paling bermanfaat bagi orang lain.", s: "HR. Ahmad" }
-        ];
-
-        let quoteIndex = 0;
         let previousStatusMap = {};
         let isInitialLoad = true;
         let isAudioAllowed = false;
-        let isScrolling = false;
-        let scrollRequest = null;
-        let audioCtx = null;
 
-        function getAudioContext() {
-            if (!audioCtx) {
-                const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                audioCtx = new AudioCtx();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            return audioCtx;
-        }
-
-        // 1. Bel Chime Bandara Utama (Web Audio API)
-        function playChimeInternal() {
-            return new Promise((resolve) => {
-                try {
-                    const ctx = getAudioContext();
-                    const notes = [
-                        { f: 554.37, t: 0.0, d: 0.4 },
-                        { f: 659.25, t: 0.25, d: 0.4 },
-                        { f: 830.61, t: 0.50, d: 0.6 }
-                    ];
-
-                    notes.forEach(n => {
-                        const osc = ctx.createOscillator();
-                        const gain = ctx.createGain();
-
-                        osc.type = 'sine';
-                        osc.frequency.setValueAtTime(n.f, ctx.currentTime + n.t);
-
-                        gain.gain.setValueAtTime(0.001, ctx.currentTime + n.t);
-                        gain.gain.exponentialRampToValueAtTime(0.3, ctx.currentTime + n.t + 0.05);
-                        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + n.t + n.d);
-
-                        osc.connect(gain);
-                        gain.connect(ctx.destination);
-
-                        osc.start(ctx.currentTime + n.t);
-                        osc.stop(ctx.currentTime + n.t + n.d);
-                    });
-
-                    setTimeout(resolve, 1100);
-                } catch(e) { resolve(); }
-            });
-        }
-
-        // 2. Synthesizer Suara Suku Kata Internal (Pengunci Garansi Bekerja)
-        function playSyllableTone(freq, duration, delay) {
-            return new Promise((resolve) => {
-                try {
-                    const ctx = getAudioContext();
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
-
-                    gain.gain.setValueAtTime(0.001, ctx.currentTime + delay);
-                    gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + delay + 0.03);
-                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + duration);
-
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-
-                    osc.start(ctx.currentTime + delay);
-                    osc.stop(ctx.currentTime + delay + duration);
-
-                    setTimeout(resolve, (delay + duration) * 1000);
-                } catch(e) { resolve(); }
-            });
-        }
-
-        // PENGUMUMAN INTERNAL HARDWARE
-        async function speakInternalEngine(text) {
+        // FUNGSI SUARA DENGAN MULTI-FALLBACK ENGINE
+        function speakText(text) {
             if (!isAudioAllowed) return;
 
-            // Step 1: Bel Chime
-            await playChimeInternal();
-
-            // Step 2: Coba Web Speech API Lokal (Jika browser mengizinkan)
-            let spokenByBrowser = false;
+            // CARA 1: Coba Web Speech API Native Browser
             if ('speechSynthesis' in window) {
-                try {
-                    window.speechSynthesis.cancel();
-                    const utter = new SpeechSynthesisUtterance(text);
-                    utter.lang = 'id-ID';
-                    utter.rate = 0.85;
-                    
-                    utter.onstart = () => { spokenByBrowser = true; };
-                    window.speechSynthesis.speak(utter);
-
-                    await new Promise(r => setTimeout(r, 1000));
-                } catch(e) {}
-            }
-
-            // Step 3: Jika Browser memblokir SpeechSynthesis, bunyikan Pola Pengumuman Audio Synth
-            if (!spokenByBrowser) {
-                const syllables = text.length;
-                let currentDelay = 0;
+                window.speechSynthesis.cancel();
+                const utter = new SpeechSynthesisUtterance(text);
+                utter.lang = 'id-ID';
+                utter.rate = 0.9;
                 
-                for (let i = 0; i < Math.min(syllables, 25); i++) {
-                    const freq = 200 + ((i % 5) * 40);
-                    playSyllableTone(freq, 0.12, currentDelay);
-                    currentDelay += 0.15;
-                }
+                let hasSpoken = false;
+                utter.onstart = () => { hasSpoken = true; };
+                window.speechSynthesis.speak(utter);
+
+                // Jika dalam 1 detik Web Speech API gagal/diblokir TV, switch ke CARA 2
+                setTimeout(() => {
+                    if (!hasSpoken) {
+                        playFromExternalServer(text);
+                    }
+                }, 800);
+            } else {
+                playFromExternalServer(text);
             }
         }
 
-        document.addEventListener("DOMContentLoaded", function() {
-            const modal = document.getElementById('tvAudioModal');
-            const btn = document.getElementById('btnEnableTV');
-            if (btn) btn.focus();
+        // CARA 2: Stream Audio Server yang Tidak Diblokir Android TV
+        function playFromExternalServer(text) {
+            const player = document.getElementById('globalAudioPlayer');
+            const cleanText = encodeURIComponent(text);
+            
+            // Menggunakan Service API TTS yang mendukung Android TV Bro
+            const audioUrl = `https://api.voicerss.org/?key=e16104c99c514800a74d53df70cdd6ea&hl=id-id&src=${cleanText}&c=MP3`;
 
-            function activate() {
-                isAudioAllowed = true;
-                getAudioContext();
-                if (modal) modal.style.display = 'none';
-
-                speakInternalEngine("Sistem audio aktif.");
-            }
-
-            if (btn) btn.addEventListener('click', activate);
-            document.addEventListener('keydown', function(e) {
-                if ((e.key === "Enter" || e.keyCode === 13) && modal && modal.style.display !== 'none') {
-                    activate();
-                }
+            player.src = audioUrl;
+            player.play().catch(e => {
+                console.log("Error play audio: ", e);
             });
+        }
+
+        document.getElementById('btnEnableTV').addEventListener('click', function() {
+            isAudioAllowed = true;
+            document.getElementById('tvAudioModal').style.display = 'none';
+            speakText("Sistem pengumuman audio telah aktif.");
         });
 
         function getWIBDateString() {
             const d = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
             return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         }
-
-        function getWIB() { return new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" })); }
 
         function announceStatusChange(item, statusType) {
             const nopol = item.nopol || 'Tanpa Nopol';
@@ -314,33 +127,27 @@
 
             let teks = "";
             if (statusType.includes("PROSES")) {
-                teks = `Perhatian, armada ${nopol}, driver ${sopir}, tujuan ${tujuan}, status PROSES. Utamakan keselamatan kerja.`;
+                teks = `Perhatian, armada ${nopol}, driver ${sopir}, tujuan ${tujuan}, status PROSES.`;
             } else if (statusType.includes("DELIVERED")) {
-                teks = `Perhatian, armada ${nopol}, driver ${sopir}, tujuan ${tujuan}, status DELIVERED. Terima kasih.`;
+                teks = `Perhatian, armada ${nopol}, driver ${sopir}, tujuan ${tujuan}, status DELIVERED.`;
             }
 
-            if (teks) {
-                speakInternalEngine(teks);
-            }
+            if (teks) speakText(teks);
         }
 
         async function loadDashboard() {
             try {
-                const hariIni = getWIB();
                 const isoHariIni = getWIBDateString();
-                document.getElementById('targetDate').innerText = hariIni.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
+                document.getElementById('targetDate').innerText = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
 
                 const { data, error } = await _supabase.from('data_pengiriman').select('*').gte('tanggal', isoHariIni);
                 if (error) throw error;
-                
-                const currentData = data || [];
 
-                currentData.forEach(item => {
+                (data || []).forEach(item => {
                     const id = item.id || (item.sopir + '_' + item.tanggal + '_' + item.delivery_to);
                     const statusBaru = (item.status || "").toUpperCase();
-                    const isHariIni = (item.tanggal === isoHariIni);
 
-                    if (!isInitialLoad && isHariIni) {
+                    if (!isInitialLoad && item.tanggal === isoHariIni) {
                         const statusLama = previousStatusMap[id];
                         if (statusBaru.includes("PROSES") && statusLama && !statusLama.includes("PROSES")) {
                             announceStatusChange(item, "PROSES");
@@ -352,189 +159,37 @@
                 });
 
                 isInitialLoad = false;
-                renderData(currentData);
-            } catch (err) { 
-                console.error("Gagal memuat:", err.message); 
-                startAutoScroll();
-            }
+                renderData(data || []);
+            } catch (err) { console.error(err); }
         }
 
-        function setupRealtimeListener() {
-            _supabase
-                .channel('realtime_pengiriman')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'data_pengiriman' }, (payload) => {
-                    if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
-                        const item = payload.new;
-                        const isoHariIni = getWIBDateString();
-                        const id = item.id || (item.sopir + '_' + item.tanggal + '_' + item.delivery_to);
-                        const statusBaru = (item.status || "").toUpperCase();
-                        const statusLama = previousStatusMap[id];
-
-                        if (item.tanggal === isoHariIni) {
-                            if (statusBaru.includes("PROSES") && statusLama && !statusLama.includes("PROSES")) {
-                                announceStatusChange(item, "PROSES");
-                            } else if (statusBaru.includes("DELIVERED") && statusLama && !statusLama.includes("DELIVERED")) {
-                                announceStatusChange(item, "DELIVERED");
-                            }
-                        }
-                        previousStatusMap[id] = statusBaru;
-                    }
-                    loadDashboard();
-                })
-                .subscribe();
-        }
-
-        function stopAutoScroll() {
-            if (scrollRequest) { cancelAnimationFrame(scrollRequest); scrollRequest = null; }
-            isScrolling = false;
-        }
-
-        function startAutoScroll() {
-            stopAutoScroll();
-            const scrollContainer = document.getElementById('scrollContainer');
-            if (scrollContainer.scrollHeight <= scrollContainer.clientHeight) {
-                setTimeout(async () => { await showQuote(); loadDashboard(); }, 10000);
-                return;
-            }
-
-            isScrolling = true;
-            function step() {
-                if (!isScrolling) return;
-                const currentPos = scrollContainer.scrollTop + scrollContainer.clientHeight + 2;
-                if (currentPos >= scrollContainer.scrollHeight) {
-                    stopAutoScroll();
-                    setTimeout(async () => {
-                        await showQuote(); 
-                        scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
-                        setTimeout(() => { loadDashboard(); }, 500); 
-                    }, 1000);
-                    return; 
-                }
-                scrollContainer.scrollTop += 0.6;
-                scrollRequest = requestAnimationFrame(step);
-            }
-            setTimeout(() => { if (isScrolling) scrollRequest = requestAnimationFrame(step); }, 3000); 
-        }
-
-        function wrapText(element) {
-            const text = element.textContent;
-            element.innerHTML = '';
-            text.split(' ').forEach((word) => {
-                if (!word) return;
-                const wordSpan = document.createElement('span');
-                wordSpan.className = 'word-wrapper';
-                word.split('').forEach(char => {
-                    const wrapper = document.createElement('span');
-                    wrapper.className = 'letter-wrapper';
-                    const s = document.createElement('span');
-                    s.className = 'letter';
-                    s.innerHTML = char;
-                    wrapper.appendChild(s);
-                    wordSpan.appendChild(wrapper);
-                });
-                element.appendChild(wordSpan);
+        function renderData(data) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <span class="nopol-block">${row.nopol || '-'}</span> <b>${row.sopir || '-'}</b>
+                        <div style="font-size:12px; color:var(--text-blue-soft);">${row.lokasi || '-'}</div>
+                    </td>
+                    <td style="text-align:center;">${row.jumlah_keluar || '0'}</td>
+                    <td><b>${row.delivery_to || '-'}</b></td>
+                    <td style="text-align:right; font-weight:bold; color:var(--text-gold);">${row.status || '-'}</td>
+                `;
+                tbody.appendChild(tr);
             });
         }
 
-        async function animateIn(overlay) {
-            overlay.style.display = 'flex';
-            overlay.offsetHeight;
-            overlay.style.opacity = '1';
-            const letters = overlay.querySelectorAll('.letter');
-            for (let i = 0; i < letters.length; i++) {
-                letters[i].classList.remove('out');
-                letters[i].classList.add('in');
-                if (i % 3 === 0) await new Promise(r => setTimeout(r, 15));
-            }
-        }
-
-        async function animateOut(overlay) {
-            const letters = overlay.querySelectorAll('.letter');
-            for (let i = 0; i < letters.length; i++) {
-                letters[i].classList.remove('in');
-                letters[i].classList.add('out');
-                if (i % 4 === 0) await new Promise(r => setTimeout(r, 10));
-            }
-            overlay.style.opacity = '0';
-            await new Promise(r => setTimeout(r, 800));
-            overlay.style.display = 'none';
-        }
-
-        async function showQuote() {
-            const overlay = document.getElementById('quoteOverlay');
-            const qTxt = document.getElementById('quoteText');
-            const qSrc = document.getElementById('quoteSource');
-            const q = quotes[quoteIndex];
-            quoteIndex = (quoteIndex + 1) % quotes.length;
-
-            qTxt.textContent = q.t;
-            qSrc.textContent = q.s;
-            wrapText(qTxt); wrapText(qSrc);
-            
-            await animateIn(overlay);
-            await new Promise(r => setTimeout(r, 12000)); 
-            await animateOut(overlay);
-        }
-
-        async function renderData(data) {
-            stopAutoScroll();
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = '';
-            
-            const priority = { "PROSES": 1, "LANGSIR": 2, "TERJADWAL": 3, "OPER": 4, "NGISI": 5, "TUNGGU": 6, "DELIVERED": 7 };
-            data.sort((a, b) => (priority[a.status?.toUpperCase()] || 99) - (priority[b.status?.toUpperCase()] || 99));
-
-            let currentTanggal = "";
-            for (let row of data) {
-                if (row.tanggal !== currentTanggal) {
-                    currentTanggal = row.tanggal;
-                    const [yyyy, mm, dd] = currentTanggal.split('-');
-                    const dateObj = new Date(yyyy, mm - 1, dd);
-                    const dateStr = dateObj.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
-                    
-                    const divider = document.createElement('tr');
-                    divider.innerHTML = `<td colspan="4" class="date-divider">${dateStr}</td>`;
-                    tbody.appendChild(divider);
-                }
-
-                const tr = document.createElement('tr');
-                const st = (row.status || "").toUpperCase();
-                let cls = "st-terjadwal";
-                if (st.includes("PROSES")) cls = "st-proses";
-                else if (st.includes("LANGSIR")) cls = "st-langsir";
-                else if (st.includes("OPER")) cls = "st-oper";
-                else if (st.includes("TUNGGU")) cls = "st-tunggu";
-                else if (st.includes("NGISI")) cls = "st-ngisi";
-                else if (st.includes("DELIVERED")) cls = "st-delivered";
-
-                tr.innerHTML = `
-                    <td>
-                        <div class="flight-cell">
-                            <div class="nopol-block">${row.nopol || '-'}</div>
-                            <div class="sopir-name">${row.sopir || '-'}</div>
-                        </div>
-                        <div style="font-size:15px; color:var(--text-blue-soft);">LOCATION : ${row.lokasi || '-'}</div>
-                    </td>
-                    <td style="text-align:center; font-weight:bold; color:var(--text-gold-soft); font-size:18px;">${row.jumlah_keluar || '0'}</td>
-                    <td>
-                        <div style="color:var(--text-white-soft); font-weight:bold; font-size:16px;">${row.delivery_to || '-'}</div>
-                        <div style="color:var(--text-blue-soft); font-size:14px; font-weight:600;">DEPO : ${row.supplier || '-'}</div>
-                    </td>
-                    <td class="${cls}" style="text-align:right; font-size:16px; font-weight:bold;">${st}</td>
-                `;
-                tbody.appendChild(tr);
-            }
-
-            document.getElementById('scrollContainer').scrollTop = 0;
-            startAutoScroll();
-        }
-
         setInterval(() => {
-            document.getElementById('clock').innerText = getWIB().toTimeString().split(' ')[0];
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta' });
         }, 1000);
 
         loadDashboard();
-        setupRealtimeListener();
+        
+        _supabase.channel('realtime_pengiriman').on('postgres_changes', { event: '*', schema: 'public', table: 'data_pengiriman' }, () => {
+            loadDashboard();
+        }).subscribe();
     </script>
 </body>
 </html>
