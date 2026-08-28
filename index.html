@@ -448,7 +448,6 @@
                 isAudioAllowed = true;
                 if (modal) modal.style.display = 'none';
 
-                // Buka AudioContext hardware
                 try {
                     const AudioCtx = window.AudioContext || window.webkitAudioContext;
                     if (AudioCtx) {
@@ -457,7 +456,6 @@
                     }
                 } catch(e){}
 
-                // Tes Panggilan Audio
                 playVoiceAnnouncement("Sistem pengumuman suara telah diaktifkan.");
             }
 
@@ -478,7 +476,7 @@
             return `${yyyy}-${mm}-${dd}`;
         }
 
-        // Tone Bel Bandara Synthesizer (100% Bunyi di Hardware Apapun)
+        // Tone Bel Bandara Synthesizer (Chime Ding-Dong)
         function playAirportChime() {
             return new Promise((resolve) => {
                 try {
@@ -518,68 +516,44 @@
             });
         }
 
-        // ENGINE SUARA WEB SPEECH API DENGAN GOOGLE TTS FALLBACK
+        // ENGINE SUARA AUDIO STREAMING ONLINE (BISA DI TV BRO & SEMUA BROWSER TV)
         function playVoiceAnnouncement(text) {
             if (!isAudioAllowed) return;
 
             const originalVolume = audio.volume;
             if (!audio.paused) audio.volume = 0.1;
 
-            // Memutar Chime Pembuka
+            // Memutar Bel Chime Pembuka
             playAirportChime().then(() => {
                 const safetyMessage = ". Utamakan keselamatan kerja dan gunakan APD saat bertugas.";
                 const fullText = text + safetyMessage;
 
-                // OPSI 1: Web Speech API (Paling Stabil di Android TV Browser)
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel(); // Bersihkan antrean
+                // Memakai API Voice RSS (Suara Bahasa Indonesia Terjamin Diputar Sebagai Stream MP3)
+                const apiKey = "c3f8e56149954a2ab462c1bd7bd4b360";
+                const ttsUrl = `https://api.voicerss.org/?key=${apiKey}&hl=id-id&c=MP3&f=16khz_16bit_mono&src=${encodeURIComponent(fullText)}`;
 
-                    const utterance = new SpeechSynthesisUtterance(fullText);
-                    utterance.lang = 'id-ID';
-                    utterance.rate = 0.85;
-                    utterance.pitch = 1.0;
+                try {
+                    ttsAudioPlayer.pause();
+                    ttsAudioPlayer.src = ttsUrl;
+                    ttsAudioPlayer.load();
 
-                    utterance.onend = async function () {
-                        await playAirportChime();
-                        if (!audio.paused) audio.volume = originalVolume;
-                    };
-
-                    utterance.onerror = function () {
-                        fallbackGoogleTTS(fullText, originalVolume);
-                    };
-
-                    window.speechSynthesis.speak(utterance);
-                } else {
-                    // OPSI 2: Fallback ke Google TTS Stream
-                    fallbackGoogleTTS(fullText, originalVolume);
-                }
-            });
-        }
-
-        function fallbackGoogleTTS(fullText, originalVolume) {
-            const googleTtsUrl = "https://translate.google.com/translate_tts?ie=UTF-8&q=" + 
-                                 encodeURIComponent(fullText) + 
-                                 "&tl=id&client=tw-ob";
-            try {
-                ttsAudioPlayer.pause();
-                ttsAudioPlayer.src = googleTtsUrl;
-                ttsAudioPlayer.load();
-
-                let playPromise = ttsAudioPlayer.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        ttsAudioPlayer.onended = async () => {
+                    let playPromise = ttsAudioPlayer.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            ttsAudioPlayer.onended = async () => {
+                                await playAirportChime();
+                                if (!audio.paused) audio.volume = originalVolume;
+                            };
+                        }).catch(async (e) => {
+                            console.error("Gagal pemutaran TTS:", e);
                             await playAirportChime();
                             if (!audio.paused) audio.volume = originalVolume;
-                        };
-                    }).catch(async () => {
-                        await playAirportChime();
-                        if (!audio.paused) audio.volume = originalVolume;
-                    });
+                        });
+                    }
+                } catch (e) {
+                    if (!audio.paused) audio.volume = originalVolume;
                 }
-            } catch (e) {
-                if (!audio.paused) audio.volume = originalVolume;
-            }
+            });
         }
 
         function enableAudioSystem() {
