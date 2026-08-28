@@ -441,20 +441,20 @@
             const modal = document.getElementById('tvAudioModal');
             const btn = document.getElementById('btnEnableTV');
             
-            // Auto Focus tombol untuk Remote Control TV
             if (btn) btn.focus();
 
             function activateAudio() {
                 isAudioAllowed = true;
                 if (modal) modal.style.display = 'none';
 
-                // Buka/Aktivkan AudioContext & TTS Engine TV
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.getVoices();
-                    window.speechSynthesis.resume();
+                // Buka/Aktivkan AudioContext
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) {
+                    const ctx = new AudioCtx();
+                    ctx.resume();
                 }
 
-                // Pengujian Suara Pertama Kali
+                // Pengujian Suara Pertama Kali via External Stream API
                 playVoiceAnnouncement("Sistem pengumuman suara telah berhasil diaktifkan.");
             }
 
@@ -527,16 +527,9 @@
             });
         }
 
+        // Fungsi Suara Pengumuman Otomatis Menggunakan Audio Stream (Penanganan Masalah Android TV)
         async function playVoiceAnnouncement(text) {
             if (!isAudioAllowed) return;
-
-            // Fitur Pemulihan Bug Web Speech API (Freeze/Pause) Android TV
-            if ('speechSynthesis' in window) {
-                if (window.speechSynthesis.paused || window.speechSynthesis.pending) {
-                    window.speechSynthesis.cancel();
-                    window.speechSynthesis.resume();
-                }
-            }
 
             const originalVolume = audio.volume;
             if (!audio.paused) audio.volume = 0.1;
@@ -552,67 +545,46 @@
                 if (!audio.paused) audio.volume = originalVolume;
             };
 
-            // Implementasi Native TTS Browser & TV
-            const speakNative = () => {
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel();
-                    
-                    const msg = new SpeechSynthesisUtterance(fullText);
-                    msg.lang = 'id-ID';
-                    msg.rate = 0.85; // Diperlambat sedikit untuk kejelasan speaker TV
-                    msg.pitch = 1;
-
-                    const voices = window.speechSynthesis.getVoices();
-                    const idVoice = voices.find(v => v.lang.includes('id') || v.lang.includes('ID'));
-                    if (idVoice) msg.voice = idVoice;
-
-                    msg.onend = finishAnnouncement;
-                    msg.onerror = (e) => {
-                        console.error("Native Speech Error:", e);
-                        finishAnnouncement();
-                    };
-
-                    window.speechSynthesis.speak(msg);
-
-                    // Pemulihan otomatis jika WebView TV menahan giliran pemutaran
-                    setTimeout(() => {
-                        if (window.speechSynthesis.speaking && window.speechSynthesis.paused) {
-                            window.speechSynthesis.resume();
-                        }
-                    }, 500);
-
-                } else {
+            // Memecah teks ke potongan kecil agar URL Google TTS tidak terpotong
+            const chunks = fullText.match(/.{1,180}(?:\s|$)/g) || [fullText];
+            
+            const playAudioChunk = (index) => {
+                if (index >= chunks.length) {
                     finishAnnouncement();
+                    return;
                 }
+
+                const encodedText = encodeURIComponent(chunks[index]);
+                const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=id&client=tw-ob`;
+                
+                const ttsAudio = new Audio(ttsUrl);
+                ttsAudio.play().then(() => {
+                    ttsAudio.onended = () => {
+                        playAudioChunk(index + 1);
+                    };
+                }).catch((err) => {
+                    console.warn("Gagal memainkan Google TTS Stream, mencoba ResponsiveVoice fallback:", err);
+                    if (window.responsiveVoice && typeof responsiveVoice.speak === 'function') {
+                        responsiveVoice.speak(fullText, "Indonesian Female", {
+                            pitch: 1,
+                            rate: 0.85,
+                            volume: 1,
+                            onend: finishAnnouncement,
+                            onerror: finishAnnouncement
+                        });
+                    } else {
+                        finishAnnouncement();
+                    }
+                });
             };
 
-            // Mencoba ResponsiveVoice, beralih ke Native jika terjadi kendala
-            if (window.responsiveVoice && typeof responsiveVoice.speak === 'function') {
-                try {
-                    responsiveVoice.speak(fullText, "Indonesian Female", {
-                        pitch: 1,
-                        rate: 0.85,
-                        volume: 1,
-                        onend: finishAnnouncement,
-                        onerror: speakNative
-                    });
-                } catch (e) {
-                    speakNative();
-                }
-            } else {
-                speakNative();
-            }
+            playAudioChunk(0);
         }
 
         function enableAudioSystem() {
             isAudioAllowed = true;
             document.getElementById('audioEnableBanner').style.display = 'none';
             document.getElementById('tvAudioModal').style.display = 'none';
-            
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.getVoices();
-                window.speechSynthesis.resume();
-            }
             
             playVoiceAnnouncement("Sistem pengumuman suara telah aktif.");
         }
