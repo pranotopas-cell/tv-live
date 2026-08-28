@@ -3,131 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Pengiriman Live</title>
-    
-    <!-- Supabase & ResponsiveVoice CDN -->
+    <title>Dashboard Pengiriman - Android TV</title>
+    <!-- Supabase Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://code.responsivevoice.org/responsivevoice.js?key=FREE_KEY"></script>
+    <!-- ResponsiveVoice untuk TTS Opsional -->
+    <script src="https://code.responsivevoice.org/responsivevoice.js?key=YOUR_KEY"></script>
 
     <style>
         :root {
-            --bg-main: #0b0f19;
-            --bg-card: #151c2e;
-            --text-gold: #f3ba2f;
-            --text-gold-soft: #d1a638;
-            --text-white: #ffffff;
-            --text-white-soft: #cbd5e1;
-            --text-blue-soft: #38bdf8;
-            --border-color: #1e293b;
+            --bg-color: #0b0f19;
+            --card-bg: rgba(17, 24, 39, 0.7);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-muted: #9ca3af;
+            --text-blue-soft: #93c5fd;
+            --text-gold-soft: #fde047;
+            --text-white-soft: #f3f4f6;
+            --accent-glow: rgba(59, 130, 246, 0.5);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background-color: var(--bg-main);
-            color: var(--text-white);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden;
+            background-color: var(--bg-color);
+            color: var(--text-main);
             height: 100vh;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
         }
 
-        /* Header Layout */
+        /* Banner Aktivasi Audio Pertama Kali */
+        #audioEnableBanner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(11, 15, 25, 0.95);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #audioEnableBanner h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #60a5fa;
+        }
+
+        #audioEnableBanner p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            max-width: 600px;
+        }
+
+        #audioEnableBanner button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 0 20px var(--accent-glow);
+            transition: background 0.3s;
+        }
+
+        #audioEnableBanner button:hover {
+            background: #1d4ed8;
+        }
+
+        /* Header Dashboard */
         header {
-            background-color: var(--bg-card);
-            border-bottom: 2px solid var(--border-color);
-            padding: 15px 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 10;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            padding: 20px 40px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
         }
 
         .header-title h1 {
-            color: var(--text-gold);
-            font-size: 24px;
+            font-size: 1.8rem;
             letter-spacing: 1px;
-            text-transform: uppercase;
         }
 
         .header-title p {
-            color: var(--text-white-soft);
-            font-size: 14px;
-            margin-top: 4px;
+            font-size: 1rem;
+            color: var(--text-muted);
         }
 
-        .header-controls {
+        .header-right {
             display: flex;
             align-items: center;
             gap: 20px;
         }
 
-        .clock-block {
-            text-align: right;
-        }
-
-        .clock-time {
-            font-size: 26px;
+        #clock {
+            font-size: 2rem;
             font-weight: bold;
-            color: var(--text-gold);
-            font-family: monospace;
+            color: var(--text-gold-soft);
         }
 
-        .audio-control {
+        .audio-ctrl {
             display: flex;
             align-items: center;
             gap: 10px;
-            background: rgba(255,255,255,0.05);
-            padding: 6px 12px;
-            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 8px 15px;
+            border-radius: 6px;
             border: 1px solid var(--border-color);
         }
 
-        .audio-btn {
-            background: var(--text-gold);
+        .audio-ctrl button {
+            background: transparent;
             border: none;
-            color: #000;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
+            color: white;
+            font-size: 1.2rem;
             cursor: pointer;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
-        /* Banner Suara */
-        #audioEnableBanner {
-            background-color: var(--text-gold);
-            color: #000;
-            text-align: center;
-            padding: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            z-index: 20;
-        }
-
-        /* Scroll Area & Table */
-        #scrollContainer {
+        /* Container Utama Tabel */
+        .main-container {
             flex: 1;
             overflow-y: auto;
-            padding: 20px 25px;
+            padding: 20px 40px;
             scroll-behavior: smooth;
-        }
-
-        #scrollContainer::-webkit-scrollbar {
-            display: none;
-        }
-        #scrollContainer {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
         }
 
         table {
@@ -136,188 +149,168 @@
         }
 
         th {
-            background-color: var(--bg-card);
-            color: var(--text-white-soft);
+            background: rgba(30, 41, 59, 0.8);
+            color: var(--text-muted);
             text-transform: uppercase;
-            font-size: 13px;
+            font-size: 0.9rem;
             letter-spacing: 1px;
-            padding: 12px 16px;
+            padding: 15px;
             text-align: left;
-            position: sticky;
-            top: 0;
-            z-index: 5;
             border-bottom: 2px solid var(--border-color);
         }
 
         td {
-            padding: 14px 16px;
+            padding: 15px;
             border-bottom: 1px solid var(--border-color);
-            vertical-align: middle;
-        }
-
-        tr:nth-child(even) {
-            background-color: rgba(255, 255, 255, 0.02);
+            background: var(--card-bg);
         }
 
         .date-divider {
-            background-color: #1e293b;
-            color: var(--text-gold);
+            background: transparent !important;
+            color: var(--text-gold-soft);
             font-weight: bold;
-            font-size: 14px;
+            font-size: 1.1rem;
+            padding-top: 25px !important;
+            padding-bottom: 10px !important;
+            border: none !important;
             letter-spacing: 1px;
-            padding: 8px 16px;
-            border-left: 4px solid var(--text-gold);
         }
 
         .flight-cell {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 4px;
+            gap: 15px;
+            margin-bottom: 5px;
         }
 
         .nopol-block {
-            background-color: var(--text-gold);
-            color: #000;
-            font-weight: bold;
-            padding: 3px 8px;
+            background: #1e3a8a;
+            color: #93c5fd;
+            padding: 4px 10px;
             border-radius: 4px;
-            font-size: 14px;
+            font-weight: bold;
+            font-size: 1rem;
+            letter-spacing: 1px;
         }
 
         .sopir-name {
+            font-size: 1.2rem;
             font-weight: bold;
-            font-size: 16px;
-            color: var(--text-white);
+            color: var(--text-white-soft);
         }
 
-        /* Status Colors */
-        .st-proses { color: #f59e0b; }
-        .st-langsir { color: #3b82f6; }
+        /* Status Badges */
+        .st-proses { color: #facc15; }
+        .st-langsir { color: #38bdf8; }
         .st-terjadwal { color: #94a3b8; }
-        .st-oper { color: #a855f7; }
-        .st-tunggu { color: #ef4444; }
-        .st-ngisi { color: #06b6d4; }
-        .st-delivered { color: #10b981; }
+        .st-oper { color: #fb923c; }
+        .st-ngisi { color: #c084fc; }
+        .st-tunggu { color: #f87171; }
+        .st-delivered { color: #4ade80; }
 
-        /* Quote Overlay Animation */
+        /* Quotes Overlay */
         #quoteOverlay {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: rgba(11, 15, 25, 0.96);
+            width: 100%;
+            height: 100%;
+            background: rgba(11, 15, 25, 0.96);
+            z-index: 999;
             display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 40px;
             text-align: center;
-            z-index: 100;
+            padding: 40px;
             opacity: 0;
             transition: opacity 0.8s ease;
         }
 
-        .quote-box {
-            max-width: 800px;
+        .quote-content {
+            max-width: 900px;
         }
 
-        #quoteText {
-            font-size: 28px;
-            line-height: 1.6;
-            color: var(--text-white);
+        .quote-text {
+            font-size: 2.2rem;
+            line-height: 1.5;
+            color: var(--text-white-soft);
             margin-bottom: 20px;
             font-style: italic;
         }
 
-        #quoteSource {
-            font-size: 20px;
-            color: var(--text-gold);
-            font-weight: bold;
+        .quote-source {
+            font-size: 1.3rem;
+            color: var(--text-gold-soft);
+            letter-spacing: 2px;
         }
 
-        .word-wrapper {
-            display: inline-block;
-            white-space: nowrap;
-            margin-right: 8px;
-        }
-
-        .letter-wrapper {
-            display: inline-block;
-            overflow: hidden;
-            vertical-align: bottom;
-        }
-
+        /* Animasi Surat/Huruf */
+        .word-wrapper { display: inline-block; white-space: nowrap; margin-right: 0.3em; }
+        .letter-wrapper { display: inline-block; overflow: hidden; }
         .letter {
             display: inline-block;
             transform: translateY(100%);
             opacity: 0;
-            transition: transform 0.4s cubic-bezier(0.1, 0.7, 0.1, 1), opacity 0.4s ease;
+            transition: transform 0.4s ease, opacity 0.4s ease;
         }
-
-        .letter.in {
-            transform: translateY(0%);
-            opacity: 1;
-        }
-
-        .letter.out {
-            transform: translateY(-100%);
-            opacity: 0;
-        }
+        .letter.in { transform: translateY(0%); opacity: 1; }
+        .letter.out { transform: translateY(-100%); opacity: 0; }
     </style>
 </head>
 <body>
 
-    <!-- Audio Enable Banner -->
-    <div id="audioEnableBanner" onclick="enableAudioSystem()">
-        🔊 Klik di sini untuk mengaktifkan Fitur Suara Pengumuman
+    <!-- Banner Interaksi Pertama (Wajib untuk Autoplay Audio & TTS di TV/Browser) -->
+    <div id="audioEnableBanner">
+        <h1>DASHBOARD PENGIRIMAN</h1>
+        <p>Tekan tombol di bawah untuk mengaktifkan sistem suara pengumuman dan murottal secara otomatis.</p>
+        <button onclick="enableAudioSystem()">MULAI DASHBOARD</button>
     </div>
 
-    <!-- Header Section -->
+    <!-- Header -->
     <header>
         <div class="header-title">
-            <h1>Dashboard Pengiriman</h1>
-            <p id="targetDate">MENGAMBIL DATA...</p>
+            <h1 id="targetDate">MEMUAT TANGGAL...</h1>
+            <p>Sistem Pemantauan Pengiriman Real-Time</p>
         </div>
-        <div class="header-controls">
-            <div class="audio-control">
-                <button class="audio-btn" id="playPauseBtn" onclick="toggleAudio()">▶</button>
-                <span id="audio-status" style="font-size: 12px; font-weight: bold;">BERHENTI</span>
+        <div class="header-right">
+            <div class="audio-ctrl">
+                <span id="audio-status" style="font-size:0.9rem; color:var(--text-muted)">BERHENTI</span>
+                <button id="playPauseBtn" onclick="toggleAudio()">▶</button>
             </div>
-            <div class="clock-block">
-                <div class="clock-time" id="clock">00:00:00</div>
-            </div>
+            <div id="clock">00:00:00</div>
         </div>
     </header>
 
-    <!-- Table & Scroll Container -->
-    <div id="scrollContainer">
+    <!-- Main Content Table -->
+    <div class="main-container" id="scrollContainer">
         <table>
             <thead>
                 <tr>
-                    <th style="width: 35%;">Armada / Driver</th>
-                    <th style="width: 15%; text-align: center;">Jumlah</th>
-                    <th style="width: 30%;">Tujuan / Depo</th>
-                    <th style="width: 20%; text-align: right;">Status</th>
+                    <th style="width: 40%;">ARMADA / SOPIR / LOKASI</th>
+                    <th style="width: 15%; text-align: center;">JUMLAH</th>
+                    <th style="width: 30%;">TUJUAN / DEPO</th>
+                    <th style="width: 15%; text-align: right;">STATUS</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
-                <!-- Data dari Supabase -->
+                <!-- Data dimasukkan secara dinamis lewat JS -->
             </tbody>
         </table>
     </div>
 
     <!-- Quote Overlay -->
     <div id="quoteOverlay">
-        <div class="quote-box">
-            <div id="quoteText"></div>
-            <div id="quoteSource"></div>
+        <div class="quote-content">
+            <div class="quote-text" id="quoteText"></div>
+            <div class="quote-source" id="quoteSource"></div>
         </div>
     </div>
 
-    <audio id="murottalAudio" crossorigin="anonymous"></audio>
+    <!-- Audio Element untuk Murottal/Radio Stream -->
+    <audio id="murottalAudio" preload="none"></audio>
 
+    <!-- JavaScript Logika & Perbaikan Artikulasinya -->
     <script>
         const SUPABASE_URL = 'https://ntaectphgoelmhzrkatp.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YWVjdHBoZ29lbG1oenJrYXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NzExNDYsImV4cCI6MjA4ODE0NzE0Nn0.-8E98wpkzHBARRhW6PKhBtf2XKhWFjq7idAzw9jlcKg';
@@ -397,6 +390,18 @@
             });
         }
 
+        // Format teks agar artikulasi Speech Synthesis jelas di Android TV
+        function formatTextForSpeech(text) {
+            if (!text) return "";
+            return text
+                .toString()
+                .trim()
+                .replace(/-/g, " ")
+                .replace(/_/g, " ")
+                .replace(/\s+/g, " ");
+        }
+
+        // Fungsi Pengumuman Suara Terbaca Jelas & Teroptimasi
         async function playVoiceAnnouncement(text) {
             if (!isAudioAllowed) return;
 
@@ -405,27 +410,38 @@
 
             await playAirportChime();
 
-            // Pesan keselamatan full Bahasa Indonesia
+            const cleanText = formatTextForSpeech(text);
             const safetyMessage = " Tetap jaga kualitas dan kuantitas, serta selalu utamakan penggunaan alat pelindung diri atau keselamatan kerja.";
-            const fullText = text + safetyMessage;
+            const fullText = cleanText + safetyMessage;
 
+            // Fallback Web Speech API dengan pemilihan Voice Engine terbaik untuk Android TV
             const speakFallback = () => {
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel();
-                    const msg = new SpeechSynthesisUtterance(fullText);
-                    msg.lang = 'id-ID';
-                    msg.rate = 0.9;
-                    msg.onend = () => { if (!audio.paused) audio.volume = originalVolume; };
-                    msg.onerror = () => { if (!audio.paused) audio.volume = originalVolume; };
-                    window.speechSynthesis.speak(msg);
+                if (!('speechSynthesis' in window)) return;
+
+                window.speechSynthesis.cancel();
+                const msg = new SpeechSynthesisUtterance(fullText);
+                msg.lang = 'id-ID';
+                msg.rate = 0.85; // Dipelankan agar artikulasi kata di Android TV lebih jelas
+                msg.pitch = 1.0;
+
+                const voices = window.speechSynthesis.getVoices();
+                const bestVoice = voices.find(v => v.lang.includes('id') && (v.name.includes('Google') || v.name.includes('Indonesian') || v.name.includes('Android')));
+                
+                if (bestVoice) {
+                    msg.voice = bestVoice;
                 }
+
+                msg.onend = () => { if (!audio.paused) audio.volume = originalVolume; };
+                msg.onerror = () => { if (!audio.paused) audio.volume = originalVolume; };
+
+                window.speechSynthesis.speak(msg);
             };
 
             if (window.responsiveVoice && typeof responsiveVoice.speak === 'function') {
                 try {
                     responsiveVoice.speak(fullText, "Indonesian Female", {
                         pitch: 1,
-                        rate: 0.9,
+                        rate: 0.85,
                         volume: 1,
                         onend: () => { if (!audio.paused) audio.volume = originalVolume; },
                         onerror: () => speakFallback()
@@ -438,9 +454,20 @@
             }
         }
 
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                window.speechSynthesis.getVoices();
+            };
+        }
+
         function enableAudioSystem() {
             isAudioAllowed = true;
             document.getElementById('audioEnableBanner').style.display = 'none';
+            
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.getVoices();
+            }
+            
             playVoiceAnnouncement("Sistem pengumuman suara telah aktif.");
         }
 
@@ -586,11 +613,12 @@
 
         function getWIB() { return new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" })); }
 
-        // Fungsi Pengumuman Suara untuk SEMUA perubahan status
         function announceStatusChange(item, statusBaru) {
-            const sopir = item.sopir || 'Pengemudi';
-            const tujuan = item.delivery_to || 'Tujuan';
-            const teks = `Pemberitahuan. Driver ${sopir}, tujuan ${tujuan}, status ${statusBaru}.`;
+            const sopir = formatTextForSpeech(item.sopir || 'Pengemudi');
+            const tujuan = formatTextForSpeech(item.delivery_to || 'Tujuan');
+            const status = formatTextForSpeech(statusBaru);
+            
+            const teks = `Pemberitahuan. Pengemudi ${sopir}, dengan tujuan ${tujuan}, status pengiriman saat ini ${status}.`;
             playVoiceAnnouncement(teks);
         }
 
@@ -612,7 +640,6 @@
 
                     if (!isInitialLoad && isHariIni) {
                         const statusLama = previousStatusMap[id];
-                        // Umumkan perubahan jika status berubah dari nilai sebelumnya
                         if (statusLama && statusLama !== statusBaru) {
                             announceStatusChange(item, statusBaru);
                         }
