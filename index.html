@@ -115,7 +115,7 @@
         .header-controls {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
         }
 
         .clock-block {
@@ -151,6 +151,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .audio-btn.disabled {
+            background: #ef4444 !important;
+            color: #ffffff !important;
         }
 
         #audioEnableBanner {
@@ -339,10 +345,18 @@
             <p id="targetDate">MENGAMBIL DATA...</p>
         </div>
         <div class="header-controls">
+            <!-- Tombol Murottal Live Stream -->
             <div class="audio-control">
                 <button class="audio-btn" id="playPauseBtn" onclick="toggleAudio()">▶</button>
                 <span id="audio-status" style="font-size: 12px; font-weight: bold;">STOP</span>
             </div>
+
+            <!-- Tombol Pengumuman Suara TV (Pengumuman On/Off) -->
+            <div class="audio-control">
+                <button class="audio-btn" id="announcementBtn" onclick="toggleAnnouncementSystem()">🔊</button>
+                <span id="announcement-status" style="font-size: 12px; font-weight: bold; color: #10b981;">VOICE ON</span>
+            </div>
+
             <div class="clock-block">
                 <div class="clock-time" id="clock">00:00:00</div>
             </div>
@@ -434,6 +448,7 @@
         let previousStatusMap = {};
         let isInitialLoad = true;
         let isAudioAllowed = false;
+        let isAnnouncementEnabled = true; // Status Sakelar Suara Pengumuman
         let isScrolling = false;
         let scrollRequest = null;
         let globalAudioCtx = null;
@@ -518,15 +533,43 @@
             });
         }
 
+        // FUNGSI SAKELAR ON/OFF PENGUMUMAN SUARA
+        function toggleAnnouncementSystem() {
+            const btn = document.getElementById('announcementBtn');
+            const statusLabel = document.getElementById('announcement-status');
+
+            isAnnouncementEnabled = !isAnnouncementEnabled;
+
+            if (isAnnouncementEnabled) {
+                btn.classList.remove('disabled');
+                btn.innerText = "🔊";
+                statusLabel.innerText = "VOICE ON";
+                statusLabel.style.color = "#10b981";
+                
+                playVoiceAnnouncement("Pengumuman suara diaktifkan.");
+            } else {
+                btn.classList.add('disabled');
+                btn.innerText = "🔇";
+                statusLabel.innerText = "VOICE OFF";
+                statusLabel.style.color = "#ef4444";
+
+                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+                if (ttsAudioPlayer) ttsAudioPlayer.pause();
+            }
+        }
+
         // ENGINE SUARA WEB SPEECH API DENGAN GOOGLE TTS FALLBACK
         function playVoiceAnnouncement(text) {
-            if (!isAudioAllowed) return;
+            // Cek apakah audio diizinkan DAN tombol sakelar pengumuman aktif
+            if (!isAudioAllowed || !isAnnouncementEnabled) return;
 
             const originalVolume = audio.volume;
             if (!audio.paused) audio.volume = 0.1;
 
             // Memutar Chime Pembuka
             playAirportChime().then(() => {
+                if (!isAnnouncementEnabled) return;
+
                 const safetyMessage = ". Utamakan keselamatan kerja dan gunakan APD saat bertugas.";
                 const fullText = text + safetyMessage;
 
@@ -540,7 +583,7 @@
                     utterance.pitch = 1.0;
 
                     utterance.onend = async function () {
-                        await playAirportChime();
+                        if (isAnnouncementEnabled) await playAirportChime();
                         if (!audio.paused) audio.volume = originalVolume;
                     };
 
@@ -557,6 +600,7 @@
         }
 
         function fallbackGoogleTTS(fullText, originalVolume) {
+            if (!isAnnouncementEnabled) return;
             const googleTtsUrl = "https://translate.google.com/translate_tts?ie=UTF-8&q=" + 
                                  encodeURIComponent(fullText) + 
                                  "&tl=id&client=tw-ob";
@@ -569,11 +613,11 @@
                 if (playPromise !== undefined) {
                     playPromise.then(() => {
                         ttsAudioPlayer.onended = async () => {
-                            await playAirportChime();
+                            if (isAnnouncementEnabled) await playAirportChime();
                             if (!audio.paused) audio.volume = originalVolume;
                         };
                     }).catch(async () => {
-                        await playAirportChime();
+                        if (isAnnouncementEnabled) await playAirportChime();
                         if (!audio.paused) audio.volume = originalVolume;
                     });
                 }
