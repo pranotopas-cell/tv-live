@@ -375,7 +375,9 @@
         </div>
     </div>
 
-    <audio id="murottalAudio" crossorigin="anonymous"></audio>
+    <audio id="murottalAudio" preload="none"></audio>
+    <!-- Element Audio Khusus Suara Pengumuman HiTV -->
+    <audio id="ttsAudioPlayer" preload="auto"></audio>
 
     <script>
         const SUPABASE_URL = 'https://ntaectphgoelmhzrkatp.supabase.co';
@@ -422,6 +424,7 @@
 
         let quoteIndex = 0;
         const audio = document.getElementById('murottalAudio');
+        const ttsAudioPlayer = document.getElementById('ttsAudioPlayer');
 
         const streamSources = [
             "https://live.mp3quran.net/makkah",
@@ -435,24 +438,7 @@
         let isAudioAllowed = false;
         let isScrolling = false;
         let scrollRequest = null;
-        let selectedVoice = null;
-
-        // Trik Khusus Android TV: Mengisi Daftar Suara (Voices)
-        function initVoices() {
-            if ('speechSynthesis' in window) {
-                const voices = window.speechSynthesis.getVoices();
-                // Cari suara Bahasa Indonesia
-                selectedVoice = voices.find(v => v.lang.includes('id') || v.lang.includes('ID'));
-                if (!selectedVoice && voices.length > 0) {
-                    selectedVoice = voices[0]; // Fallback ke suara default jika ID tidak ada
-                }
-            }
-        }
-
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.onvoiceschanged = initVoices;
-            initVoices();
-        }
+        let globalAudioCtx = null;
 
         document.addEventListener("DOMContentLoaded", function() {
             const modal = document.getElementById('tvAudioModal');
@@ -464,20 +450,17 @@
                 isAudioAllowed = true;
                 if (modal) modal.style.display = 'none';
 
-                // Buka Kunci AudioContext & SpeechSynthesis
-                const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                if (AudioCtx) {
-                    const ctx = new AudioCtx();
-                    ctx.resume();
-                }
+                // Buka Izin Audio global untuk HiTV Browser
+                try {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) {
+                        globalAudioCtx = new AudioCtx();
+                        globalAudioCtx.resume();
+                    }
+                } catch(e){}
 
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.resume();
-                    initVoices();
-                }
-
-                // Tes Pengumuman Pertama
-                playVoiceAnnouncement("Sistem pengumuman suara telah aktif.");
+                // Uji Coba Suara Pertama
+                playVoiceAnnouncement("Sistem pengumuman suara telah diaktifkan.");
             }
 
             if (btn) btn.addEventListener('click', activateAudio);
@@ -497,17 +480,11 @@
             return `${yyyy}-${mm}-${dd}`;
         }
 
-        // Chime Bandara Synthesizer
+        // Tone Bel Bandara Synthesizer
         function playAirportChime() {
             return new Promise((resolve) => {
                 try {
-                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    if (!AudioContext) {
-                        resolve();
-                        return;
-                    }
-                    const ctx = new AudioContext();
-
+                    const ctx = globalAudioCtx || new (window.AudioContext || window.webkitAudioContext)();
                     if (ctx.state === 'suspended') {
                         ctx.resume();
                     }
@@ -538,7 +515,6 @@
                     });
 
                     setTimeout(() => {
-                        ctx.close();
                         resolve();
                     }, 2200);
                 } catch (e) {
@@ -548,7 +524,7 @@
             });
         }
 
-        // PENGUMUMAN SUARA UNTUK SMART TV / ANDROID TV
+        // PENGUMUMAN SUARA UNTUK HITV BROWSER
         async function playVoiceAnnouncement(text) {
             if (!isAudioAllowed) return;
 
@@ -558,46 +534,33 @@
             // Memutar Chime Pembuka
             await playAirportChime();
 
-            const safetyMessage = " Utamakan keselamatan kerja dan gunakan alat pelindung diri. Terima kasih.";
+            const safetyMessage = ". Utamakan keselamatan kerja dan gunakan APD saat bertugas. Terima kasih.";
             const fullText = text + safetyMessage;
 
-            if ('speechSynthesis' in window) {
-                // Bersihkan antrean lama & paksa resume (Mencegah Bug Stuck di WebView TV)
-                window.speechSynthesis.cancel();
-                window.speechSynthesis.resume();
+            // URL Audio Stream Server Bebas Blokir CORS
+            const ttsUrl = "https://api.streamelements.com/kappa/v2/speech?voice=Indonesian%20Female&text=" + encodeURIComponent(fullText);
 
-                const utterance = new SpeechSynthesisUtterance(fullText);
-                utterance.lang = 'id-ID';
-                utterance.rate = 0.85; // Kecepatan diperlambat agar jelas di TV
-                utterance.pitch = 1.0;
+            try {
+                ttsAudioPlayer.pause();
+                ttsAudioPlayer.src = ttsUrl;
+                ttsAudioPlayer.load();
 
-                if (selectedVoice) {
-                    utterance.voice = selectedVoice;
+                let playPromise = ttsAudioPlayer.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        ttsAudioPlayer.onended = async () => {
+                            await playAirportChime();
+                            if (!audio.paused) audio.volume = originalVolume;
+                        };
+                    }).catch(async (err) => {
+                        console.warn("HiTV Browser memblokir pengumuman external, memutar bel sebagai penanda.", err);
+                        await playAirportChime();
+                        if (!audio.paused) audio.volume = originalVolume;
+                    });
                 }
-
-                utterance.onend = async () => {
-                    await playAirportChime();
-                    if (!audio.paused) audio.volume = originalVolume;
-                };
-
-                utterance.onerror = async (err) => {
-                    console.error("SpeechSynthesis Error:", err);
-                    await playAirportChime();
-                    if (!audio.paused) audio.volume = originalVolume;
-                };
-
-                window.speechSynthesis.speak(utterance);
-
-                // Trik interval pemicu agar Android TV tidak menghentikan suara di tengah jalan
-                const resumeInterval = setInterval(() => {
-                    if (!window.speechSynthesis.speaking) {
-                        clearInterval(resumeInterval);
-                    } else {
-                        window.speechSynthesis.resume();
-                    }
-                }, 1000);
-
-            } else {
+            } catch (err) {
+                console.error("Error eksekusi TTS HiTV:", err);
                 await playAirportChime();
                 if (!audio.paused) audio.volume = originalVolume;
             }
@@ -607,11 +570,6 @@
             isAudioAllowed = true;
             document.getElementById('audioEnableBanner').style.display = 'none';
             document.getElementById('tvAudioModal').style.display = 'none';
-            
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.resume();
-                initVoices();
-            }
             playVoiceAnnouncement("Sistem pengumuman suara telah aktif.");
         }
 
