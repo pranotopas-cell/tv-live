@@ -7,6 +7,8 @@
     
     <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- ResponsiveVoice API (Paling Stabil untuk Smart TV) -->
+    <script src="https://code.responsivevoice.org/responsivevoice.js?key=free"></script>
 
     <style>
         :root {
@@ -72,7 +74,7 @@
         .st-ngisi { color: #06b6d4; }
         .st-delivered { color: #10b981; }
 
-        /* Quote Overlay Animation */
+        /* Quote Overlay */
         #quoteOverlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(11, 15, 25, 0.96); display: none; flex-direction: column; justify-content: center; align-items: center; padding: 40px; text-align: center; z-index: 100; opacity: 0; transition: opacity 0.8s ease; }
         .quote-box { max-width: 800px; }
         #quoteText { font-size: 28px; line-height: 1.6; color: var(--text-white); margin-bottom: 20px; font-style: italic; }
@@ -86,10 +88,10 @@
 </head>
 <body>
 
-    <!-- Modal Aktivasi Audio Remote TV -->
+    <!-- Modal Aktivasi TV -->
     <div id="tvAudioModal">
         <h2>SISTEM PENGUMUMAN SUARA DASHBOARD</h2>
-        <p>Silakan tekan tombol <b style="color: var(--text-gold);">OK / ENTER</b> pada Remote TV Anda untuk menguji & mengaktifkan suara.</p>
+        <p>Silakan tekan tombol <b style="color: var(--text-gold);">OK / ENTER</b> pada Remote TV Anda untuk menguji suara.</p>
         <button id="btnEnableTV">AKTIFKAN SUARA (TEKAN OK)</button>
     </div>
 
@@ -110,7 +112,7 @@
         </div>
     </header>
 
-    <!-- Table & Scroll Container -->
+    <!-- Table Container -->
     <div id="scrollContainer">
         <table>
             <thead>
@@ -134,6 +136,7 @@
     </div>
 
     <audio id="murottalAudio" preload="none"></audio>
+    <audio id="fallbackPlayer" preload="auto"></audio>
 
     <script>
         const SUPABASE_URL = 'https://ntaectphgoelmhzrkatp.supabase.co';
@@ -148,6 +151,7 @@
 
         let quoteIndex = 0;
         const audio = document.getElementById('murottalAudio');
+        const fallbackPlayer = document.getElementById('fallbackPlayer');
         const streamSources = [
             "https://live.mp3quran.net/makkah",
             "https://live.mp3quran.net/madinah"
@@ -159,18 +163,6 @@
         let isScrolling = false;
         let scrollRequest = null;
         let audioCtx = null;
-        let idVoice = null;
-
-        // Inisialisasi Voice Synthesizer
-        function initVoices() {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.onvoiceschanged = () => {
-                    const voices = window.speechSynthesis.getVoices();
-                    idVoice = voices.find(v => v.lang.includes('id') || v.lang.includes('ID'));
-                };
-            }
-        }
-        initVoices();
 
         document.addEventListener("DOMContentLoaded", function() {
             const modal = document.getElementById('tvAudioModal');
@@ -181,14 +173,18 @@
                 isAudioAllowed = true;
                 if (modal) modal.style.display = 'none';
 
-                // Unlock Web Audio Context untuk TV
+                // Buka proteksi Web Audio API
                 try {
                     const AudioContext = window.AudioContext || window.webkitAudioContext;
                     audioCtx = new AudioContext();
                     audioCtx.resume();
                 } catch(e) {}
 
-                // Test Suara Langsung
+                // Inisialisasi ResponsiveVoice jika tersedia
+                if (window.responsiveVoice) {
+                    window.responsiveVoice.init();
+                }
+
                 playVoiceAnnouncement("Sistem pengumuman suara telah aktif.");
             }
 
@@ -205,7 +201,7 @@
             return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         }
 
-        // Generator Sound Chime Bel Bandara yang Kompatibel Semua Browser TV
+        // Generator Bel Chime Bandara
         function playAirportChime() {
             return new Promise((resolve) => {
                 try {
@@ -246,7 +242,7 @@
             });
         }
 
-        // FUNGSI TTS BARU (WebSpeech + Native Fallback)
+        // PERBAIKAN UTAMA: SISTEM MULTI-ENGINE TTS
         function playVoiceAnnouncement(text) {
             if (!isAudioAllowed) return;
 
@@ -256,26 +252,43 @@
             playAirportChime().then(() => {
                 const fullText = text + ". Utamakan keselamatan kerja dan gunakan APD saat bertugas.";
 
+                // METODE 1: ResponsiveVoice (Sangat disarankan untuk Smart TV)
+                if (window.responsiveVoice && window.responsiveVoice.voiceSupport()) {
+                    window.responsiveVoice.speak(fullText, "Indonesian Female", {
+                        rate: 0.85,
+                        onend: async () => {
+                            await playAirportChime();
+                            if (!audio.paused) audio.volume = originalVolume;
+                        },
+                        onerror: () => fallbackTTS(fullText, originalVolume)
+                    });
+                } else {
+                    fallbackTTS(fullText, originalVolume);
+                }
+            });
+        }
+
+        // METODE CADANGAN 2 & 3: Audio Element Streaming Direct
+        function fallbackTTS(fullText, originalVolume) {
+            const googleUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(fullText)}&tl=id&client=tw-ob`;
+            
+            fallbackPlayer.src = googleUrl;
+            fallbackPlayer.play().then(() => {
+                fallbackPlayer.onended = async () => {
+                    await playAirportChime();
+                    if (!audio.paused) audio.volume = originalVolume;
+                };
+            }).catch(() => {
+                // METODE CADANGAN TERAKHIR: Web Speech API Native
                 if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel(); // Reset antrean
-
-                    const utterance = new SpeechSynthesisUtterance(fullText);
-                    utterance.lang = 'id-ID';
-                    utterance.rate = 0.85; // Diperlambat sedikit agar jelas di TV
-                    utterance.pitch = 1.0;
-
-                    if (idVoice) utterance.voice = idVoice;
-
-                    utterance.onend = async () => {
+                    window.speechSynthesis.cancel();
+                    const u = new SpeechSynthesisUtterance(fullText);
+                    u.lang = 'id-ID';
+                    u.onend = async () => {
                         await playAirportChime();
                         if (!audio.paused) audio.volume = originalVolume;
                     };
-
-                    utterance.onerror = async () => {
-                        if (!audio.paused) audio.volume = originalVolume;
-                    };
-
-                    window.speechSynthesis.speak(utterance);
+                    window.speechSynthesis.speak(u);
                 } else {
                     if (!audio.paused) audio.volume = originalVolume;
                 }
