@@ -37,6 +37,57 @@
             flex-direction: column;
         }
 
+        /* Modal Pemicu Audio TV */
+        #tvAudioModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(11, 15, 25, 0.98);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #tvAudioModal h2 {
+            color: var(--text-gold);
+            margin-bottom: 15px;
+            font-size: 28px;
+            letter-spacing: 1px;
+        }
+
+        #tvAudioModal p {
+            color: var(--text-white-soft);
+            margin-bottom: 30px;
+            font-size: 18px;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+
+        #btnEnableTV {
+            padding: 16px 40px;
+            font-size: 20px;
+            font-weight: bold;
+            background: var(--text-gold);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            outline: 3px solid #ffffff;
+            transition: transform 0.2s;
+        }
+
+        #btnEnableTV:focus, #btnEnableTV:hover {
+            transform: scale(1.05);
+            background: #ffffff;
+            color: #000;
+        }
+
         /* Header Layout */
         header {
             background-color: var(--bg-card);
@@ -103,7 +154,7 @@
             justify-content: center;
         }
 
-        /* Banner Suara */
+        /* Banner Suara (Kondisional) */
         #audioEnableBanner {
             background-color: var(--text-gold);
             color: #000;
@@ -112,6 +163,7 @@
             font-weight: bold;
             cursor: pointer;
             z-index: 20;
+            display: none;
         }
 
         /* Scroll Area & Table */
@@ -270,15 +322,22 @@
 </head>
 <body>
 
+    <!-- Modal Aktivasi Audio Remote TV -->
+    <div id="tvAudioModal">
+        <h2>SISTEM PENGUMUMAN SUARA DASHBOARD</h2>
+        <p>Silakan tekan tombol <b style="color: var(--text-gold);">OK / ENTER</b> pada Remote Control TV Anda untuk mengaktifkan Suara Pengumuman Otomatis.</p>
+        <button id="btnEnableTV">AKTIFKAN SUARA (TEKAN OK)</button>
+    </div>
+
     <!-- Audio Enable Banner -->
     <div id="audioEnableBanner" onclick="enableAudioSystem()">
-        🔊 Mengaktifkan Fitur Suara 
+        🔊 Klik di sini jika suara belum aktif
     </div>
 
     <!-- Header Section -->
     <header>
         <div class="header-title">
-            <h1>Dashboard Pengiriman INVESTAMA KALIMANTAN ENERGI GROUP </h1>
+            <h1>Dashboard Pengiriman INVESTAMA KALIMANTAN ENERGI GROUP</h1>
             <p id="targetDate">MENGAMBIL DATA...</p>
         </div>
         <div class="header-controls">
@@ -297,14 +356,14 @@
         <table>
             <thead>
                 <tr>
-                    <th style="width: 35%;">Unit / Sopir / lokasi</th>
+                    <th style="width: 35%;">Unit / Sopir / Lokasi</th>
                     <th style="width: 15%; text-align: center;">Jumlah</th>
                     <th style="width: 30%;">Tujuan Pengiriman / Asal Depo</th>
                     <th style="width: 20%; text-align: right;">Status Pengiriman</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
-                <!-- Data dari Supabase akan di-render di sini -->
+                <!-- Data dari Supabase -->
             </tbody>
         </table>
     </div>
@@ -377,12 +436,37 @@
         let isScrolling = false;
         let scrollRequest = null;
 
-        // Inisialisasi daftar voice bawaan untuk browser TV / Android Native
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.onvoiceschanged = () => {
-                window.speechSynthesis.getVoices();
-            };
-        }
+        // Inisialisasi awal modal pemicu audio TV
+        document.addEventListener("DOMContentLoaded", function() {
+            const modal = document.getElementById('tvAudioModal');
+            const btn = document.getElementById('btnEnableTV');
+            
+            // Auto Focus tombol untuk Remote Control TV
+            if (btn) btn.focus();
+
+            function activateAudio() {
+                isAudioAllowed = true;
+                if (modal) modal.style.display = 'none';
+
+                // Buka/Aktivkan AudioContext & TTS Engine TV
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.getVoices();
+                    window.speechSynthesis.resume();
+                }
+
+                // Pengujian Suara Pertama Kali
+                playVoiceAnnouncement("Sistem pengumuman suara telah berhasil diaktifkan.");
+            }
+
+            if (btn) btn.addEventListener('click', activateAudio);
+
+            // Handler tombol Enter/OK Remote Control
+            document.addEventListener('keydown', function(e) {
+                if (e.key === "Enter" && modal && modal.style.display !== 'none') {
+                    activateAudio();
+                }
+            });
+        });
 
         function getWIBDateString() {
             const d = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
@@ -392,7 +476,7 @@
             return `${yyyy}-${mm}-${dd}`;
         }
 
-        // Fungsi Chime Bandara Autentik
+        // Chime Bandara Synthesizer
         function playAirportChime() {
             return new Promise((resolve) => {
                 try {
@@ -402,6 +486,10 @@
                         return;
                     }
                     const ctx = new AudioContext();
+
+                    if (ctx.state === 'suspended') {
+                        ctx.resume();
+                    }
 
                     const notes = [
                         { freq: 698.46, time: 0.00, duration: 0.45 }, // F5
@@ -442,31 +530,38 @@
         async function playVoiceAnnouncement(text) {
             if (!isAudioAllowed) return;
 
+            // Fitur Pemulihan Bug Web Speech API (Freeze/Pause) Android TV
+            if ('speechSynthesis' in window) {
+                if (window.speechSynthesis.paused || window.speechSynthesis.pending) {
+                    window.speechSynthesis.cancel();
+                    window.speechSynthesis.resume();
+                }
+            }
+
             const originalVolume = audio.volume;
             if (!audio.paused) audio.volume = 0.1;
 
-            // 1. Memutar chime pembuka
+            // Memutar chime pembuka
             await playAirportChime();
 
             const safetyMessage = " Tetap jaga kualitas dan kuantitas pengiriman, serta utamakan keselamatan dan selalu gunakan alat pelindung diri saat proses bongkar bbm. Terima kasih.";
             const fullText = text + safetyMessage;
 
             const finishAnnouncement = async () => {
-                // 3. Memutar chime penutup
                 await playAirportChime();
                 if (!audio.paused) audio.volume = originalVolume;
             };
 
-            // Fallback menggunakan Web Speech API bawaan perangkat (Universal Browser/TV)
+            // Implementasi Native TTS Browser & TV
             const speakNative = () => {
                 if ('speechSynthesis' in window) {
                     window.speechSynthesis.cancel();
+                    
                     const msg = new SpeechSynthesisUtterance(fullText);
                     msg.lang = 'id-ID';
-                    msg.rate = 0.9;
+                    msg.rate = 0.85; // Diperlambat sedikit untuk kejelasan speaker TV
                     msg.pitch = 1;
 
-                    // Cari suara Bahasa Indonesia jika tersedia
                     const voices = window.speechSynthesis.getVoices();
                     const idVoice = voices.find(v => v.lang.includes('id') || v.lang.includes('ID'));
                     if (idVoice) msg.voice = idVoice;
@@ -476,19 +571,27 @@
                         console.error("Native Speech Error:", e);
                         finishAnnouncement();
                     };
-                    
+
                     window.speechSynthesis.speak(msg);
+
+                    // Pemulihan otomatis jika WebView TV menahan giliran pemutaran
+                    setTimeout(() => {
+                        if (window.speechSynthesis.speaking && window.speechSynthesis.paused) {
+                            window.speechSynthesis.resume();
+                        }
+                    }, 500);
+
                 } else {
                     finishAnnouncement();
                 }
             };
 
-            // 2. Coba jalankan ResponsiveVoice, jika gagal beralih ke Native Browser TTS
+            // Mencoba ResponsiveVoice, beralih ke Native jika terjadi kendala
             if (window.responsiveVoice && typeof responsiveVoice.speak === 'function') {
                 try {
                     responsiveVoice.speak(fullText, "Indonesian Female", {
                         pitch: 1,
-                        rate: 0.9,
+                        rate: 0.85,
                         volume: 1,
                         onend: finishAnnouncement,
                         onerror: speakNative
@@ -504,13 +607,14 @@
         function enableAudioSystem() {
             isAudioAllowed = true;
             document.getElementById('audioEnableBanner').style.display = 'none';
+            document.getElementById('tvAudioModal').style.display = 'none';
             
-            // Pancing izin audio browser untuk memicu Web Audio API
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.getVoices();
+                window.speechSynthesis.resume();
             }
             
-            playVoiceAnnouncement("Mohon perhatian. Sistem pengumuman suara telah aktif.");
+            playVoiceAnnouncement("Sistem pengumuman suara telah aktif.");
         }
 
         function toggleAudio() {
