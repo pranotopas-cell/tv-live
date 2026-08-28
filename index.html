@@ -32,7 +32,6 @@
             flex-direction: column;
         }
 
-        /* Overlay Tombol TV */
         #tvAudioModal {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -173,16 +172,22 @@
         let scrollRequest = null;
         let audioCtx = null;
 
-        // Sound Generator Internal (Nada Bel Bandara)
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioCtx();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        // 1. Bel Chime Bandara Utama (Web Audio API)
         function playChimeInternal() {
             return new Promise((resolve) => {
                 try {
-                    if (!audioCtx) {
-                        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                        audioCtx = new AudioCtx();
-                    }
-                    if (audioCtx.state === 'suspended') audioCtx.resume();
-
+                    const ctx = getAudioContext();
                     const notes = [
                         { f: 554.37, t: 0.0, d: 0.4 },
                         { f: 659.25, t: 0.25, d: 0.4 },
@@ -190,21 +195,21 @@
                     ];
 
                     notes.forEach(n => {
-                        const osc = audioCtx.createOscillator();
-                        const gain = audioCtx.createGain();
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
 
                         osc.type = 'sine';
-                        osc.frequency.setValueAtTime(n.f, audioCtx.currentTime + n.t);
+                        osc.frequency.setValueAtTime(n.f, ctx.currentTime + n.t);
 
-                        gain.gain.setValueAtTime(0.001, audioCtx.currentTime + n.t);
-                        gain.gain.exponentialRampToValueAtTime(0.3, audioCtx.currentTime + n.t + 0.05);
-                        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + n.t + n.d);
+                        gain.gain.setValueAtTime(0.001, ctx.currentTime + n.t);
+                        gain.gain.exponentialRampToValueAtTime(0.3, ctx.currentTime + n.t + 0.05);
+                        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + n.t + n.d);
 
                         osc.connect(gain);
-                        gain.connect(audioCtx.destination);
+                        gain.connect(ctx.destination);
 
-                        osc.start(audioCtx.currentTime + n.t);
-                        osc.stop(audioCtx.currentTime + n.t + n.d);
+                        osc.start(ctx.currentTime + n.t);
+                        osc.stop(ctx.currentTime + n.t + n.d);
                     });
 
                     setTimeout(resolve, 1100);
@@ -212,22 +217,66 @@
             });
         }
 
-        // SISTEM Bicarakan Teks via Aliran Audio Cloud (MP3 Direct)
-        async function playVoiceStream(text) {
+        // 2. Synthesizer Suara Suku Kata Internal (Pengunci Garansi Bekerja)
+        function playSyllableTone(freq, duration, delay) {
+            return new Promise((resolve) => {
+                try {
+                    const ctx = getAudioContext();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+
+                    gain.gain.setValueAtTime(0.001, ctx.currentTime + delay);
+                    gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + delay + 0.03);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + duration);
+
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    osc.start(ctx.currentTime + delay);
+                    osc.stop(ctx.currentTime + delay + duration);
+
+                    setTimeout(resolve, (delay + duration) * 1000);
+                } catch(e) { resolve(); }
+            });
+        }
+
+        // PENGUMUMAN INTERNAL HARDWARE
+        async function speakInternalEngine(text) {
             if (!isAudioAllowed) return;
 
-            // 1. Jalankan Nada Bel Chime
+            // Step 1: Bel Chime
             await playChimeInternal();
 
-            // 2. Minta berkas MP3 ucapan wanita bahasa Indonesia dari Server Google Cloud
-            const googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=id&client=tw-ob`;
-            
-            const audio = new Audio(googleTtsUrl);
-            audio.volume = 1.0;
-            
-            audio.play().catch(e => {
-                console.error("Gagal memutar stream suara:", e);
-            });
+            // Step 2: Coba Web Speech API Lokal (Jika browser mengizinkan)
+            let spokenByBrowser = false;
+            if ('speechSynthesis' in window) {
+                try {
+                    window.speechSynthesis.cancel();
+                    const utter = new SpeechSynthesisUtterance(text);
+                    utter.lang = 'id-ID';
+                    utter.rate = 0.85;
+                    
+                    utter.onstart = () => { spokenByBrowser = true; };
+                    window.speechSynthesis.speak(utter);
+
+                    await new Promise(r => setTimeout(r, 1000));
+                } catch(e) {}
+            }
+
+            // Step 3: Jika Browser memblokir SpeechSynthesis, bunyikan Pola Pengumuman Audio Synth
+            if (!spokenByBrowser) {
+                const syllables = text.length;
+                let currentDelay = 0;
+                
+                for (let i = 0; i < Math.min(syllables, 25); i++) {
+                    const freq = 200 + ((i % 5) * 40);
+                    playSyllableTone(freq, 0.12, currentDelay);
+                    currentDelay += 0.15;
+                }
+            }
         }
 
         document.addEventListener("DOMContentLoaded", function() {
@@ -237,10 +286,10 @@
 
             function activate() {
                 isAudioAllowed = true;
+                getAudioContext();
                 if (modal) modal.style.display = 'none';
 
-                // Tes Suara Saat Aktif
-                playVoiceStream("Sistem pengumuman suara telah diaktifkan.");
+                speakInternalEngine("Sistem audio aktif.");
             }
 
             if (btn) btn.addEventListener('click', activate);
@@ -271,7 +320,7 @@
             }
 
             if (teks) {
-                playVoiceStream(teks);
+                speakInternalEngine(teks);
             }
         }
 
