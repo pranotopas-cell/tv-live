@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Live</title>
+    <title>Dashboard Pengiriman Live</title>
     
     <!-- Supabase & ResponsiveVoice CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -35,57 +35,6 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-        }
-
-        /* Modal Pemicu Audio TV */
-        #tvAudioModal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(11, 15, 25, 0.98);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            text-align: center;
-            padding: 20px;
-        }
-
-        #tvAudioModal h2 {
-            color: var(--text-gold);
-            margin-bottom: 15px;
-            font-size: 28px;
-            letter-spacing: 1px;
-        }
-
-        #tvAudioModal p {
-            color: var(--text-white-soft);
-            margin-bottom: 30px;
-            font-size: 18px;
-            max-width: 600px;
-            line-height: 1.5;
-        }
-
-        #btnEnableTV {
-            padding: 16px 40px;
-            font-size: 20px;
-            font-weight: bold;
-            background: var(--text-gold);
-            color: #000;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            outline: 3px solid #ffffff;
-            transition: transform 0.2s;
-        }
-
-        #btnEnableTV:focus, #btnEnableTV:hover {
-            transform: scale(1.05);
-            background: #ffffff;
-            color: #000;
         }
 
         /* Header Layout */
@@ -154,7 +103,7 @@
             justify-content: center;
         }
 
-        /* Banner Suara (Kondisional) */
+        /* Banner Suara */
         #audioEnableBanner {
             background-color: var(--text-gold);
             color: #000;
@@ -163,7 +112,6 @@
             font-weight: bold;
             cursor: pointer;
             z-index: 20;
-            display: none;
         }
 
         /* Scroll Area & Table */
@@ -174,6 +122,7 @@
             scroll-behavior: smooth;
         }
 
+        /* Sembunyikan scrollbar untuk tampilan layar TV / Display Dashboard */
         #scrollContainer::-webkit-scrollbar {
             display: none;
         }
@@ -322,22 +271,15 @@
 </head>
 <body>
 
-    <!-- Modal Aktivasi Audio Remote TV -->
-    <div id="tvAudioModal">
-        <h2>SISTEM PENGUMUMAN SUARA DASHBOARD</h2>
-        <p>Silakan tekan tombol <b style="color: var(--text-gold);">OK / ENTER</b> pada Remote Control TV Anda untuk mengaktifkan Suara Pengumuman Otomatis.</p>
-        <button id="btnEnableTV">AKTIFKAN SUARA (TEKAN OK)</button>
-    </div>
-
     <!-- Audio Enable Banner -->
     <div id="audioEnableBanner" onclick="enableAudioSystem()">
-        🔊 Klik di sini jika suara belum aktif
+        🔊 Klik di sini untuk mengaktifkan Fitur Suara Pengumuman
     </div>
 
     <!-- Header Section -->
     <header>
         <div class="header-title">
-            <h1>JADWAL PENGIRIMAN INVESTAMA KALIMANTAN ENERGI</h1>
+            <h1>Dashboard Pengiriman</h1>
             <p id="targetDate">MENGAMBIL DATA...</p>
         </div>
         <div class="header-controls">
@@ -356,14 +298,14 @@
         <table>
             <thead>
                 <tr>
-                    <th style="width: 35%;">Unit / Sopir / Lokasi</th>
+                    <th style="width: 35%;">Armada / Driver</th>
                     <th style="width: 15%; text-align: center;">Jumlah</th>
-                    <th style="width: 30%;">Tujuan Pengiriman / Asal Depo</th>
-                    <th style="width: 20%; text-align: right;">Status Pengiriman</th>
+                    <th style="width: 30%;">Tujuan / Depo</th>
+                    <th style="width: 20%; text-align: right;">Status</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
-                <!-- Data dari Supabase -->
+                <!-- Data dari Supabase akan di-render di sini -->
             </tbody>
         </table>
     </div>
@@ -385,40 +327,8 @@
 
         const quotes = [
             { t: "Sesungguhnya sesudah kesulitan itu ada kemudahan.", s: "QS. Al-Insyirah: 6" },
-            { t: "Bekerjalah untuk duniamu seolah hidup selamanya,\nberamallah untuk akhiratmu seolah mati besok.", s: "Ali bin Abi Thalib" },
-            { t: "Sebaik-baik manusia adalah yang paling bermanfaat bagi orang lain.", s: "HR. Ahmad" },
-            { t: "Barangsiapa bertaqwa kepada Allah,\nniscaya Dia akan membukakan jalan keluar baginya.", s: "QS. At-Talaq: 2" },
-            { t: "Allah mencintai seorang hamba yang apabila bekerja,\nia bekerja dengan itqan (profesional).", s: "HR. Al-Baihaqi" },
-            { t: "Niatkan kerjamu sebagai ibadah, maka lelahmu menjadi pahala.", s: "Kata Bijak Muslim" },
-            { t: "Rezeki sudah diatur, tugas kita hanyalah menjemputnya dengan cara yang baik.", s: "Nasehat Tauhid" },
-            { t: "Tangan di atas lebih baik daripada tangan di bawah.", s: "HR. Bukhari & Muslim" },
-            { t: "Mencari rezeki halal adalah wajib setelah ibadah fardhu.", s: "HR. Ath-Thabrani" },
-            { t: "Janganlah kamu berputus asa dari rahmat Allah.", s: "QS. Az-Zumar: 53"},
-            { t: "Ridha Allah terletak pada ridha kedua orang tua.", s: "HR. Tirmidzi" },
-            { t: "Harta tidak akan berkurang karena sedekah.", s: "HR. Muslim" },
-            { t: "Dan barangsiapa yang bertawakal kepada Allah, niscaya Allah akan mencukupkan keperluannya.", s: "QS. At-Talaq: 3" },
-            { t: "Kekayaan bukanlah dengan banyaknya harta, namun kekayaan adalah hati yang selalu merasa cukup.", s: "HR. Bukhari" },
-            { t: "Jadikanlah sabar dan shalat sebagai penolongmu. Dan sesungguhnya yang demikian itu sungguh berat, kecuali bagi orang-orang yang khusyu.", s: "QS. Al-Baqarah: 45" },
-            { t: "Tidak ada satu subuh pun yang dialami hamba-hamba Allah melainkan malaikat turun dan berdoa: Ya Allah, berikanlah ganti bagi orang yang berinfak.", s: "HR. Bukhari" },
-            { t: "Mukmin yang kuat lebih baik dan lebih dicintai Allah daripada mukmin yang lemah.", s: "HR. Muslim" },
-            { t: "Sesungguhnya Allah tidak akan mengubah keadaan suatu kaum sebelum mereka mengubah keadaan diri mereka sendiri.", s: "QS. Ar-Ra'd: 11" },
-            { t: "Senyummu di hadapan saudaramu adalah sedekah.", s: "HR. Tirmidzi" },
-            { t: "Bersemangatlah atas hal-hal yang bermanfaat bagimu dan mintalah pertolongan kepada Allah, jangan menjadi lemah.", s: "HR. Muslim" },
-            { t: "Sesungguhnya bersama kesulitan ada kemudahan, maka melangkahlah dengan iman.", s: "QS. Al-Insyirah: 6" },
-            { t: "Jangan remehkan kebaikan sekecil apa pun, karena kita tidak pernah tahu kebaikan mana yang membawakan surga.", s: "HR. Muslim" },
-            { t: "Rezeki yang berkah bukan tentang seberapa banyak jumlahnya, melainkan seberapa tenang hati yang menerimanya.", s: "Nasehat Tauhid" },
-            { t: "Dunia ini hanya tempat persinggahan; jadikan setiap lelahmu di sini sebagai bekal pulang yang indah.", s: "Kata Bijak Muslim" },
-            { t: "Barangsiapa yang menempuh jalan untuk mencari ilmu, maka Allah akan mudahkan jalannya menuju surga.", s: "HR. Muslim" },
-            { t: "Bukan kesulitan yang membuat kita takut, melainkan ketakutan yang membuat segalanya menjadi sulit. Bertawakallah.", s: "Ali bin Abi Thalib" },
-            { t: "Dan bersabarlah kamu, sesungguhnya janji Allah adalah benar.", s: "QS. Ar-Rum: 60" },
-            { t: "Bekerjalah dengan jujur, karena rezeki yang berkah akan melahirkan keturunan yang berkah pula.", s: "Nasehat Bijak" },
-            { t: "Dua nikmat yang sering dilupakan oleh manusia adalah kesehatan dan waktu luang.", s: "HR. Bukhari" },
-            { t: "Ketika kamu merasa sendirian, ingatlah bahwa Allah senantiasa mendengar bisikan doa dalam sujudmu.", s: "Kata Bijak Muslim" },
-            { t: "Siapa yang menabur kebaikan, ia akan memanen kebahagiaan, baik di dunia maupun di akhirat.", s: "Nasehat Tauhid" },
-            { t: "Bukan kemiskinan yang kita takuti, melainkan hilangnya rasa syukur saat harta melimpah.", s: "Kata Hikmah" },
-            { t: "Jika Allah menunda sesuatu yang kamu inginkan, itu karena Dia ingin memberimu sesuatu yang jauh lebih baik pada waktu yang tepat.", s: "QS. Al-Baqarah: 216" },
-            { t: "Senyummu di hadapan saudaramu adalah bernilai sedekah.", s: "HR. Tirmidzi" },
-            { t: "Mulailah pagimu dengan bismillah, jalani siangmu dengan alhamdulillah, dan tutuplah malammu dengan istighfar.", s: "Nasehat Bijak" }
+            { t: "Bekerjalah untuk duniamu seolah hidup selamanya ,\nberamallah untuk akhiratmu seolah mati besok.", s: "Ali bin Abi Thalib" },
+            { t: "Sebaik-baik manusia adalah yang paling bermanfaat bagi orang lain.", s: "HR. Ahmad" }
         ];
 
         let quoteIndex = 0;
@@ -436,34 +346,6 @@
         let isScrolling = false;
         let scrollRequest = null;
 
-        // Inisialisasi awal modal pemicu audio TV
-        document.addEventListener("DOMContentLoaded", function() {
-            const modal = document.getElementById('tvAudioModal');
-            const btn = document.getElementById('btnEnableTV');
-            
-            if (btn) btn.focus();
-
-            function activateAudio() {
-                isAudioAllowed = true;
-                if (modal) modal.style.display = 'none';
-
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.getVoices();
-                    window.speechSynthesis.resume();
-                }
-
-                playVoiceAnnouncement("Sistem pengumuman suara telah berhasil diaktifkan.");
-            }
-
-            if (btn) btn.addEventListener('click', activateAudio);
-
-            document.addEventListener('keydown', function(e) {
-                if (e.key === "Enter" && modal && modal.style.display !== 'none') {
-                    activateAudio();
-                }
-            });
-        });
-
         function getWIBDateString() {
             const d = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
             const yyyy = d.getFullYear();
@@ -472,16 +354,7 @@
             return `${yyyy}-${mm}-${dd}`;
         }
 
-        // FUNGSI KHUSUS PENGECAM DAN PENGEJAAN NOMOR POLISI (KH 9842 GN -> K , H , 9 , 8 , 4 , 2 , G , N)
-        function formatNopolTTS(nopol) {
-            if (!nopol) return "";
-            // Bersihkan spasi dan karakter non-alphanumeric berlebih
-            const cleaned = nopol.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-            // Pisahkan setiap karakter dengan koma & spasi agar dieja per huruf/angka
-            return cleaned.split('').join(', ');
-        }
-
-        // Chime Bandara Synthesizer
+        // Fungsi untuk membunyikan suara chime/ding-dong ala bandara menggunakan Web Audio API
         function playAirportChime() {
             return new Promise((resolve) => {
                 try {
@@ -492,15 +365,10 @@
                     }
                     const ctx = new AudioContext();
 
-                    if (ctx.state === 'suspended') {
-                        ctx.resume();
-                    }
-
+                    // Nada 1: C5 (523.25 Hz), Nada 2: G4 (392.00 Hz)
                     const notes = [
-                        { freq: 698.46, time: 0.00, duration: 0.45 }, // F5
-                        { freq: 587.33, time: 0.35, duration: 0.45 }, // D5
-                        { freq: 440.00, time: 0.70, duration: 0.45 }, // A4
-                        { freq: 349.23, time: 1.05, duration: 1.10 }  // F4
+                        { freq: 523.25, time: 0, duration: 0.8 },
+                        { freq: 392.00, time: 0.5, duration: 1.2 }
                     ];
 
                     notes.forEach(note => {
@@ -510,8 +378,8 @@
                         osc.type = 'sine';
                         osc.frequency.setValueAtTime(note.freq, ctx.currentTime + note.time);
 
-                        gain.gain.setValueAtTime(0.0001, ctx.currentTime + note.time);
-                        gain.gain.exponentialRampToValueAtTime(0.4, ctx.currentTime + note.time + 0.03);
+                        gain.gain.setValueAtTime(0.001, ctx.currentTime + note.time);
+                        gain.gain.exponentialRampToValueAtTime(0.3, ctx.currentTime + note.time + 0.05);
                         gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + note.time + note.duration);
 
                         osc.connect(gain);
@@ -524,7 +392,7 @@
                     setTimeout(() => {
                         ctx.close();
                         resolve();
-                    }, 2200);
+                    }, 1700);
                 } catch (e) {
                     console.error("Gagal memutar chime:", e);
                     resolve();
@@ -535,55 +403,25 @@
         async function playVoiceAnnouncement(text) {
             if (!isAudioAllowed) return;
 
-            if ('speechSynthesis' in window) {
-                if (window.speechSynthesis.paused || window.speechSynthesis.pending) {
-                    window.speechSynthesis.cancel();
-                    window.speechSynthesis.resume();
-                }
-            }
-
             const originalVolume = audio.volume;
             if (!audio.paused) audio.volume = 0.1;
 
+            // Memutar suara ding-dong terlebih dahulu
             await playAirportChime();
 
-            // Menggunakan pengumuman langsung tanpa safety message berlebih
-            const fullText = text;
+            // Pesan keselamatan yang ditambahkan setelah pengumuman
+            const safetyMessage = " Tetap jaga kualitas dan kuantitas, serta selalu utamakan penggunaan APD atau safety.";
+            const fullText = text + safetyMessage;
 
-            const finishAnnouncement = async () => {
-                await playAirportChime();
-                if (!audio.paused) audio.volume = originalVolume;
-            };
-
-            const speakNative = () => {
+            const speakFallback = () => {
                 if ('speechSynthesis' in window) {
                     window.speechSynthesis.cancel();
-                    
                     const msg = new SpeechSynthesisUtterance(fullText);
                     msg.lang = 'id-ID';
-                    msg.rate = 0.85; 
-                    msg.pitch = 1;
-
-                    const voices = window.speechSynthesis.getVoices();
-                    const idVoice = voices.find(v => v.lang.includes('id') || v.lang.includes('ID'));
-                    if (idVoice) msg.voice = idVoice;
-
-                    msg.onend = finishAnnouncement;
-                    msg.onerror = (e) => {
-                        console.error("Native Speech Error:", e);
-                        finishAnnouncement();
-                    };
-
+                    msg.rate = 0.9;
+                    msg.onend = () => { if (!audio.paused) audio.volume = originalVolume; };
+                    msg.onerror = () => { if (!audio.paused) audio.volume = originalVolume; };
                     window.speechSynthesis.speak(msg);
-
-                    setTimeout(() => {
-                        if (window.speechSynthesis.speaking && window.speechSynthesis.paused) {
-                            window.speechSynthesis.resume();
-                        }
-                    }, 500);
-
-                } else {
-                    finishAnnouncement();
                 }
             };
 
@@ -591,29 +429,22 @@
                 try {
                     responsiveVoice.speak(fullText, "Indonesian Female", {
                         pitch: 1,
-                        rate: 0.85,
+                        rate: 0.9,
                         volume: 1,
-                        onend: finishAnnouncement,
-                        onerror: speakNative
+                        onend: () => { if (!audio.paused) audio.volume = originalVolume; },
+                        onerror: () => speakFallback()
                     });
                 } catch (e) {
-                    speakNative();
+                    speakFallback();
                 }
             } else {
-                speakNative();
+                speakFallback();
             }
         }
 
         function enableAudioSystem() {
             isAudioAllowed = true;
             document.getElementById('audioEnableBanner').style.display = 'none';
-            document.getElementById('tvAudioModal').style.display = 'none';
-            
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.getVoices();
-                window.speechSynthesis.resume();
-            }
-            
             playVoiceAnnouncement("Sistem pengumuman suara telah aktif.");
         }
 
@@ -700,7 +531,7 @@
             wrapText(qSrc);
             
             await animateIn(overlay);
-            await new Promise(r => setTimeout(r, 15000)); 
+            await new Promise(r => setTimeout(r, 7000)); 
             await animateOut(overlay);
         }
 
@@ -717,6 +548,7 @@
         function startAutoScroll() {
             stopAutoScroll();
 
+            // Cek apakah konten melebihi area layar, jika tidak perlu di-scroll, berikan delay lalu tampilkan quote
             if (scrollContainer.scrollHeight <= scrollContainer.clientHeight) {
                 setTimeout(async () => {
                     await showQuote();
@@ -726,7 +558,7 @@
             }
 
             isScrolling = true;
-            const scrollSpeed = 0.6; 
+            const scrollSpeed = 0.8; 
 
             function step() {
                 if (!isScrolling) return;
@@ -738,6 +570,7 @@
                     stopAutoScroll();
                     setTimeout(async () => {
                         await showQuote(); 
+                        // Smooth reset posisi scroll ke 0 sebelum reload data
                         scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
                         setTimeout(() => { 
                             loadDashboard(); 
@@ -759,32 +592,15 @@
 
         function getWIB() { return new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" })); }
 
-        // FUNGSI LOGIKA MEMBACA PERUBAHAN STATUS PENGIRIMAN
-        function announceStatusChange(item, statusBaru) {
-            // Eja nomor polisi per huruf & angka
-            const nopolSpelled = formatNopolTTS(item.nopol);
+        function announceStatusChange(item, statusType) {
             const sopir = item.sopir || 'Sopir';
             const tujuan = item.delivery_to || 'Tujuan';
-            const stUpper = (statusBaru || "").toUpperCase();
 
             let teks = "";
-            
-            if (stUpper.includes("PROSES")) {
-                teks = `Mohon perhatian, kendaraan nomor polisi ${nopolSpelled}. Driver ${sopir}, tujuan ${tujuan}, status PROSES pengiriman.`;
-            } else if (stUpper.includes("DELIVERED")) {
-                teks = `Mohon perhatian, pengiriman unit nomor polisi ${nopolSpelled}. Driver ${sopir}, tujuan ${tujuan}, telah selesai dan terkonfirmasi DELIVERED.`;
-            } else if (stUpper.includes("LANGSIR")) {
-                teks = `Informasi, kendaraan nomor polisi ${nopolSpelled}. Driver ${sopir}, status LANGSIR.`;
-            } else if (stUpper.includes("OPER")) {
-                teks = `Informasi, kendaraan nomor polisi ${nopolSpelled}. Driver ${sopir}, status OPER pengiriman.`;
-            } else if (stUpper.includes("NGISI")) {
-                teks = `Informasi, kendaraan nomor polisi ${nopolSpelled}. Driver ${sopir}, status NGISI BBM.`;
-            } else if (stUpper.includes("TUNGGU")) {
-                teks = `Informasi, kendaraan nomor polisi ${nopolSpelled}. Driver ${sopir}, status TUNGGU antrean.`;
-            } else if (stUpper.includes("TERJADWAL")) {
-                teks = `Informasi, kendaraan nomor polisi ${nopolSpelled}. Driver ${sopir}, status TERJADWAL.`;
-            } else {
-                teks = `Mohon perhatian, kendaraan nomor polisi ${nopolSpelled}. Driver ${sopir}, status diperbarui menjadi ${statusBaru}.`;
+            if (statusType.includes("PROSES")) {
+                teks = `Pemberitahuan. Driver ${sopir}, tujuan ${tujuan}, status PROSES.`;
+            } else if (statusType.includes("DELIVERED")) {
+                teks = `Pemberitahuan. Driver ${sopir}, tujuan ${tujuan}, status DELIVERED.`;
             }
 
             if (teks) {
@@ -808,11 +624,14 @@
                     const statusBaru = (item.status || "").toUpperCase();
                     const isHariIni = (item.tanggal === isoHariIni);
 
-                    // Hanya umumkan jika BUKAN muatan awal (initial load) DAN ada perubahan status
                     if (!isInitialLoad && isHariIni) {
                         const statusLama = previousStatusMap[id];
-                        if (statusLama && statusLama !== statusBaru) {
-                            announceStatusChange(item, statusBaru);
+                        
+                        if (statusBaru.includes("PROSES") && statusLama && !statusLama.includes("PROSES")) {
+                            announceStatusChange(item, "PROSES");
+                        }
+                        else if (statusBaru.includes("DELIVERED") && statusLama && !statusLama.includes("DELIVERED")) {
+                            announceStatusChange(item, "DELIVERED");
                         }
                     }
                     previousStatusMap[id] = statusBaru;
@@ -841,11 +660,10 @@
                             const statusLama = previousStatusMap[id];
 
                             if (item.tanggal === isoHariIni) {
-                                // Hanya diumumkan jika statusLama ada dan BERBEDA dengan statusBaru, ATAU jika data baru dimasukkan (INSERT)
-                                if (statusLama && statusLama !== statusBaru) {
-                                    announceStatusChange(item, statusBaru);
-                                } else if (!statusLama && payload.eventType === 'INSERT') {
-                                    announceStatusChange(item, statusBaru);
+                                if (statusBaru.includes("PROSES") && statusLama && !statusLama.includes("PROSES")) {
+                                    announceStatusChange(item, "PROSES");
+                                } else if (statusBaru.includes("DELIVERED") && statusLama && !statusLama.includes("DELIVERED")) {
+                                    announceStatusChange(item, "DELIVERED");
                                 }
                             }
                             previousStatusMap[id] = statusBaru;
