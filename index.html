@@ -37,6 +37,59 @@
             flex-direction: column;
         }
 
+        /* Modal Aktivasi Suara di Awal Loading */
+        #audioInitModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(11, 15, 25, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 2px solid var(--text-gold);
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(243, 186, 47, 0.3);
+            max-width: 400px;
+        }
+
+        .modal-content h2 {
+            color: var(--text-gold);
+            margin-bottom: 12px;
+            font-size: 20px;
+        }
+
+        .modal-content p {
+            color: var(--text-white-soft);
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .btn-activate {
+            background: var(--text-gold);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            font-weight: bold;
+            font-size: 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .btn-activate:hover {
+            transform: scale(1.05);
+            background-color: #e5ad28;
+        }
+
         /* Header Layout */
         header {
             background-color: var(--bg-card);
@@ -103,17 +156,6 @@
             justify-content: center;
         }
 
-        /* Banner Suara */
-        #audioEnableBanner {
-            background-color: var(--text-gold);
-            color: #000;
-            text-align: center;
-            padding: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            z-index: 20;
-        }
-
         /* Scroll Area & Table */
         #scrollContainer {
             flex: 1;
@@ -122,7 +164,6 @@
             scroll-behavior: smooth;
         }
 
-        /* Sembunyikan scrollbar untuk tampilan layar TV / Display Dashboard */
         #scrollContainer::-webkit-scrollbar {
             display: none;
         }
@@ -271,15 +312,19 @@
 </head>
 <body>
 
-    <!-- Audio Enable Banner -->
-    <div id="audioEnableBanner" onclick="enableAudioSystem()">
-        🔊 Mengaktifkan Fitur Suara 
+    <!-- Modal Aktivasi Suara Awal Loading -->
+    <div id="audioInitModal">
+        <div class="modal-content">
+            <h2>SISTEM DASHBOARD LIVE</h2>
+            <p>Klik tombol di bawah untuk mengaktifkan fitur suara pengumuman dan audio sistem.</p>
+            <button class="btn-activate" onclick="enableAudioSystem()">🔊 AKTIFKAN</button>
+        </div>
     </div>
 
     <!-- Header Section -->
     <header>
         <div class="header-title">
-            <h1>DASHBOARD INVESTAMA KALIMANTAN ENERGI GROUP </h1>
+            <h1>DASHBOARD INVESTAMA KALIMANTAN ENERGI GROUP</h1>
             <p id="targetDate">MENGAMBIL DATA...</p>
         </div>
         <div class="header-controls">
@@ -359,8 +404,33 @@
             { t: "Siapa yang menabur kebaikan, ia akan memanen kebahagiaan, baik di dunia maupun di akhirat.", s: "Nasehat Tauhid" },
             { t: "Bukan kemiskinan yang kita takuti, melainkan hilangnya rasa syukur saat harta melimpah.", s: "Kata Hikmah" },
             { t: "Jika Allah menunda sesuatu yang kamu inginkan, itu karena Dia ingin memberimu sesuatu yang jauh lebih baik pada waktu yang tepat.", s: "QS. Al-Baqarah: 216" },
-            { t: "Senyummu di hadapan saudaramu adalah bernilai sedekah.", s: "HR. Tirmidzi" },
-            { t: "Mulailah pagimu dengan bismillah, jalani siangmu dengan alhamdulillah, dan tutuplah malammu dengan istighfar.", s: "Nasehat Bijak" }
+            { t: "Mulailah pagimu dengan bismillah, jalani siangmu dengan alhamdulillah, dan tutuplah malammu dengan istighfar.", s: "Nasehat Bijak" },
+            { t: "Kejujuran adalah perhiasan terbaik bagi seorang pekerja dan kehormatan tertinggi bagi seorang profesional.", s: "Kata Mutiara Work Ethics" },
+            { t: "Kematangan seseorang terlihat dari bagaimana ia tetap tenang di bawah tekanan dan tetap ikhlas saat diuji.", s: "Nasehat Kehidupan" },
+            { t: "Setiap langkah kecil yang kamu lakukan hari ini dengan penuh tanggung jawab adalah fondasi keberhasilan esok hari.", s: "Motivasi Kerja" },
+            { t: "Ingatlah bahwa keberhasilan besar merupakan kumpulan dari usaha-usaha kecil yang konsisten dijalani setiap hari.", s: "Kata Hikmah" },
+            { t: "Jangan membandingkan prosesmu dengan orang lain, setiap bunga mekar pada waktunya masing-masing.", s: "Nasehat Diri" },
+            { t: "Keselamatan kerja adalah keutamaan, pulang dengan selamat kepada keluarga adalah kemenangan sejati.", s: "Pesan Keselamatan Kerja" },
+            { t: "Tidak ada hasil luar biasa yang lahir dari usaha yang biasa-biasa saja. Tetap fokus dan berikan yang terbaik.", s: "Motivasi Profesional" },
+            { t: "Bersyukurlah atas pekerjaan yang kamu miliki hari ini, banyak orang di luar sana mendambakan posisi yang kamu tempati.", s: "Renungan Pagi" },
+            { t: "Ikhlas dalam bekerja membuat beban seberat apa pun terasa ringan, karena balasan terbaik ada di sisi Allah.", s: "Nasehat Tauhid" },
+            { t: "Jangan menunggu waktu yang tepat untuk berbuat baik, buatlah waktu yang ada menjadi moment terbaik.", s: "Kata Bijak" },
+            { t: "Sebuah perjalanan ribuan mil selalu dimulai dengan satu langkah pertama.", s: "Lao Tzu" },
+            { t: "Kedisiplinan adalah jembatan antara cita-cita dan pencapaian.", s: "Jim Rohn" },
+            { t: "Karakter sejati kita terlihat saat tidak ada orang lain yang melihat. Tetaplah jujur dalam bertugas.", s: "Integritas Kerja" },
+            { t: "Jangan pernah meremehkan senyum dan sapaan ramah, hal kecil itu bisa menghangatkan hari orang lain.", s: "Pesan Kebaikan" },
+            { t: "Fokus pada solusi, bukan pada masalahnya. Setiap tantangan selalu membawa pelajaran berharga.", s: "Mindset Sukses" },
+            { t: "Tanggung jawab adalah tanda kedewasaan. Kerjakan tugasmu dengan penuh kebanggaan.", s: "Etos Kerja" },
+            { t: "Doa tanpa usaha adalah kesombongan, usaha tanpa doa adalah keputusasaan. Seimbangkan keduanya.", s: "Nasehat Tauhid" },
+            { t: "Semakin banyak kamu bersyukur, semakin banyak hal indah yang akan kamu temukan dalam hidup.", s: "Kata Hikmah" },
+            { t: "Kesabaran bukan berarti diam dan menyerah, melainkan terus melangkah dengan keyakinan penuh.", s: "Sikap Hidup" },
+            { t: "Kepercayaan dibentuk dari konsistensi dan integritas yang dibangun hari demi hari.", s: "Prinsip Profesional" },
+            { t: "Setiap lelah yang diniatkan demi menafkahi keluarga akan bernilai ganjaran besar di hadapan Allah.", s: "Nasehat Pekerja" },
+            { t: "Jadikan setiap rintangan sebagai batu pijakan untuk melompat lebih tinggi.", s: "Motivasi Diri" },
+            { t: "Kerja keras mengalahkan bakat ketika bakat tidak bekerja keras.", s: "Tim Notke" },
+            { t: "Kebahagiaan sejati hadir ketika kita bisa bermanfaat dan memberikan kedamaian bagi sekeliling kita.", s: "Kata Mutiara" },
+            { t: "Senantiasa utamakan keselamatan dalam bertugas, ada keluarga tercinta yang menunggu kepulanganmu di rumah.", s: "Pesan Keselamatan Kerja" },
+            { t: "Tutup harimu dengan penuh kesyukuran, esok adalah kesempatan baru untuk menjadi lebih baik.", s: "Renungan Malam" }
         ];
 
         let quoteIndex = 0;
@@ -386,7 +456,6 @@
             return `${yyyy}-${mm}-${dd}`;
         }
 
-        // Fungsi Chime Bandara Autentik (Harmoni Nada Sol-Mi-Do / F5 - D5 - A4 - F4)
         function playAirportChime() {
             return new Promise((resolve) => {
                 try {
@@ -398,10 +467,10 @@
                     const ctx = new AudioContext();
 
                     const notes = [
-                        { freq: 698.46, time: 0.00, duration: 0.45 }, // F5
-                        { freq: 587.33, time: 0.35, duration: 0.45 }, // D5
-                        { freq: 440.00, time: 0.70, duration: 0.45 }, // A4
-                        { freq: 349.23, time: 1.05, duration: 1.10 }  // F4
+                        { freq: 698.46, time: 0.00, duration: 0.45 },
+                        { freq: 587.33, time: 0.35, duration: 0.45 },
+                        { freq: 440.00, time: 0.70, duration: 0.45 },
+                        { freq: 349.23, time: 1.05, duration: 1.10 }
                     ];
 
                     notes.forEach(note => {
@@ -439,15 +508,12 @@
             const originalVolume = audio.volume;
             if (!audio.paused) audio.volume = 0.1;
 
-            // 1. Memutar chime pembuka
             await playAirportChime();
 
-            // Pesan keselamatan yang ditambahkan setelah pengumuman
-            const safetyMessage = "jaga kualitas dan kuantitas pengiriman bbm, serta utamakan keselamatan dan selalu gunakan alat pelindung diri saat bertugas. Terima kasih.";
+            const safetyMessage = "harap jaga kualitas dan kuantitas pengiriman,serta utamakan keselamatan dan selalu gunakan APD saat bertugas. Terima kasih.";
             const fullText = text + safetyMessage;
 
             const finishAnnouncement = async () => {
-                // 3. Memutar chime penutup setelah pengumuman selesai
                 await playAirportChime();
                 if (!audio.paused) audio.volume = originalVolume;
             };
@@ -466,7 +532,6 @@
                 }
             };
 
-            // 2. Memutar pengumuman suara
             if (window.responsiveVoice && typeof responsiveVoice.speak === 'function') {
                 try {
                     responsiveVoice.speak(fullText, "Indonesian Female", {
@@ -486,8 +551,8 @@
 
         function enableAudioSystem() {
             isAudioAllowed = true;
-            document.getElementById('audioEnableBanner').style.display = 'none';
-            playVoiceAnnouncement("Sistem  suara telah aktif.");
+            document.getElementById('audioInitModal').style.display = 'none';
+            playVoiceAnnouncement("Sistem suara telah aktif.");
         }
 
         function toggleAudio() {
@@ -632,24 +697,22 @@
 
         function getWIB() { return new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" })); }
 
-        // KODE BARU (Sudah diperbaiki):
-function announceStatusChange(item, statusType) {
-    // Memisah setiap huruf/angka dengan spasi agar dieja satu per satu (contoh: K H 1 2 3 4 A B)
-    const nopolEja = (item.nopol || 'Tanpa Nopol').split('').join(' ');
-    const sopir = item.sopir || 'Sopir';
-    const tujuan = item.delivery_to || 'Tujuan';
+        function announceStatusChange(item, statusType) {
+            const nopolEja = (item.nopol || 'Tanpa Nopol').split('').join(' ');
+            const sopir = item.sopir || 'Sopir';
+            const tujuan = item.delivery_to || 'Tujuan';
 
-    let teks = "";
-    if (statusType.includes("PROSES")) {
-        teks = `Mohon perhatian, kendaraan dengan nomor polisi ${nopolEja}. Driver ${sopir}, tujuan pengiriman ${tujuan}, status PROSES menuju lokasi pengiriman.`;
-    } else if (statusType.includes("DELIVERED")) {
-        teks = `Mohon perhatian, kendaraan dengan nomor polisi ${nopolEja}. Driver ${sopir}, tujuan pengiriman ${tujuan}, status DELIVERED telah sampai lokasi pengiriman.`;
-    }
+            let teks = "";
+            if (statusType.includes("PROSES")) {
+                teks = `Mohon perhatian, armada dengan nomor polisi ${nopolEja}. pengemudi ${sopir}, tujuan pengiriman ${tujuan}, status PROSES menuju lokasi pengiriman.`;
+            } else if (statusType.includes("DELIVERED")) {
+                teks = `Mohon perhatian, armada dengan nomor polisi ${nopolEja}. pengemudi ${sopir}, tujuan pengiriman ${tujuan}, status DELIVERED telah sampai lokasi pengiriman.`;
+            }
 
-    if (teks) {
-        playVoiceAnnouncement(teks);
-    }
-}
+            if (teks) {
+                playVoiceAnnouncement(teks);
+            }
+        }
 
         async function loadDashboard() {
             try {
