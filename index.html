@@ -569,7 +569,7 @@
             audio.src = streamSources[currentSourceIndex];
             audio.play().then(() => {
                 btn.innerText = "⏸";
-                statusLabel.innerText = "QUR'AN LIVE";
+                statusLabel.innerText = "LIVE";
             }).catch(() => tryNextSource());
         }
 
