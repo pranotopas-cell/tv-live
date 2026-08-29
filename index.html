@@ -457,7 +457,7 @@
                     window.speechSynthesis.cancel();
                     const msg = new SpeechSynthesisUtterance(fullText);
                     msg.lang = 'id-ID';
-                    msg.rate = 0.9;
+                    msg.rate = 0.75;
                     msg.onend = finishAnnouncement;
                     msg.onerror = finishAnnouncement;
                     window.speechSynthesis.speak(msg);
@@ -471,7 +471,7 @@
                 try {
                     responsiveVoice.speak(fullText, "Indonesian Female", {
                         pitch: 1,
-                        rate: 0.9,
+                        rate: 0.75,
                         volume: 1,
                         onend: finishAnnouncement,
                         onerror: speakFallback
