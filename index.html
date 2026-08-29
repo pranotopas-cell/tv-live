@@ -641,9 +641,9 @@ function announceStatusChange(item, statusType) {
 
     let teks = "";
     if (statusType.includes("PROSES")) {
-        teks = `Mohon perhatian, kendaraan nomor polisi ${nopolEja}. Driver ${sopir}, tujuan ${tujuan}, status PROSES.`;
+        teks = `Mohon perhatian, kendaraan dengan nomor polisi ${nopolEja}. Driver ${sopir}, tujuan pengiriman ${tujuan}, status PROSES menuju lokasi pengiriman.`;
     } else if (statusType.includes("DELIVERED")) {
-        teks = `Mohon perhatian, kendaraan nomor polisi ${nopolEja}. Driver ${sopir}, tujuan ${tujuan}, status DELIVERED.`;
+        teks = `Mohon perhatian, kendaraan dengan nomor polisi ${nopolEja}. Driver ${sopir}, tujuan pengiriman ${tujuan}, status DELIVERED telah sampai lokasi pengiriman.`;
     }
 
     if (teks) {
