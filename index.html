@@ -279,7 +279,7 @@
     <!-- Header Section -->
     <header>
         <div class="header-title">
-            <h1>Dashboard Pengiriman INVESTAMA KALIMANTAN ENERGI GROUP </h1>
+            <h1>DASHBOARD INVESTAMA KALIMANTAN ENERGI GROUP </h1>
             <p id="targetDate">MENGAMBIL DATA...</p>
         </div>
         <div class="header-controls">
@@ -443,7 +443,7 @@
             await playAirportChime();
 
             // Pesan keselamatan yang ditambahkan setelah pengumuman
-            const safetyMessage = " Tetap jaga kualitas dan kuantitas pengiriman, serta utamakan keselamatan dan selalu gunakan alat pelindung diri saat proses bongkar bbm. Terima kasih.";
+            const safetyMessage = "jaga kualitas dan kuantitas pengiriman bbm, serta utamakan keselamatan dan selalu gunakan alat pelindung diri saat bertugas. Terima kasih.";
             const fullText = text + safetyMessage;
 
             const finishAnnouncement = async () => {
@@ -487,7 +487,7 @@
         function enableAudioSystem() {
             isAudioAllowed = true;
             document.getElementById('audioEnableBanner').style.display = 'none';
-            playVoiceAnnouncement("Mohon perhatian. Sistem pengumuman suara telah aktif.");
+            playVoiceAnnouncement("Sistem  suara telah aktif.");
         }
 
         function toggleAudio() {
@@ -573,7 +573,7 @@
             wrapText(qSrc);
             
             await animateIn(overlay);
-            await new Promise(r => setTimeout(r, 7000)); 
+            await new Promise(r => setTimeout(r, 30000)); 
             await animateOut(overlay);
         }
 
@@ -599,7 +599,7 @@
             }
 
             isScrolling = true;
-            const scrollSpeed = 0.8; 
+            const scrollSpeed = 0.4; 
 
             function step() {
                 if (!isScrolling) return;
@@ -639,9 +639,9 @@
 
             let teks = "";
             if (statusType.includes("PROSES")) {
-                teks = `Mohon perhatian, kendaraan nomor polisi ${nopol}. Driver ${sopir}, tujuan ${tujuan}, status PROSES.`;
+                teks = `Mohon perhatian,unit dengan nomor polisi ${nopol}. Driver ${sopir}, tujuan pengiriman  ${tujuan}, status PROSES menuju lokasi pengiriman.`;
             } else if (statusType.includes("DELIVERED")) {
-                teks = `Mohon perhatian, kendaraan nomor polisi ${nopol}. Driver ${sopir}, tujuan ${tujuan}, status DELIVERED.`;
+                teks = `Mohon perhatian,unit dengan  nomor polisi ${nopol}. Driver ${sopir}, tujuan pengiriman ${tujuan}, status DELIVERED telah sampai ke lokasi pengiriman .`;
             }
 
             if (teks) {
