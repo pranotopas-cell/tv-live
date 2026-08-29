@@ -679,7 +679,7 @@
             // Memutar Chime Pembuka Bandara Bergema
             await playAirportChime();
 
-            const safetyMessage = ". Tetap jaga kualitas dan kuantitas pengiriman, serta utamakan keselamatan dan selalu gunakan alat pelindung diri saat bertugas, terima kasih.";
+            const safetyMessage = ".jaga kualitas dan kuantitas pengiriman, serta utamakan keselamatan dan selalu gunakan alat pelindung diri saat bertugas, terima kasih.";
             const fullText = text + safetyMessage;
 
             try {
@@ -922,21 +922,21 @@
             let teks = "";
             
             if (stUpper.includes("PROSES")) {
-                teks = `Mohon perhatian, kendaraan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, tujuan ${tujuan}, status PROSES pengiriman.`;
+                teks = `Mohon perhatian, unit dengan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, tujuan pengiriman ${tujuan}, status PROSES perjalanan pengiriman ke lokasi.`;
             } else if (stUpper.includes("DELIVERED")) {
-                teks = `Mohon perhatian, pengiriman unit nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, tujuan ${tujuan}, telah selesai dan terkonfirmasi DELIVERED.`;
+                teks = `Mohon perhatian, unit dengan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, tujuan pengiriman ${tujuan}, telah sampai ke tujuan dan terkonfirmasi DELIVERED.`;
             } else if (stUpper.includes("LANGSIR")) {
-                teks = `Informasi, kendaraan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status LANGSIR.`;
+                teks = `Informasi, unit dengan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status LANGSIR.`;
             } else if (stUpper.includes("OPER")) {
-                teks = `Informasi, kendaraan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status OPER pengiriman.`;
+                teks = `Informasi, unit dengan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status OPER muatan.`;
             } else if (stUpper.includes("NGISI")) {
-                teks = `Informasi, kendaraan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status NGISI AJA di depo.`;
+                teks = `Informasi, unit dengan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status NGISI AJA di depo.`;
             } else if (stUpper.includes("TUNGGU")) {
-                teks = `Informasi, kendaraan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status TUNGGU antrean.`;
+                teks = `Informasi, unit dengan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status TUNGGU informasi jadwal pengiriman.`;
             } else if (stUpper.includes("TERJADWAL")) {
-                teks = `Informasi, kendaraan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status TERJADWAL.`;
+                teks = `Informasi, unit dengan  nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status TERJADWAL .`;
             } else {
-                teks = `Mohon perhatian, kendaraan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status diperbarui menjadi ${statusBaru}.`;
+                teks = `Mohon perhatian, unit dengan  nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status diperbarui menjadi ${statusBaru}.`;
             }
 
             if (teks) {
