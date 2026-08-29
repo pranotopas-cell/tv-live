@@ -272,19 +272,19 @@
         }
 
         .quote-box {
-            max-width: 800px;
+            max-width: 850px;
         }
 
         #quoteText {
-            font-size: 28px;
+            font-size: 30px;
             line-height: 1.6;
             color: var(--text-white);
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             font-style: italic;
         }
 
         #quoteSource {
-            font-size: 20px;
+            font-size: 22px;
             color: var(--text-gold);
             font-weight: bold;
         }
@@ -326,7 +326,7 @@
     <div id="tvAudioModal">
         <h2>SISTEM PENGUMUMAN SUARA DASHBOARD</h2>
         <p>Silakan tekan tombol <b style="color: var(--text-gold);">OK / ENTER</b> pada Remote Control TV Anda untuk mengaktifkan Suara Pengumuman Otomatis.</p>
-        <button id="btnEnableTV">AKTIFKAN SUARA</button>
+        <button id="btnEnableTV">AKTIFKAN </button>
     </div>
 
     <!-- Audio Enable Banner -->
@@ -383,6 +383,7 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YWVjdHBoZ29lbG1oenJrYXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NzExNDYsImV4cCI6MjA4ODE0NzE0Nn0.-8E98wpkzHBARRhW6PKhBtf2XKhWFjq7idAzw9jlcKg';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // Koleksi Quote Diperbanyak (60 Quote Hikmah & Motivasi Kerja)
         const quotes = [
             { t: "Sesungguhnya sesudah kesulitan itu ada kemudahan.", s: "QS. Al-Insyirah: 6" },
             { t: "Bekerjalah untuk duniamu seolah hidup selamanya,\nberamallah untuk akhiratmu seolah mati besok.", s: "Ali bin Abi Thalib" },
@@ -417,8 +418,33 @@
             { t: "Siapa yang menabur kebaikan, ia akan memanen kebahagiaan, baik di dunia maupun di akhirat.", s: "Nasehat Tauhid" },
             { t: "Bukan kemiskinan yang kita takuti, melainkan hilangnya rasa syukur saat harta melimpah.", s: "Kata Hikmah" },
             { t: "Jika Allah menunda sesuatu yang kamu inginkan, itu karena Dia ingin memberimu sesuatu yang jauh lebih baik pada waktu yang tepat.", s: "QS. Al-Baqarah: 216" },
-            { t: "Senyummu di hadapan saudaramu adalah bernilai sedekah.", s: "HR. Tirmidzi" },
-            { t: "Mulailah pagimu dengan bismillah, jalani siangmu dengan alhamdulillah, dan tutuplah malammu dengan istighfar.", s: "Nasehat Bijak" }
+            { t: "Mulailah pagimu dengan bismillah, jalani siangmu dengan alhamdulillah, dan tutuplah malammu dengan istighfar.", s: "Nasehat Bijak" },
+            { t: "Kejujuran adalah perhiasan terbaik bagi seorang pekerja dan kehormatan tertinggi bagi seorang profesional.", s: "Kata Mutiara Work Ethics" },
+            { t: "Kematangan seseorang terlihat dari bagaimana ia tetap tenang di bawah tekanan dan tetap ikhlas saat diuji.", s: "Nasehat Kehidupan" },
+            { t: "Setiap langkah kecil yang kamu lakukan hari ini dengan penuh tanggung jawab adalah fondasi keberhasilan esok hari.", s: "Motivasi Kerja" },
+            { t: "Ingatlah bahwa keberhasilan besar merupakan kumpulan dari usaha-usaha kecil yang konsisten dijalani setiap hari.", s: "Kata Hikmah" },
+            { t: "Jangan membandingkan prosesmu dengan orang lain, setiap bunga mekar pada waktunya masing-masing.", s: "Nasehat Diri" },
+            { t: "Keselamatan kerja adalah keutamaan, pulang dengan selamat kepada keluarga adalah kemenangan sejati.", s: "Pesan Keselamatan Kerja" },
+            { t: "Tidak ada hasil luar biasa yang lahir dari usaha yang biasa-biasa saja. Tetap fokus dan berikan yang terbaik.", s: "Motivasi Profesional" },
+            { t: "Bersyukurlah atas pekerjaan yang kamu miliki hari ini, banyak orang di luar sana mendambakan posisi yang kamu tempati.", s: "Renungan Pagi" },
+            { t: "Ikhlas dalam bekerja membuat beban seberat apa pun terasa ringan, karena balasan terbaik ada di sisi Allah.", s: "Nasehat Tauhid" },
+            { t: "Jangan menunggu waktu yang tepat untuk berbuat baik, buatlah waktu yang ada menjadi moment terbaik.", s: "Kata Bijak" },
+            { t: "Sebuah perjalanan ribuan mil selalu dimulai dengan satu langkah pertama.", s: "Lao Tzu" },
+            { t: "Kedisiplinan adalah jembatan antara cita-cita dan pencapaian.", s: "Jim Rohn" },
+            { t: "Karakter sejati kita terlihat saat tidak ada orang lain yang melihat. Tetaplah jujur dalam bertugas.", s: "Integritas Kerja" },
+            { t: "Jangan pernah meremehkan senyum dan sapaan ramah, hal kecil itu bisa menghangatkan hari orang lain.", s: "Pesan Kebaikan" },
+            { t: "Fokus pada solusi, bukan pada masalahnya. Setiap tantangan selalu membawa pelajaran berharga.", s: "Mindset Sukses" },
+            { t: "Tanggung jawab adalah tanda kedewasaan. Kerjakan tugasmu dengan penuh kebanggaan.", s: "Etos Kerja" },
+            { t: "Doa tanpa usaha adalah kesombongan, usaha tanpa doa adalah keputusasaan. Seimbangkan keduanya.", s: "Nasehat Tauhid" },
+            { t: "Semakin banyak kamu bersyukur, semakin banyak hal indah yang akan kamu temukan dalam hidup.", s: "Kata Hikmah" },
+            { t: "Kesabaran bukan berarti diam dan menyerah, melainkan terus melangkah dengan keyakinan penuh.", s: "Sikap Hidup" },
+            { t: "Kepercayaan dibentuk dari konsistensi dan integritas yang dibangun hari demi hari.", s: "Prinsip Profesional" },
+            { t: "Setiap lelah yang diniatkan demi menafkahi keluarga akan bernilai ganjaran besar di hadapan Allah.", s: "Nasehat Pekerja" },
+            { t: "Jadikan setiap rintangan sebagai batu pijakan untuk melompat lebih tinggi.", s: "Motivasi Diri" },
+            { t: "Kerja keras mengalahkan bakat ketika bakat tidak bekerja keras.", s: "Tim Notke" },
+            { t: "Kebahagiaan sejati hadir ketika kita bisa bermanfaat dan memberikan kedamaian bagi sekeliling kita.", s: "Kata Mutiara" },
+            { t: "Senantiasa utamakan keselamatan dalam bertugas, ada keluarga tercinta yang menunggu kepulanganmu di rumah.", s: "Pesan Keselamatan Kerja" },
+            { t: "Tutup harimu dengan penuh kesyukuran, esok adalah kesempatan baru untuk menjadi lebih baik.", s: "Renungan Malam" }
         ];
 
         let quoteIndex = 0;
@@ -591,7 +617,7 @@
                 .replace(/\s+/g, " ");
         }
 
-        // Native TTS Fallback
+        // Native TTS Fallback dengan Suara Lebih Berwibawa (Pitch 0.85)
         function speakNativeFallback(fullText, originalVolume) {
             const finishAnnouncement = async () => {
                 await playAirportChime();
@@ -603,13 +629,13 @@
                 
                 const msg = new SpeechSynthesisUtterance(fullText);
                 msg.lang = 'id-ID';
-                msg.rate = 0.82; 
-                msg.pitch = 1.05;
+                msg.rate = 0.80; // Kecepatan agak lambat agar berwibawa
+                msg.pitch = 0.85; // Pitch lebih rendah agar terdengar berat & berwibawa
 
                 const voices = window.speechSynthesis.getVoices();
                 const bestVoice = voices.find(v => 
                     v.lang.includes('id') && 
-                    (v.name.includes('Google') || v.name.includes('Gadis') || v.name.includes('Indonesian') || v.name.includes('id-id'))
+                    (v.name.includes('Google') || v.name.includes('Indonesian') || v.name.includes('Male') || v.name.includes('id-id'))
                 );
                 
                 if (bestVoice) {
@@ -635,7 +661,7 @@
         }
 
         // =========================================================================
-        // SUARA PENGUMUMAN BANDARA BERMERDU & ACOUSTIC FILTER ENGINE
+        // SUARA PENGUMUMAN BERWIBAWA & ACOUSTIC FILTER ENGINE
         // =========================================================================
         async function playVoiceAnnouncement(text) {
             if (!isAudioAllowed) return;
@@ -653,7 +679,7 @@
             // Memutar Chime Pembuka Bandara Bergema
             await playAirportChime();
 
-            const safetyMessage = ". Tetap jaga kualitas dan kuantitas pengiriman, serta utamakan keselamatan dan selalu gunakan alat pelindung diri saat bertugas, matur nuwun.";
+            const safetyMessage = ". Tetap jaga kualitas dan kuantitas pengiriman, serta utamakan keselamatan dan selalu gunakan alat pelindung diri saat bertugas, terima kasih.";
             const fullText = text + safetyMessage;
 
             try {
@@ -665,7 +691,7 @@
                 ttsAudio.src = googleTtsUrl;
                 ttsAudio.volume = 1.0;
 
-                // Pemprosesan Akustik Filter Suara Bandara (Echo/Warm Reverberation)
+                // Pemprosesan Akustik Filter Suara Berwibawa (Equalizer Low-Bass Boost)
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
                 if (AudioContext) {
                     const ctx = new AudioContext();
@@ -673,23 +699,30 @@
 
                     const source = ctx.createMediaElementSource(ttsAudio);
                     
-                    // Equalizer Kehangatan Vokal Bandara
-                    const filter = ctx.createBiquadFilter();
-                    filter.type = "peaking";
-                    filter.frequency.value = 2500;
-                    filter.Q.value = 1.0;
-                    filter.gain.value = 3.0;
+                    // Filter Bass untuk menambah wibawa vokal
+                    const bassFilter = ctx.createBiquadFilter();
+                    bassFilter.type = "lowshelf";
+                    bassFilter.frequency.value = 200;
+                    bassFilter.gain.value = 5.0;
 
-                    // Reverb Suara Ruangan Bandara
+                    // Filter Clarity
+                    const clarityFilter = ctx.createBiquadFilter();
+                    clarityFilter.type = "peaking";
+                    clarityFilter.frequency.value = 1800;
+                    clarityFilter.Q.value = 1.0;
+                    clarityFilter.gain.value = 2.5;
+
+                    // Reverb Suara Ruangan
                     const convolver = ctx.createConvolver();
                     convolver.buffer = createReverbBuffer(ctx);
                     
                     const reverbGain = ctx.createGain();
-                    reverbGain.gain.value = 0.18; // Gema halus ruang publik
+                    reverbGain.gain.value = 0.20;
 
-                    source.connect(filter);
-                    filter.connect(ctx.destination);
-                    filter.connect(convolver);
+                    source.connect(bassFilter);
+                    bassFilter.connect(clarityFilter);
+                    clarityFilter.connect(ctx.destination);
+                    clarityFilter.connect(convolver);
                     convolver.connect(reverbGain);
                     reverbGain.connect(ctx.destination);
 
@@ -801,6 +834,7 @@
             overlay.style.display = 'none';
         }
 
+        // Tampilan Quote Diperlama Menjadi 30 Detik (30000ms)
         async function showQuote() {
             const overlay = document.getElementById('quoteOverlay');
             const qTxt = document.getElementById('quoteText');
@@ -816,7 +850,7 @@
             wrapText(qSrc);
             
             await animateIn(overlay);
-            await new Promise(r => setTimeout(r, 15000)); 
+            await new Promise(r => setTimeout(r, 30000)); // Durasi 30 detik
             await animateOut(overlay);
         }
 
@@ -830,6 +864,7 @@
             isScrolling = false;
         }
 
+        // Kecepatan Scrolling Diperlambat (scrollSpeed = 0.25)
         function startAutoScroll() {
             stopAutoScroll();
 
@@ -842,7 +877,7 @@
             }
 
             isScrolling = true;
-            const scrollSpeed = 0.4; 
+            const scrollSpeed = 0.25; // Diperlambat dari 0.6 menjadi 0.25
 
             function step() {
                 if (!isScrolling) return;
@@ -857,7 +892,7 @@
                         scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
                         setTimeout(() => { 
                             loadDashboard(); 
-                        }, 500); 
+                        }, 1000); 
                     }, 1000);
                     return; 
                 }
@@ -895,7 +930,7 @@
             } else if (stUpper.includes("OPER")) {
                 teks = `Informasi, kendaraan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status OPER pengiriman.`;
             } else if (stUpper.includes("NGISI")) {
-                teks = `Informasi, kendaraan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status NGISI Bahan Bakar Minyak.`;
+                teks = `Informasi, kendaraan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status NGISI AJA di depo.`;
             } else if (stUpper.includes("TUNGGU")) {
                 teks = `Informasi, kendaraan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status TUNGGU antrean.`;
             } else if (stUpper.includes("TERJADWAL")) {
