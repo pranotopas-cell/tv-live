@@ -383,7 +383,7 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YWVjdHBoZ29lbG1oenJrYXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NzExNDYsImV4cCI6MjA4ODE0NzE0Nn0.-8E98wpkzHBARRhW6PKhBtf2XKhWFjq7idAzw9jlcKg';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Koleksi Quote Diperbanyak (60 Quote Hikmah & Motivasi Kerja)
+        // Koleksi Quote (60 Quote Hikmah & Motivasi Kerja)
         const quotes = [
             { t: "Sesungguhnya sesudah kesulitan itu ada kemudahan.", s: "QS. Al-Insyirah: 6" },
             { t: "Bekerjalah untuk duniamu seolah hidup selamanya,\nberamallah untuk akhiratmu seolah mati besok.", s: "Ali bin Abi Thalib" },
@@ -456,14 +456,42 @@
         ];
         let currentSourceIndex = 0;
 
-        let previousStatusMap = {};
+        let previousDataMap = {}; // Menyimpan snapshot data sebelumnya
         let isInitialLoad = true;
         let isAudioAllowed = false;
         let isScrolling = false;
         let scrollRequest = null;
 
-        // Inisialisasi awal modal pemicu audio TV
+        // =========================================================================
+        // FITUR ANTI SLEEP / CEGAH TV MATI OTOMATIS (WAKE LOCK ENGINE)
+        // =========================================================================
+        let wakeLock = null;
+
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('Screen Wake Lock Aktif: TV tidak akan sleep.');
+                    wakeLock.addEventListener('release', () => {
+                        console.log('Screen Wake Lock terlepas.');
+                    });
+                }
+            } catch (err) {
+                console.warn(`Gagal aktifkan Wake Lock: ${err.name}, ${err.message}`);
+            }
+        }
+
+        // Re-apply Wake Lock jika tab/aktivitas halaman kembali menjadi aktif
+        document.addEventListener('visibilitychange', async () => {
+            if (wakeLock !== null && document.visibilityState === 'visible') {
+                await requestWakeLock();
+            }
+        });
+
         document.addEventListener("DOMContentLoaded", function() {
+            // Aktifkan cegah sleep segera setelah dokumen siap
+            requestWakeLock();
+
             const modal = document.getElementById('tvAudioModal');
             const btn = document.getElementById('btnEnableTV');
             
@@ -472,6 +500,9 @@
             function activateAudio() {
                 isAudioAllowed = true;
                 if (modal) modal.style.display = 'none';
+
+                // Re-trigger Wake Lock saat ditekan tombol OK
+                requestWakeLock();
 
                 if ('speechSynthesis' in window) {
                     window.speechSynthesis.getVoices();
@@ -505,22 +536,8 @@
         }
 
         // =========================================================================
-        // CHIME EFEK BANDARA HARMONIC DENGAN REVERB & EFEK DING-DONG MERDU
+        // EFEK BEL PINTU (DING-DONG) SIMPLE DAN MERDU
         // =========================================================================
-        function createReverbBuffer(audioCtx) {
-            const sampleRate = audioCtx.sampleRate;
-            const length = sampleRate * 2.5; 
-            const impulse = audioCtx.createBuffer(2, length, sampleRate);
-            const left = impulse.getChannelData(0);
-            const right = impulse.getChannelData(1);
-            for (let i = 0; i < length; i++) {
-                const decay = Math.exp(-i / (sampleRate * 0.5));
-                left[i] = (Math.random() * 2 - 1) * decay;
-                right[i] = (Math.random() * 2 - 1) * decay;
-            }
-            return impulse;
-        }
-
         function playAirportChime() {
             return new Promise((resolve) => {
                 try {
@@ -532,27 +549,15 @@
 
                     const masterGain = ctx.createGain();
                     masterGain.gain.value = 0.5;
-
-                    const convolver = ctx.createConvolver();
-                    convolver.buffer = createReverbBuffer(ctx);
-                    
-                    const reverbGain = ctx.createGain();
-                    reverbGain.gain.value = 0.35;
-
                     masterGain.connect(ctx.destination);
-                    masterGain.connect(convolver);
-                    convolver.connect(reverbGain);
-                    reverbGain.connect(ctx.destination);
 
-                    // Melodi Khas Pengumuman Bandara (A Major / Warm Polyphonic Tone)
-                    const notes = [
-                        { freq: 554.37, time: 0.00, duration: 0.6 }, // C#5
-                        { freq: 659.25, time: 0.35, duration: 0.6 }, // E5
-                        { freq: 440.00, time: 0.70, duration: 0.6 }, // A4
-                        { freq: 329.63, time: 1.05, duration: 1.4 }  // E4
+                    // Nada Ding-Dong (Ding = G5 / 783.99 Hz, Dong = E5 / 659.25 Hz)
+                    const dingDongNotes = [
+                        { freq: 783.99, time: 0.00, duration: 0.8 }, // Ding
+                        { freq: 659.25, time: 0.45, duration: 1.2 }  // Dong
                     ];
 
-                    notes.forEach(note => {
+                    dingDongNotes.forEach(note => {
                         const osc = ctx.createOscillator();
                         const gain = ctx.createGain();
 
@@ -560,7 +565,7 @@
                         osc.frequency.setValueAtTime(note.freq, ctx.currentTime + note.time);
                         
                         gain.gain.setValueAtTime(0.0001, ctx.currentTime + note.time);
-                        gain.gain.exponentialRampToValueAtTime(0.5, ctx.currentTime + note.time + 0.04);
+                        gain.gain.exponentialRampToValueAtTime(0.6, ctx.currentTime + note.time + 0.03);
                         gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + note.time + note.duration);
 
                         osc.connect(gain);
@@ -573,17 +578,14 @@
                     setTimeout(() => {
                         ctx.close();
                         resolve();
-                    }, 2400);
+                    }, 1700);
                 } catch (e) {
-                    console.error("Gagal memutar chime:", e);
+                    console.error("Gagal memutar bell:", e);
                     resolve();
                 }
             });
         }
 
-        // =========================================================================
-        // MESIN FONETIK (EJAAN OTOMATIS TV)
-        // =========================================================================
         function spellNopolForTV(nopolStr) {
             if (!nopolStr) return "tanpa nomor polisi";
             
@@ -617,7 +619,6 @@
                 .replace(/\s+/g, " ");
         }
 
-        // Native TTS Fallback dengan Suara Lebih Berwibawa (Pitch 0.85)
         function speakNativeFallback(fullText, originalVolume) {
             const finishAnnouncement = async () => {
                 await playAirportChime();
@@ -629,8 +630,8 @@
                 
                 const msg = new SpeechSynthesisUtterance(fullText);
                 msg.lang = 'id-ID';
-                msg.rate = 0.80; // Kecepatan agak lambat agar berwibawa
-                msg.pitch = 0.85; // Pitch lebih rendah agar terdengar berat & berwibawa
+                msg.rate = 0.80;
+                msg.pitch = 0.85;
 
                 const voices = window.speechSynthesis.getVoices();
                 const bestVoice = voices.find(v => 
@@ -660,9 +661,6 @@
             }
         }
 
-        // =========================================================================
-        // SUARA PENGUMUMAN BERWIBAWA & ACOUSTIC FILTER ENGINE
-        // =========================================================================
         async function playVoiceAnnouncement(text) {
             if (!isAudioAllowed) return;
 
@@ -676,7 +674,6 @@
             const originalVolume = audio.volume;
             if (!audio.paused) audio.volume = 0.1;
 
-            // Memutar Chime Pembuka Bandara Bergema
             await playAirportChime();
 
             const safetyMessage = ".jaga kualitas dan kuantitas pengiriman, serta utamakan keselamatan dan selalu gunakan alat pelindung diri saat bertugas, terima kasih.";
@@ -691,7 +688,6 @@
                 ttsAudio.src = googleTtsUrl;
                 ttsAudio.volume = 1.0;
 
-                // Pemprosesan Akustik Filter Suara Berwibawa (Equalizer Low-Bass Boost)
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
                 if (AudioContext) {
                     const ctx = new AudioContext();
@@ -699,32 +695,20 @@
 
                     const source = ctx.createMediaElementSource(ttsAudio);
                     
-                    // Filter Bass untuk menambah wibawa vokal
                     const bassFilter = ctx.createBiquadFilter();
                     bassFilter.type = "lowshelf";
                     bassFilter.frequency.value = 200;
                     bassFilter.gain.value = 5.0;
 
-                    // Filter Clarity
                     const clarityFilter = ctx.createBiquadFilter();
                     clarityFilter.type = "peaking";
                     clarityFilter.frequency.value = 1800;
                     clarityFilter.Q.value = 1.0;
                     clarityFilter.gain.value = 2.5;
 
-                    // Reverb Suara Ruangan
-                    const convolver = ctx.createConvolver();
-                    convolver.buffer = createReverbBuffer(ctx);
-                    
-                    const reverbGain = ctx.createGain();
-                    reverbGain.gain.value = 0.20;
-
                     source.connect(bassFilter);
                     bassFilter.connect(clarityFilter);
                     clarityFilter.connect(ctx.destination);
-                    clarityFilter.connect(convolver);
-                    convolver.connect(reverbGain);
-                    reverbGain.connect(ctx.destination);
 
                     ttsAudio.onended = async () => {
                         await playAirportChime();
@@ -733,7 +717,7 @@
                     };
 
                     ttsAudio.onerror = (e) => {
-                        console.warn("Google Audio dengan Filter Gagal, Beralih ke Standard Native Audio:", e);
+                        console.warn("Google Audio Gagal, Beralih ke Native TTS:", e);
                         speakNativeFallback(fullText, originalVolume);
                     };
 
@@ -748,7 +732,7 @@
                 }
 
             } catch (err) {
-                console.warn("Audio Playback Filter Error, beralih ke Native TTS TV:", err);
+                console.warn("Audio Playback Error, beralih ke Native TTS TV:", err);
                 speakNativeFallback(fullText, originalVolume);
             }
         }
@@ -758,6 +742,8 @@
             document.getElementById('audioEnableBanner').style.display = 'none';
             document.getElementById('tvAudioModal').style.display = 'none';
             
+            requestWakeLock();
+
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.getVoices();
                 window.speechSynthesis.resume();
@@ -834,7 +820,6 @@
             overlay.style.display = 'none';
         }
 
-        // Tampilan Quote Diperlama Menjadi 30 Detik (30000ms)
         async function showQuote() {
             const overlay = document.getElementById('quoteOverlay');
             const qTxt = document.getElementById('quoteText');
@@ -850,7 +835,7 @@
             wrapText(qSrc);
             
             await animateIn(overlay);
-            await new Promise(r => setTimeout(r, 30000)); // Durasi 30 detik
+            await new Promise(r => setTimeout(r, 30000));
             await animateOut(overlay);
         }
 
@@ -864,7 +849,6 @@
             isScrolling = false;
         }
 
-        // Kecepatan Scrolling Diperlambat (scrollSpeed = 0.25)
         function startAutoScroll() {
             stopAutoScroll();
 
@@ -877,7 +861,7 @@
             }
 
             isScrolling = true;
-            const scrollSpeed = 0.45; // Diperlambat dari 0.6 menjadi 0.25
+            const scrollSpeed = 0.45;
 
             function step() {
                 if (!isScrolling) return;
@@ -911,32 +895,38 @@
         function getWIB() { return new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" })); }
 
         // =========================================================================
-        // LOGIKA PENGUMUMAN DENGAN FORMAT EJAAN FONETIK TV
+        // LOGIKA PENGUMUMAN TERBAIK (STATUS BARU, ROUTE BARU, ATAU JADWAL BARU)
         // =========================================================================
-        function announceStatusChange(item, statusBaru) {
+        function announceStatusChange(item, type = 'status_change') {
             const nopolEjaan = spellNopolForTV(item.nopol);
             const sopir = formatTextForSpeech(item.sopir || 'Sopir');
             const tujuan = formatTextForSpeech(item.delivery_to || 'Tujuan');
-            const stUpper = (statusBaru || "").toUpperCase().trim();
+            const stUpper = ((item.status || "")).toUpperCase().trim();
 
             let teks = "";
             
-            if (stUpper.includes("PROSES")) {
-                teks = `Mohon perhatian, unit dengan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, tujuan pengiriman ${tujuan}, status PROSES perjalanan pengiriman ke lokasi.`;
-            } else if (stUpper.includes("DELIVERED")) {
-                teks = `Mohon perhatian, unit dengan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, tujuan pengiriman ${tujuan}, telah sampai ke tujuan dan terkonfirmasi DELIVERED.`;
-            } else if (stUpper.includes("LANGSIR")) {
-                teks = `Informasi, unit dengan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status LANGSIR.`;
-            } else if (stUpper.includes("OPER")) {
-                teks = `Informasi, unit dengan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status OPER muatan.`;
-            } else if (stUpper.includes("NGISI")) {
-                teks = `Informasi, unit dengan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status NGISI AJA di depo.`;
-            } else if (stUpper.includes("TUNGGU")) {
-                teks = `Informasi, unit dengan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status TUNGGU informasi jadwal pengiriman.`;
-            } else if (stUpper.includes("TERJADWAL")) {
-                teks = `Informasi, unit dengan  nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status TERJADWAL .`;
+            if (type === 'new_route') {
+                teks = `Mohon perhatian, penambahan rute baru untuk unit dengan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, tujuan pengiriman ke ${tujuan}.`;
+            } else if (type === 'new_schedule') {
+                teks = `Mohon perhatian, penambahan jadwal pengiriman baru untuk unit dengan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, tujuan pengiriman ke ${tujuan}, status ${stUpper}.`;
             } else {
-                teks = `Mohon perhatian, unit dengan  nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status diperbarui menjadi ${statusBaru}.`;
+                if (stUpper.includes("PROSES")) {
+                    teks = `Mohon perhatian, unit dengan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, tujuan pengiriman ${tujuan}, status PROSES perjalanan pengiriman ke lokasi.`;
+                } else if (stUpper.includes("DELIVERED")) {
+                    teks = `Mohon perhatian, unit dengan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, tujuan pengiriman ${tujuan}, telah sampai ke tujuan dan terkonfirmasi DELIVERED.`;
+                } else if (stUpper.includes("LANGSIR")) {
+                    teks = `Informasi, unit dengan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status LANGSIR.`;
+                } else if (stUpper.includes("OPER")) {
+                    teks = `Informasi, unit dengan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status OPER muatan.`;
+                } else if (stUpper.includes("NGISI")) {
+                    teks = `Informasi, unit dengan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status NGISI AJA di depo.`;
+                } else if (stUpper.includes("TUNGGU")) {
+                    teks = `Informasi, unit dengan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status TUNGGU informasi jadwal pengiriman.`;
+                } else if (stUpper.includes("TERJADWAL")) {
+                    teks = `Informasi, unit dengan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status TERJADWAL.`;
+                } else {
+                    teks = `Mohon perhatian, unit dengan nomor polisi ${nopolEjaan}. Pengemudi ${sopir}, status diperbarui menjadi ${item.status}.`;
+                }
             }
 
             if (teks) {
@@ -958,16 +948,24 @@
                 currentData.forEach(item => {
                     const id = item.id || (item.sopir + '_' + item.tanggal + '_' + item.delivery_to);
                     const statusBaru = (item.status || "").toUpperCase();
+                    const ruteBaru = (item.delivery_to || "").toUpperCase();
                     const isHariIni = (item.tanggal === isoHariIni);
 
+                    // HANYA jika jadwal hari ini
                     if (!isInitialLoad && isHariIni) {
-                        const statusLama = previousStatusMap[id];
+                        const oldItem = previousDataMap[id];
                         
-                        if (statusLama && statusLama !== statusBaru) {
-                            announceStatusChange(item, statusBaru);
+                        if (oldItem) {
+                            if (oldItem.status !== statusBaru) {
+                                announceStatusChange(item, 'status_change');
+                            } else if (oldItem.rute !== ruteBaru) {
+                                announceStatusChange(item, 'new_route');
+                            }
                         }
                     }
-                    previousStatusMap[id] = statusBaru;
+
+                    // Simpan data snapshot
+                    previousDataMap[id] = { status: statusBaru, rute: ruteBaru };
                 });
 
                 isInitialLoad = false;
@@ -985,22 +983,43 @@
                     'postgres_changes',
                     { event: '*', schema: 'public', table: 'data_pengiriman' },
                     (payload) => {
-                        if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
-                            const item = payload.new;
-                            const isoHariIni = getWIBDateString();
-                            const id = item.id || (item.sopir + '_' + item.tanggal + '_' + item.delivery_to);
-                            const statusBaru = (item.status || "").toUpperCase();
-                            const statusLama = previousStatusMap[id];
+                        const isoHariIni = getWIBDateString();
 
+                        if (payload.eventType === 'UPDATE') {
+                            const item = payload.new;
+                            
+                            // FILTER STRICT: Hanya untuk Jadwal Hari Ini
                             if (item.tanggal === isoHariIni) {
-                                if (statusLama && statusLama !== statusBaru) {
-                                    announceStatusChange(item, statusBaru);
-                                } else if (!statusLama) {
-                                    announceStatusChange(item, statusBaru);
+                                const id = item.id || (item.sopir + '_' + item.tanggal + '_' + item.delivery_to);
+                                const statusBaru = (item.status || "").toUpperCase();
+                                const ruteBaru = (item.delivery_to || "").toUpperCase();
+                                const oldItem = previousDataMap[id];
+
+                                if (oldItem) {
+                                    if (oldItem.status !== statusBaru) {
+                                        announceStatusChange(item, 'status_change');
+                                    } else if (oldItem.rute !== ruteBaru) {
+                                        announceStatusChange(item, 'new_route');
+                                    }
+                                } else {
+                                    announceStatusChange(item, 'status_change');
                                 }
+                                previousDataMap[id] = { status: statusBaru, rute: ruteBaru };
                             }
-                            previousStatusMap[id] = statusBaru;
+                        } else if (payload.eventType === 'INSERT') {
+                            const item = payload.new;
+                            
+                            // FILTER STRICT: Hanya jika Penambahan Jadwal Baru Hari Ini
+                            if (item.tanggal === isoHariIni) {
+                                const id = item.id || (item.sopir + '_' + item.tanggal + '_' + item.delivery_to);
+                                const statusBaru = (item.status || "").toUpperCase();
+                                const ruteBaru = (item.delivery_to || "").toUpperCase();
+                                
+                                announceStatusChange(item, 'new_schedule');
+                                previousDataMap[id] = { status: statusBaru, rute: ruteBaru };
+                            }
                         }
+                        
                         loadDashboard();
                     }
                 )
