@@ -632,22 +632,24 @@
 
         function getWIB() { return new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" })); }
 
-        function announceStatusChange(item, statusType) {
-            const nopol = item.nopol || 'Tanpa Nopol';
-            const sopir = item.sopir || 'Sopir';
-            const tujuan = item.delivery_to || 'Tujuan';
+        // KODE BARU (Sudah diperbaiki):
+function announceStatusChange(item, statusType) {
+    // Memisah setiap huruf/angka dengan spasi agar dieja satu per satu (contoh: K H 1 2 3 4 A B)
+    const nopolEja = (item.nopol || 'Tanpa Nopol').split('').join(' ');
+    const sopir = item.sopir || 'Sopir';
+    const tujuan = item.delivery_to || 'Tujuan';
 
-            let teks = "";
-            if (statusType.includes("PROSES")) {
-                teks = `Mohon perhatian,unit dengan nomor polisi ${nopol}. Driver ${sopir}, tujuan pengiriman  ${tujuan}, status PROSES menuju lokasi pengiriman.`;
-            } else if (statusType.includes("DELIVERED")) {
-                teks = `Mohon perhatian,unit dengan  nomor polisi ${nopol}. Driver ${sopir}, tujuan pengiriman ${tujuan}, status DELIVERED telah sampai ke lokasi pengiriman .`;
-            }
+    let teks = "";
+    if (statusType.includes("PROSES")) {
+        teks = `Mohon perhatian, kendaraan nomor polisi ${nopolEja}. Driver ${sopir}, tujuan ${tujuan}, status PROSES.`;
+    } else if (statusType.includes("DELIVERED")) {
+        teks = `Mohon perhatian, kendaraan nomor polisi ${nopolEja}. Driver ${sopir}, tujuan ${tujuan}, status DELIVERED.`;
+    }
 
-            if (teks) {
-                playVoiceAnnouncement(teks);
-            }
-        }
+    if (teks) {
+        playVoiceAnnouncement(teks);
+    }
+}
 
         async function loadDashboard() {
             try {
