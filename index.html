@@ -323,8 +323,8 @@
     <!-- Modal Aktivasi Suara Awal Loading -->
     <div id="audioInitModal">
         <div class="modal-content">
-            <h2>SISTEM DASHBOARD LIVE</h2>
-            <p>Klik tombol di bawah untuk mengaktifkan fitur suara pengumuman dan audio sistem.</p>
+            <h2>DASHBOARD INVESTAMA KALIMANTAN ENERGI</h2>
+            <p>Klik tombol di bawah untuk mengaktifkan.</p>
             <button class="btn-activate" onclick="enableAudioSystem()">🔊 AKTIFKAN</button>
         </div>
     </div>
@@ -351,10 +351,10 @@
         <table>
             <thead>
                 <tr>
-                    <th style="width: 35%;">Armada / Driver</th>
+                    <th style="width: 35%;">Armada / Driver / Lokasi</th>
                     <th style="width: 15%; text-align: center;">Jumlah</th>
                     <th style="width: 30%;">Tujuan / Depo</th>
-                    <th style="width: 20%; text-align: right;">Status</th>
+                    <th style="width: 20%; text-align: right;">Status pengiriman</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
@@ -537,7 +537,7 @@
 
             await playAirportChime();
 
-            const safetyMessage = "harap jaga kualitas dan kuantitas pengiriman,serta utamakan keselamatan dan selalu gunakan APD saat bertugas Matur nuwun.";
+            const safetyMessage = "Harap jaga kualitas dan kuantitas pengiriman,serta utamakan keselamatan dan selalu gunakan APD saat bertugas Terima Kasih.";
             const fullText = text + safetyMessage;
 
             const finishAnnouncement = async () => {
@@ -580,7 +580,7 @@
             isAudioAllowed = true;
             document.getElementById('audioInitModal').style.display = 'none';
             requestWakeLock(); // Aktifkan pencegah TV mati saat tombol ditekan
-            playVoiceAnnouncement("nyuwun kawigatosanipun, dashboard PT Investama Kalimantan energi group telah diaktifkan.");
+            playVoiceAnnouncement("Terma Kasih, dashboard PT Investama Kalimantan energi group telah diaktifkan.");
         }
 
         function toggleAudio() {
@@ -760,9 +760,9 @@
 
             let teks = "";
             if (statusType.includes("PROSES")) {
-                teks = `Nyuwun kawigatosanipun, armada dengan nomor polisi ${nopolEja}. pengemudi ${sopir}, tujuan pengiriman ${tujuan}, status PROSES menuju lokasi pengiriman.`;
+                teks = `Mohon Perhatian, armada dengan nomor polisi ${nopolEja}. Driver ${sopir}, tujuan pengiriman ${tujuan}, status PROSES perjalanan menuju lokasi pengiriman.`;
             } else if (statusType.includes("DELIVERED")) {
-                teks = `Nyuwun Kawigatosanipun, armada dengan nomor polisi ${nopolEja}. pengemudi ${sopir}, tujuan pengiriman ${tujuan}, status DELIVERED telah sampai lokasi pengiriman.`;
+                teks = `Mohon Perhatian, armada dengan nomor polisi ${nopolEja}. Driver ${sopir}, tujuan pengiriman ${tujuan}, status DELIVERED telah sampai lokasi pengiriman.`;
             }
 
             if (teks) {
