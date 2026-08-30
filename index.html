@@ -508,7 +508,7 @@
                         osc.frequency.setValueAtTime(note.freq, ctx.currentTime + note.time);
 
                         gain.gain.setValueAtTime(0.0001, ctx.currentTime + note.time);
-                        gain.gain.exponentialRampToValueAtTime(0.4, ctx.currentTime + note.time + 0.03);
+                        gain.gain.exponentialRampToValueAtTime(1.0, ctx.currentTime + note.time + 0.03);
                         gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + note.time + note.duration);
 
                         osc.connect(gain);
