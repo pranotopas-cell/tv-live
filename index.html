@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Live</title>
     
-    <!-- Supabase & ResponsiveVoice CDN Gratis (Tanpa API Key Berbayar) -->
+    <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://code.responsivevoice.org/responsivevoice.js?key=FREE"></script>
 
     <style>
         :root {
@@ -161,7 +160,6 @@
             flex: 1;
             overflow-y: auto;
             padding: 20px 25px;
-            scroll-behavior: smooth;
         }
 
         #scrollContainer::-webkit-scrollbar {
@@ -250,6 +248,7 @@
             width: 100vw;
             height: 100vh;
             background-color: rgba(11, 15, 25, 0.96);
+            backdrop-filter: blur(8px);
             display: none;
             flex-direction: column;
             justify-content: center;
@@ -258,25 +257,28 @@
             text-align: center;
             z-index: 100;
             opacity: 0;
-            transition: opacity 0.8s ease;
+            transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .quote-box {
-            max-width: 800px;
+            max-width: 850px;
+            padding: 20px;
         }
 
         #quoteText {
-            font-size: 28px;
+            font-size: 30px;
             line-height: 1.6;
             color: var(--text-white);
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             font-style: italic;
+            font-weight: 300;
         }
 
         #quoteSource {
             font-size: 20px;
             color: var(--text-gold);
             font-weight: bold;
+            letter-spacing: 1px;
         }
 
         /* Typography Letter Animation Wrappers */
@@ -294,19 +296,24 @@
 
         .letter {
             display: inline-block;
-            transform: translateY(100%);
+            transform: translateY(120%) scale(0.8);
             opacity: 0;
-            transition: transform 0.4s cubic-bezier(0.1, 0.7, 0.1, 1), opacity 0.4s ease;
+            filter: blur(4px);
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), 
+                        opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                        filter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .letter.in {
-            transform: translateY(0%);
+            transform: translateY(0%) scale(1);
             opacity: 1;
+            filter: blur(0px);
         }
 
         .letter.out {
-            transform: translateY(-100%);
+            transform: translateY(-120%) scale(0.8);
             opacity: 0;
+            filter: blur(4px);
         }
     </style>
 </head>
@@ -315,9 +322,9 @@
     <!-- Modal Aktivasi Suara Awal Loading -->
     <div id="audioInitModal">
         <div class="modal-content">
-            <h2>SISTEM DASHBOARD LIVE</h2>
-            <p>Klik tombol di bawah untuk mengaktifkan fitur suara pengumuman dan audio sistem.</p>
-            <button class="btn-activate" onclick="enableAudioSystem()">🔊 AKTIFKAN</button>
+            <h2>DASHBOARD INVESTAMA KALIMANTAN ENERGI</h2>
+            <p>Klik tombol di bawah untuk mengaktifkan sistem suara.</p>
+            <button class="btn-activate" onclick="enableAudioSystem()">🔊 AKTIFKAN SUARA</button>
         </div>
     </div>
 
@@ -343,10 +350,10 @@
         <table>
             <thead>
                 <tr>
-                    <th style="width: 35%;">Armada / Driver</th>
-                    <th style="width: 15%; text-align: center;">Jumlah</th>
+                    <th style="width: 35%;">Armada / Driver / Lokasi</th>
+                    <th style="width: 15%; text-align: center;">Jumlah (KL)</th>
                     <th style="width: 30%;">Tujuan / Depo</th>
-                    <th style="width: 20%; text-align: right;">Status</th>
+                    <th style="width: 20%; text-align: right;">Status pengiriman</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
@@ -375,62 +382,7 @@
             { t: "Bekerjalah untuk duniamu seolah hidup selamanya,\nberamallah untuk akhiratmu seolah mati besok.", s: "Ali bin Abi Thalib" },
             { t: "Sebaik-baik manusia adalah yang paling bermanfaat bagi orang lain.", s: "HR. Ahmad" },
             { t: "Barangsiapa bertaqwa kepada Allah,\nniscaya Dia akan membukakan jalan keluar baginya.", s: "QS. At-Talaq: 2" },
-            { t: "Allah mencintai seorang hamba yang apabila bekerja,\nia bekerja dengan itqan (profesional).", s: "HR. Al-Baihaqi" },
-            { t: "Niatkan kerjamu sebagai ibadah, maka lelahmu menjadi pahala.", s: "Kata Bijak Muslim" },
-            { t: "Rezeki sudah diatur, tugas kita hanyalah menjemputnya dengan cara yang baik.", s: "Nasehat Tauhid" },
-            { t: "Tangan di atas lebih baik daripada tangan di bawah.", s: "HR. Bukhari & Muslim" },
-            { t: "Mencari rezeki halal adalah wajib setelah ibadah fardhu.", s: "HR. Ath-Thabrani" },
-            { t: "Janganlah kamu berputus asa dari rahmat Allah.", s: "QS. Az-Zumar: 53"},
-            { t: "Ridha Allah terletak pada ridha kedua orang tua.", s: "HR. Tirmidzi" },
-            { t: "Harta tidak akan berkurang karena sedekah.", s: "HR. Muslim" },
-            { t: "Dan barangsiapa yang bertawakal kepada Allah, niscaya Allah akan mencukupkan keperluannya.", s: "QS. At-Talaq: 3" },
-            { t: "Kekayaan bukanlah dengan banyaknya harta, namun kekayaan adalah hati yang selalu merasa cukup.", s: "HR. Bukhari" },
-            { t: "Jadikanlah sabar dan shalat sebagai penolongmu. Dan sesungguhnya yang demikian itu sungguh berat, kecuali bagi orang-orang yang khusyu.", s: "QS. Al-Baqarah: 45" },
-            { t: "Tidak ada satu subuh pun yang dialami hamba-hamba Allah melainkan malaikat turun dan berdoa: Ya Allah, berikanlah ganti bagi orang yang berinfak.", s: "HR. Bukhari" },
-            { t: "Mukmin yang kuat lebih baik dan lebih dicintai Allah daripada mukmin yang lemah.", s: "HR. Muslim" },
-            { t: "Sesungguhnya Allah tidak akan mengubah keadaan suatu kaum sebelum mereka mengubah keadaan diri mereka sendiri.", s: "QS. Ar-Ra'd: 11" },
-            { t: "Senyummu di hadapan saudaramu adalah sedekah.", s: "HR. Tirmidzi" },
-            { t: "Bersemangatlah atas hal-hal yang bermanfaat bagimu dan mintalah pertolongan kepada Allah, jangan menjadi lemah.", s: "HR. Muslim" },
-            { t: "Sesungguhnya bersama kesulitan ada kemudahan, maka melangkahlah dengan iman.", s: "QS. Al-Insyirah: 6" },
-            { t: "Jangan remehkan kebaikan sekecil apa pun, karena kita tidak pernah tahu kebaikan mana yang membawakan surga.", s: "HR. Muslim" },
-            { t: "Rezeki yang berkah bukan tentang seberapa banyak jumlahnya, melainkan seberapa tenang hati yang menerimanya.", s: "Nasehat Tauhid" },
-            { t: "Dunia ini hanya tempat persinggahan; jadikan setiap lelahmu di sini sebagai bekal pulang yang indah.", s: "Kata Bijak Muslim" },
-            { t: "Barangsiapa yang menempuh jalan untuk mencari ilmu, maka Allah akan mudahkan jalannya menuju surga.", s: "HR. Muslim" },
-            { t: "Bukan kesulitan yang membuat kita takut, melainkan ketakutan yang membuat segalanya menjadi sulit. Bertawakallah.", s: "Ali bin Abi Thalib" },
-            { t: "Dan bersabarlah kamu, sesungguhnya janji Allah adalah benar.", s: "QS. Ar-Rum: 60" },
-            { t: "Bekerjalah dengan jujur, karena rezeki yang berkah akan melahirkan keturunan yang berkah pula.", s: "Nasehat Bijak" },
-            { t: "Dua nikmat yang sering dilupakan oleh manusia adalah kesehatan dan waktu luang.", s: "HR. Bukhari" },
-            { t: "Ketika kamu merasa sendirian, ingatlah bahwa Allah senantiasa mendengar bisikan doa dalam sujudmu.", s: "Kata Bijak Muslim" },
-            { t: "Siapa yang menabur kebaikan, ia akan memanen kebahagiaan, baik di dunia maupun di akhirat.", s: "Nasehat Tauhid" },
-            { t: "Bukan kemiskinan yang kita takuti, melainkan hilangnya rasa syukur saat harta melimpah.", s: "Kata Hikmah" },
-            { t: "Jika Allah menunda sesuatu yang kamu inginkan, itu karena Dia ingin memberimu sesuatu yang jauh lebih baik pada waktu yang tepat.", s: "QS. Al-Baqarah: 216" },
-            { t: "Mulailah pagimu dengan bismillah, jalani siangmu dengan alhamdulillah, dan tutuplah malammu dengan istighfar.", s: "Nasehat Bijak" },
-            { t: "Kejujuran adalah perhiasan terbaik bagi seorang pekerja dan kehormatan tertinggi bagi seorang profesional.", s: "Kata Mutiara Work Ethics" },
-            { t: "Kematangan seseorang terlihat dari bagaimana ia tetap tenang di bawah tekanan dan tetap ikhlas saat diuji.", s: "Nasehat Kehidupan" },
-            { t: "Setiap langkah kecil yang kamu lakukan hari ini dengan penuh tanggung jawab adalah fondasi keberhasilan esok hari.", s: "Motivasi Kerja" },
-            { t: "Ingatlah bahwa keberhasilan besar merupakan kumpulan dari usaha-usaha kecil yang konsisten dijalani setiap hari.", s: "Kata Hikmah" },
-            { t: "Jangan membandingkan prosesmu dengan orang lain, setiap bunga mekar pada waktunya masing-masing.", s: "Nasehat Diri" },
-            { t: "Keselamatan kerja adalah keutamaan, pulang dengan selamat kepada keluarga adalah kemenangan sejati.", s: "Pesan Keselamatan Kerja" },
-            { t: "Tidak ada hasil luar biasa yang lahir dari usaha yang biasa-biasa saja. Tetap fokus dan berikan yang terbaik.", s: "Motivasi Profesional" },
-            { t: "Bersyukurlah atas pekerjaan yang kamu miliki hari ini, banyak orang di luar sana mendambakan posisi yang kamu tempati.", s: "Renungan Pagi" },
-            { t: "Ikhlas dalam bekerja membuat beban seberat apa pun terasa ringan, karena balasan terbaik ada di sisi Allah.", s: "Nasehat Tauhid" },
-            { t: "Jangan menunggu waktu yang tepat untuk berbuat baik, buatlah waktu yang ada menjadi moment terbaik.", s: "Kata Bijak" },
-            { t: "Sebuah perjalanan ribuan mil selalu dimulai dengan satu langkah pertama.", s: "Lao Tzu" },
-            { t: "Kedisiplinan adalah jembatan antara cita-cita dan pencapaian.", s: "Jim Rohn" },
-            { t: "Karakter sejati kita terlihat saat tidak ada orang lain yang melihat. Tetaplah jujur dalam bertugas.", s: "Integritas Kerja" },
-            { t: "Jangan pernah meremehkan senyum dan sapaan ramah, hal kecil itu bisa menghangatkan hari orang lain.", s: "Pesan Kebaikan" },
-            { t: "Fokus pada solusi, bukan pada masalahnya. Setiap tantangan selalu membawa pelajaran berharga.", s: "Mindset Sukses" },
-            { t: "Tanggung jawab adalah tanda kedewasaan. Kerjakan tugasmu dengan penuh kebanggaan.", s: "Etos Kerja" },
-            { t: "Doa tanpa usaha adalah kesombongan, usaha tanpa doa adalah keputusasaan. Seimbangkan keduanya.", s: "Nasehat Tauhid" },
-            { t: "Semakin banyak kamu bersyukur, semakin banyak hal indah yang akan kamu temukan dalam hidup.", s: "Kata Hikmah" },
-            { t: "Kesabaran bukan berarti diam dan menyerah, melainkan terus melangkah dengan keyakinan penuh.", s: "Sikap Hidup" },
-            { t: "Kepercayaan dibentuk dari konsistensi dan integritas yang dibangun hari demi hari.", s: "Prinsip Profesional" },
-            { t: "Setiap lelah yang diniatkan demi menafkahi keluarga akan bernilai ganjaran besar di hadapan Allah.", s: "Nasehat Pekerja" },
-            { t: "Jadikan setiap rintangan sebagai batu pijakan untuk melompat lebih tinggi.", s: "Motivasi Diri" },
-            { t: "Kerja keras mengalahkan bakat ketika bakat tidak bekerja keras.", s: "Tim Notke" },
-            { t: "Kebahagiaan sejati hadir ketika kita bisa bermanfaat dan memberikan kedamaian bagi sekeliling kita.", s: "Kata Mutiara" },
-            { t: "Senantiasa utamakan keselamatan dalam bertugas, ada keluarga tercinta yang menunggu kepulanganmu di rumah.", s: "Pesan Keselamatan Kerja" },
-            { t: "Tutup harimu dengan penuh kesyukuran, esok adalah kesempatan baru untuk menjadi lebih baik.", s: "Renungan Malam" }
+            { t: "Allah mencintai seorang hamba yang apabila bekerja,\nia bekerja dengan itqan (profesional).", s: "HR. Al-Baihaqi" }
         ];
 
         let quoteIndex = 0;
@@ -447,6 +399,51 @@
         let isAudioAllowed = false;
         let isScrolling = false;
         let scrollRequest = null;
+        let wakeLock = null;
+
+        // --- SISTEM AUDIO CONTEXT (UNTUK AIRPORT CHIME & EQUALIZER) ---
+        let audioCtx = null;
+        let filterNode = null;
+
+        function initAudioContext() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    audioCtx = new AudioContext();
+                    filterNode = audioCtx.createBiquadFilter();
+                    filterNode.type = 'highshelf';
+                    filterNode.frequency.setValueAtTime(2500, audioCtx.currentTime); 
+                    filterNode.gain.setValueAtTime(8, audioCtx.currentTime); // Boost Treble
+                    filterNode.connect(audioCtx.destination);
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Pre-load Web Speech Synthesis Voices
+        let voices = [];
+        function populateVoices() {
+            if ('speechSynthesis' in window) {
+                voices = window.speechSynthesis.getVoices();
+            }
+        }
+        populateVoices();
+        if ('speechSynthesis' in window && window.speechSynthesis.onvoiceschanged !== undefined) {
+            window.speechSynthesis.onvoiceschanged = populateVoices;
+        }
+
+        // --- MENCEGAH LAYAR TV MATI / STANDBY ---
+        async function requestWakeLock() {
+            if ('wakeLock' in navigator) {
+                try {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                } catch (err) {
+                    console.error('Wake Lock gagal:', err.message);
+                }
+            }
+        }
 
         function getWIBDateString() {
             const d = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
@@ -456,16 +453,11 @@
             return `${yyyy}-${mm}-${dd}`;
         }
 
-        // 1. Fungsi Chime (Ding Dong) - Gain diperbesar ke 1.0 agar lebih jelas
         function playAirportChime() {
             return new Promise((resolve) => {
                 try {
-                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    if (!AudioContext) {
-                        resolve();
-                        return;
-                    }
-                    const ctx = new AudioContext();
+                    initAudioContext();
+                    if (!audioCtx) { resolve(); return; }
 
                     const notes = [
                         { freq: 698.46, time: 0.00, duration: 0.45 },
@@ -475,95 +467,80 @@
                     ];
 
                     notes.forEach(note => {
-                        const osc = ctx.createOscillator();
-                        const gain = ctx.createGain();
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
 
                         osc.type = 'sine';
-                        osc.frequency.setValueAtTime(note.freq, ctx.currentTime + note.time);
+                        osc.frequency.setValueAtTime(note.freq, audioCtx.currentTime + note.time);
 
-                        gain.gain.setValueAtTime(0.0001, ctx.currentTime + note.time);
-                        gain.gain.exponentialRampToValueAtTime(1.0, ctx.currentTime + note.time + 0.03);
-                        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + note.time + note.duration);
+                        gain.gain.setValueAtTime(0.0001, audioCtx.currentTime + note.time);
+                        gain.gain.exponentialRampToValueAtTime(0.8, audioCtx.currentTime + note.time + 0.03);
+                        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + note.time + note.duration);
 
                         osc.connect(gain);
-                        gain.connect(ctx.destination);
+                        gain.connect(filterNode || audioCtx.destination);
 
-                        osc.start(ctx.currentTime + note.time);
-                        osc.stop(ctx.currentTime + note.time + note.duration);
+                        osc.start(audioCtx.currentTime + note.time);
+                        osc.stop(audioCtx.currentTime + note.time + note.duration);
                     });
 
-                    setTimeout(() => {
-                        ctx.close();
-                        resolve();
-                    }, 2200);
+                    setTimeout(() => { resolve(); }, 2200);
                 } catch (e) {
-                    console.error("Gagal memutar chime:", e);
                     resolve();
                 }
             });
         }
 
-        // 2. Fungsi Utama Pengumuman Suara (TTS Merdu & Berkecepatan Pas)
+        // --- PENGUCAPAN SUARA HANDAL DENGAN WEB SPEECH SYNTHESIS API ---
+        function speakText(text) {
+            return new Promise((resolve) => {
+                if (!('speechSynthesis' in window)) {
+                    resolve();
+                    return;
+                }
+
+                window.speechSynthesis.cancel(); // Reset antrean suara lama
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'id-ID';
+                utterance.rate = 0.9;  // Kecepatan sedikit diperlambat agar artikulasi lebih jernih
+                utterance.pitch = 1.1; // Pitch dinaikkan agar terdengar lebih nyaring (treble)
+
+                // Pilih voice Bahasa Indonesia terbaik jika tersedia
+                if (voices.length === 0) voices = window.speechSynthesis.getVoices();
+                const idVoice = voices.find(v => v.lang.includes('id') || v.lang.includes('ID'));
+                if (idVoice) utterance.voice = idVoice;
+
+                utterance.onend = () => resolve();
+                utterance.onerror = () => resolve();
+
+                window.speechSynthesis.speak(utterance);
+            });
+        }
+
         async function playVoiceAnnouncement(text) {
             if (!isAudioAllowed) return;
 
             const originalVolume = audio.volume;
             if (!audio.paused) audio.volume = 0.1;
 
-            // Memutar chime awal
             await playAirportChime();
 
-            const safetyMessage = " Harap jaga kualitas dan kuantitas pengiriman, serta utamakan keselamatan dan selalu gunakan APD saat bertugas. Terima kasih.";
+            const safetyMessage = " Harap jaga kualitas dan kuantitas pengiriman, serta utamakan keselamatan dan selalu gunakan APD saat bertugas. Terima Kasih.";
             const fullText = text + safetyMessage;
 
-            const finishAnnouncement = async () => {
-                await playAirportChime();
-                if (!audio.paused) audio.volume = originalVolume;
-            };
+            await speakText(fullText);
 
-            // Fallback bawaan browser (kecepatan diperlambat)
-            const speakFallback = () => {
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel();
-                    const msg = new SpeechSynthesisUtterance(fullText);
-                    msg.lang = 'id-ID';
-                    msg.rate = 0.85; // Diperlambat sedikit agar intonasi merdu
-                    msg.pitch = 1.0;
-
-                    const voices = window.speechSynthesis.getVoices();
-                    const idVoice = voices.find(v => v.lang.includes('id') || v.lang.includes('ID'));
-                    if (idVoice) msg.voice = idVoice;
-
-                    msg.onend = finishAnnouncement;
-                    msg.onerror = finishAnnouncement;
-                    window.speechSynthesis.speak(msg);
-                } else {
-                    finishAnnouncement();
-                }
-            };
-
-            // Menggunakan ResponsiveVoice gratis dengan alunan vokal wanita Indonesia
-            if (window.responsiveVoice && typeof responsiveVoice.speak === 'function') {
-                try {
-                    responsiveVoice.speak(fullText, "Indonesian Female", {
-                        pitch: 1,
-                        rate: 0.85, // Rate 0.85 membuat artikulasi lebih tenang & santai di Android TV
-                        volume: 1,
-                        onend: finishAnnouncement,
-                        onerror: speakFallback
-                    });
-                } catch (e) {
-                    speakFallback();
-                }
-            } else {
-                speakFallback();
-            }
+            await playAirportChime();
+            if (!audio.paused) audio.volume = originalVolume;
         }
 
         function enableAudioSystem() {
             isAudioAllowed = true;
+            initAudioContext();
             document.getElementById('audioInitModal').style.display = 'none';
-            playVoiceAnnouncement("Sistem suara telah aktif.");
+            requestWakeLock();
+            playVoiceAnnouncement("Mohon Perhatian, dashboard PT Investama Kalimantan energi group telah diaktifkan.");
         }
 
         function toggleAudio() {
@@ -618,7 +595,7 @@
             for (let i = 0; i < letters.length; i++) {
                 letters[i].classList.remove('out');
                 letters[i].classList.add('in');
-                if (i % 3 === 0) await new Promise(r => setTimeout(r, 15));
+                if (i % 2 === 0) await new Promise(r => setTimeout(r, 18));
             }
         }
 
@@ -627,7 +604,7 @@
             for (let i = 0; i < letters.length; i++) {
                 letters[i].classList.remove('in');
                 letters[i].classList.add('out');
-                if (i % 4 === 0) await new Promise(r => setTimeout(r, 10));
+                if (i % 3 === 0) await new Promise(r => setTimeout(r, 12));
             }
             overlay.style.opacity = '0';
             await new Promise(r => setTimeout(r, 800));
@@ -649,7 +626,7 @@
             wrapText(qSrc);
             
             await animateIn(overlay);
-            await new Promise(r => setTimeout(r, 30000)); 
+            await new Promise(r => setTimeout(r, 20000)); 
             await animateOut(overlay);
         }
 
@@ -661,6 +638,31 @@
                 scrollRequest = null;
             }
             isScrolling = false;
+        }
+
+        function smoothScrollToTop(duration = 2800) {
+            return new Promise((resolve) => {
+                const startPos = scrollContainer.scrollTop;
+                const startTime = performance.now();
+
+                function step(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const ease = progress < 0.5 
+                        ? 4 * progress * progress * progress 
+                        : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+
+                    scrollContainer.scrollTop = startPos * (1 - ease);
+
+                    if (progress < 1) {
+                        requestAnimationFrame(step);
+                    } else {
+                        scrollContainer.scrollTop = 0;
+                        resolve();
+                    }
+                }
+                requestAnimationFrame(step);
+            });
         }
 
         function startAutoScroll() {
@@ -675,7 +677,7 @@
             }
 
             isScrolling = true;
-            const scrollSpeed = 0.6; 
+            const scrollSpeed = 0.45; 
 
             function step() {
                 if (!isScrolling) return;
@@ -687,7 +689,7 @@
                     stopAutoScroll();
                     setTimeout(async () => {
                         await showQuote(); 
-                        scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+                        await smoothScrollToTop(2800);
                         setTimeout(() => { 
                             loadDashboard(); 
                         }, 500); 
@@ -715,9 +717,9 @@
 
             let teks = "";
             if (statusType.includes("PROSES")) {
-                teks = `Mohon perhatian, armada dengan nomor polisi ${nopolEja}. pengemudi ${sopir}, tujuan pengiriman ${tujuan}, status PROSES menuju lokasi pengiriman.`;
+                teks = `Mohon Perhatian, armada dengan nomor polisi ${nopolEja}. Driver ${sopir}, tujuan pengiriman ${tujuan}, status PROSES perjalanan menuju lokasi pengiriman.`;
             } else if (statusType.includes("DELIVERED")) {
-                teks = `Mohon perhatian, armada dengan nomor polisi ${nopolEja}. pengemudi ${sopir}, tujuan pengiriman ${tujuan}, status DELIVERED telah sampai lokasi pengiriman.`;
+                teks = `Mohon Perhatian, armada dengan nomor polisi ${nopolEja}. Driver ${sopir}, tujuan pengiriman ${tujuan}, status DELIVERED telah sampai lokasi pengiriman.`;
             }
 
             if (teks) {
