@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Live</title>
     
-    <!-- Supabase & ResponsiveVoice CDN -->
+    <!-- Supabase & ResponsiveVoice CDN Gratis (Tanpa API Key Berbayar) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://code.responsivevoice.org/responsivevoice.js?key=FREE_KEY"></script>
+    <script src="https://code.responsivevoice.org/responsivevoice.js?key=FREE"></script>
 
     <style>
         :root {
@@ -161,6 +161,7 @@
             flex: 1;
             overflow-y: auto;
             padding: 20px 25px;
+            scroll-behavior: smooth;
         }
 
         #scrollContainer::-webkit-scrollbar {
@@ -249,7 +250,6 @@
             width: 100vw;
             height: 100vh;
             background-color: rgba(11, 15, 25, 0.96);
-            backdrop-filter: blur(8px);
             display: none;
             flex-direction: column;
             justify-content: center;
@@ -258,28 +258,25 @@
             text-align: center;
             z-index: 100;
             opacity: 0;
-            transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: opacity 0.8s ease;
         }
 
         .quote-box {
-            max-width: 850px;
-            padding: 20px;
+            max-width: 800px;
         }
 
         #quoteText {
-            font-size: 30px;
+            font-size: 28px;
             line-height: 1.6;
             color: var(--text-white);
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             font-style: italic;
-            font-weight: 300;
         }
 
         #quoteSource {
             font-size: 20px;
             color: var(--text-gold);
             font-weight: bold;
-            letter-spacing: 1px;
         }
 
         /* Typography Letter Animation Wrappers */
@@ -297,24 +294,19 @@
 
         .letter {
             display: inline-block;
-            transform: translateY(120%) scale(0.8);
+            transform: translateY(100%);
             opacity: 0;
-            filter: blur(4px);
-            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), 
-                        opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
-                        filter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: transform 0.4s cubic-bezier(0.1, 0.7, 0.1, 1), opacity 0.4s ease;
         }
 
         .letter.in {
-            transform: translateY(0%) scale(1);
+            transform: translateY(0%);
             opacity: 1;
-            filter: blur(0px);
         }
 
         .letter.out {
-            transform: translateY(-120%) scale(0.8);
+            transform: translateY(-100%);
             opacity: 0;
-            filter: blur(4px);
         }
     </style>
 </head>
@@ -323,8 +315,8 @@
     <!-- Modal Aktivasi Suara Awal Loading -->
     <div id="audioInitModal">
         <div class="modal-content">
-            <h2>DASHBOARD INVESTAMA KALIMANTAN ENERGI</h2>
-            <p>Klik tombol di bawah untuk mengaktifkan.</p>
+            <h2>SISTEM DASHBOARD LIVE</h2>
+            <p>Klik tombol di bawah untuk mengaktifkan fitur suara pengumuman dan audio sistem.</p>
             <button class="btn-activate" onclick="enableAudioSystem()">🔊 AKTIFKAN</button>
         </div>
     </div>
@@ -351,10 +343,10 @@
         <table>
             <thead>
                 <tr>
-                    <th style="width: 35%;">Armada / Driver / Lokasi</th>
-                    <th style="width: 15%; text-align: center;">Jumlah (KL)</th>
+                    <th style="width: 35%;">Armada / Driver</th>
+                    <th style="width: 15%; text-align: center;">Jumlah</th>
                     <th style="width: 30%;">Tujuan / Depo</th>
-                    <th style="width: 20%; text-align: right;">Status pengiriman</th>
+                    <th style="width: 20%; text-align: right;">Status</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
@@ -396,7 +388,7 @@
             { t: "Jadikanlah sabar dan shalat sebagai penolongmu. Dan sesungguhnya yang demikian itu sungguh berat, kecuali bagi orang-orang yang khusyu.", s: "QS. Al-Baqarah: 45" },
             { t: "Tidak ada satu subuh pun yang dialami hamba-hamba Allah melainkan malaikat turun dan berdoa: Ya Allah, berikanlah ganti bagi orang yang berinfak.", s: "HR. Bukhari" },
             { t: "Mukmin yang kuat lebih baik dan lebih dicintai Allah daripada mukmin yang lemah.", s: "HR. Muslim" },
-            { t: "Sesungguhnya Allah tidak akan mengubah keadaan suatu kaum sebelum mereka mengubah keadaan diri mebimbing mereka sendiri.", s: "QS. Ar-Ra'd: 11" },
+            { t: "Sesungguhnya Allah tidak akan mengubah keadaan suatu kaum sebelum mereka mengubah keadaan diri mereka sendiri.", s: "QS. Ar-Ra'd: 11" },
             { t: "Senyummu di hadapan saudaramu adalah sedekah.", s: "HR. Tirmidzi" },
             { t: "Bersemangatlah atas hal-hal yang bermanfaat bagimu dan mintalah pertolongan kepada Allah, jangan menjadi lemah.", s: "HR. Muslim" },
             { t: "Sesungguhnya bersama kesulitan ada kemudahan, maka melangkahlah dengan iman.", s: "QS. Al-Insyirah: 6" },
@@ -455,25 +447,6 @@
         let isAudioAllowed = false;
         let isScrolling = false;
         let scrollRequest = null;
-        let wakeLock = null;
-
-        // --- MENCEGAH LAYAR TV MATI / STANDBY (WAKE LOCK API) ---
-        async function requestWakeLock() {
-            if ('wakeLock' in navigator) {
-                try {
-                    wakeLock = await navigator.wakeLock.request('screen');
-                    console.log('Screen Wake Lock Aktif');
-                } catch (err) {
-                    console.error('Gagal mengaktifkan Wake Lock:', err.message);
-                }
-            }
-        }
-
-        document.addEventListener('visibilitychange', async () => {
-            if (wakeLock !== null && document.visibilityState === 'visible') {
-                await requestWakeLock();
-            }
-        });
 
         function getWIBDateString() {
             const d = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
@@ -483,6 +456,7 @@
             return `${yyyy}-${mm}-${dd}`;
         }
 
+        // 1. Fungsi Chime (Ding Dong) - Gain diperbesar ke 1.0 agar lebih jelas
         function playAirportChime() {
             return new Promise((resolve) => {
                 try {
@@ -529,15 +503,17 @@
             });
         }
 
+        // 2. Fungsi Utama Pengumuman Suara (TTS Merdu & Berkecepatan Pas)
         async function playVoiceAnnouncement(text) {
             if (!isAudioAllowed) return;
 
             const originalVolume = audio.volume;
             if (!audio.paused) audio.volume = 0.1;
 
+            // Memutar chime awal
             await playAirportChime();
 
-            const safetyMessage = "Harap jaga kualitas dan kuantitas pengiriman,serta utamakan keselamatan dan selalu gunakan APD saat bertugas Terima Kasih.";
+            const safetyMessage = " Harap jaga kualitas dan kuantitas pengiriman, serta utamakan keselamatan dan selalu gunakan APD saat bertugas. Terima kasih.";
             const fullText = text + safetyMessage;
 
             const finishAnnouncement = async () => {
@@ -545,12 +521,19 @@
                 if (!audio.paused) audio.volume = originalVolume;
             };
 
+            // Fallback bawaan browser (kecepatan diperlambat)
             const speakFallback = () => {
                 if ('speechSynthesis' in window) {
                     window.speechSynthesis.cancel();
                     const msg = new SpeechSynthesisUtterance(fullText);
                     msg.lang = 'id-ID';
-                    msg.rate = 0.75;
+                    msg.rate = 0.85; // Diperlambat sedikit agar intonasi merdu
+                    msg.pitch = 1.0;
+
+                    const voices = window.speechSynthesis.getVoices();
+                    const idVoice = voices.find(v => v.lang.includes('id') || v.lang.includes('ID'));
+                    if (idVoice) msg.voice = idVoice;
+
                     msg.onend = finishAnnouncement;
                     msg.onerror = finishAnnouncement;
                     window.speechSynthesis.speak(msg);
@@ -559,11 +542,12 @@
                 }
             };
 
+            // Menggunakan ResponsiveVoice gratis dengan alunan vokal wanita Indonesia
             if (window.responsiveVoice && typeof responsiveVoice.speak === 'function') {
                 try {
                     responsiveVoice.speak(fullText, "Indonesian Female", {
                         pitch: 1,
-                        rate: 0.75,
+                        rate: 0.85, // Rate 0.85 membuat artikulasi lebih tenang & santai di Android TV
                         volume: 1,
                         onend: finishAnnouncement,
                         onerror: speakFallback
@@ -579,8 +563,7 @@
         function enableAudioSystem() {
             isAudioAllowed = true;
             document.getElementById('audioInitModal').style.display = 'none';
-            requestWakeLock(); // Aktifkan pencegah TV mati saat tombol ditekan
-            playVoiceAnnouncement("Mohon Perhatian, dashboard PT Investama Kalimantan energi group telah diaktifkan.");
+            playVoiceAnnouncement("Sistem suara telah aktif.");
         }
 
         function toggleAudio() {
@@ -635,7 +618,7 @@
             for (let i = 0; i < letters.length; i++) {
                 letters[i].classList.remove('out');
                 letters[i].classList.add('in');
-                if (i % 2 === 0) await new Promise(r => setTimeout(r, 18));
+                if (i % 3 === 0) await new Promise(r => setTimeout(r, 15));
             }
         }
 
@@ -644,7 +627,7 @@
             for (let i = 0; i < letters.length; i++) {
                 letters[i].classList.remove('in');
                 letters[i].classList.add('out');
-                if (i % 3 === 0) await new Promise(r => setTimeout(r, 12));
+                if (i % 4 === 0) await new Promise(r => setTimeout(r, 10));
             }
             overlay.style.opacity = '0';
             await new Promise(r => setTimeout(r, 800));
@@ -680,34 +663,6 @@
             isScrolling = false;
         }
 
-        // --- FUNGSI SCROLL PERHALUS DENGAN ANIMASI CUBIC EASING ---
-        function smoothScrollToTop(duration = 2800) {
-            return new Promise((resolve) => {
-                const startPos = scrollContainer.scrollTop;
-                const startTime = performance.now();
-
-                function step(currentTime) {
-                    const elapsed = currentTime - startTime;
-                    const progress = Math.min(elapsed / duration, 1);
-                    
-                    // Cubic Ease-in-out Math
-                    const ease = progress < 0.5 
-                        ? 4 * progress * progress * progress 
-                        : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-
-                    scrollContainer.scrollTop = startPos * (1 - ease);
-
-                    if (progress < 1) {
-                        requestAnimationFrame(step);
-                    } else {
-                        scrollContainer.scrollTop = 0;
-                        resolve();
-                    }
-                }
-                requestAnimationFrame(step);
-            });
-        }
-
         function startAutoScroll() {
             stopAutoScroll();
 
@@ -720,7 +675,7 @@
             }
 
             isScrolling = true;
-            const scrollSpeed = 0.45; 
+            const scrollSpeed = 0.6; 
 
             function step() {
                 if (!isScrolling) return;
@@ -732,7 +687,7 @@
                     stopAutoScroll();
                     setTimeout(async () => {
                         await showQuote(); 
-                        await smoothScrollToTop(2800); // Perhalus pergerakan naik ke atas
+                        scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
                         setTimeout(() => { 
                             loadDashboard(); 
                         }, 500); 
@@ -760,9 +715,9 @@
 
             let teks = "";
             if (statusType.includes("PROSES")) {
-                teks = `Mohon Perhatian, armada dengan nomor polisi ${nopolEja}. Driver ${sopir}, tujuan pengiriman ${tujuan}, status PROSES perjalanan menuju lokasi pengiriman.`;
+                teks = `Mohon perhatian, armada dengan nomor polisi ${nopolEja}. pengemudi ${sopir}, tujuan pengiriman ${tujuan}, status PROSES menuju lokasi pengiriman.`;
             } else if (statusType.includes("DELIVERED")) {
-                teks = `Mohon Perhatian, armada dengan nomor polisi ${nopolEja}. Driver ${sopir}, tujuan pengiriman ${tujuan}, status DELIVERED telah sampai lokasi pengiriman.`;
+                teks = `Mohon perhatian, armada dengan nomor polisi ${nopolEja}. pengemudi ${sopir}, tujuan pengiriman ${tujuan}, status DELIVERED telah sampai lokasi pengiriman.`;
             }
 
             if (teks) {
