@@ -406,12 +406,12 @@
     <!-- Modal Form Pengumuman -->
     <div id="announcementModal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
-            <h2>📢 TULIS PENGUMUMAN</h2>
-            <p>Pengumuman akan ditampilkan dan dibacakan, lalu menghilang secara otomatis.</p>
+            <h2>📢 TULIS PEMBERITAHUAN</h2>
+            <p>Pengumuman akan ditampilkan dan dibacakan.</p>
             <textarea id="announcementInput" placeholder="Ketik pengumuman di sini..."></textarea>
             <div class="modal-buttons">
                 <button class="btn-danger" onclick="closeAnnouncementModal()">Batal</button>
-                <button class="btn-primary" onclick="submitAnnouncement()">📢 Kirim & Bacakan</button>
+                <button class="btn-primary" onclick="submitAnnouncement()">📢 Kirim</button>
             </div>
         </div>
     </div>
@@ -424,7 +424,7 @@
         </div>
         <div class="header-controls">
             <!-- Tombol Tambah Pengumuman -->
-            <button class="btn-announcement" onclick="openAnnouncementModal()">📢 PENGUMUMAN</button>
+            <button class="btn-announcement" onclick="openAnnouncementModal()">📢 PEMBERITAHUAN</button>
             
             <div class="audio-control">
                 <button class="audio-btn" id="playPauseBtn" onclick="toggleAudio()">▶</button>
@@ -576,11 +576,11 @@
             // Tampilkan di Banner Dashboard
             const banner = document.getElementById('announcementBanner');
             const bannerText = document.getElementById('announcementText');
-            bannerText.innerText = "📢 PENGUMUMAN: " + text;
+            bannerText.innerText = "📢 PEMBERITAHUAN: " + text;
             banner.style.display = 'block';
 
             // Bacakan pengumuman lewat audio & sembunyikan otomatis setelah selesai
-            playVoiceAnnouncement("Mohon Perhatian Pengumuman. " + text, false, () => {
+            playVoiceAnnouncement("Mohon Perhatian Pemberitahuan. " + text, false, () => {
                 clearAnnouncementBanner();
             });
 
@@ -715,7 +715,7 @@
             isAudioAllowed = true;
             document.getElementById('audioInitModal').style.display = 'none';
             requestWakeLock();
-            playVoiceAnnouncement("Mohon Perhatian, dashboard PT Investama Kalimantan energi group telah diaktifkan.");
+            playVoiceAnnouncement("Sistem Suara Telah di Aktifkan");
         }
 
         function toggleAudio() {
