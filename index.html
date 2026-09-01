@@ -580,7 +580,7 @@
             banner.style.display = 'block';
 
             // Bacakan pengumuman lewat audio & sembunyikan otomatis setelah selesai
-            playVoiceAnnouncement("Mohon Perhatian Pemberitahuan. " + text, false, () => {
+            playVoiceAnnouncement("Mohon Perhatian, Pemberitahuan. " + text, false, () => {
                 clearAnnouncementBanner();
             });
 
@@ -715,7 +715,7 @@
             isAudioAllowed = true;
             document.getElementById('audioInitModal').style.display = 'none';
             requestWakeLock();
-            playVoiceAnnouncement("Sistem Suara Telah di Aktifkan");
+            playVoiceAnnouncement("Sistem Suara Telah di Aktifkan.");
         }
 
         function toggleAudio() {
