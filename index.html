@@ -48,7 +48,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 999;
+            z-index: 10000;
         }
 
         .modal-content {
@@ -207,31 +207,35 @@
             justify-content: center;
         }
 
-        /* Banner Pengumuman Running Text Fix */
+        /* BANNER PEMBERITAHUAN FIXED FULL DISPLAY */
         #announcementBanner {
             display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
             background: #f59e0b;
             color: #000;
-            padding: 12px 20px;
-            font-weight: bold;
-            font-size: 18px;
-            width: 100%;
+            padding: 14px 0;
+            z-index: 9999;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+            border-bottom: 3px solid #b45309;
             overflow: hidden;
-            position: relative;
-            z-index: 20;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            white-space: nowrap;
         }
 
-        #announcementBanner p {
+        #announcementText {
             display: inline-block;
-            white-space: nowrap;
-            padding-left: 100%;
-            animation: marquee 20s linear infinite;
+            padding-left: 100vw;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            animation: marquee 18s linear infinite;
         }
 
         @keyframes marquee {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(-100%, 0); }
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
         }
 
         /* Scroll Area & Table */
@@ -439,9 +443,9 @@
         </div>
     </header>
 
-    <!-- Banner Pengumuman Teks Berjalan -->
+    <!-- Banner Pengumuman Running Text Fix -->
     <div id="announcementBanner">
-        <p id="announcementText"></p>
+        <div id="announcementText"></div>
     </div>
 
     <!-- Table & Scroll Container -->
