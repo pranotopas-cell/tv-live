@@ -207,23 +207,26 @@
             justify-content: center;
         }
 
-        /* Banner Pengumuman Running Text */
+        /* Banner Pengumuman Running Text Fix */
         #announcementBanner {
             display: none;
-            background: var(--text-gold);
+            background: #f59e0b;
             color: #000;
-            padding: 10px;
+            padding: 12px 20px;
             font-weight: bold;
-            font-size: 16px;
-            white-space: nowrap;
+            font-size: 18px;
+            width: 100%;
             overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            position: relative;
+            z-index: 20;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
 
         #announcementBanner p {
             display: inline-block;
+            white-space: nowrap;
             padding-left: 100%;
-            animation: marquee 25s linear infinite;
+            animation: marquee 20s linear infinite;
         }
 
         @keyframes marquee {
@@ -552,9 +555,12 @@
         let scrollRequest = null;
         let wakeLock = null;
 
-        /* --- FUNGSI PENGUMUMAN MANUAL --- */
+        /* --- FUNGSI PENGUMUMAN MANUAL FIX --- */
         function openAnnouncementModal() {
+            const input = document.getElementById('announcementInput');
+            input.value = '';
             document.getElementById('announcementModal').style.display = 'flex';
+            setTimeout(() => input.focus(), 100);
         }
 
         function closeAnnouncementModal() {
@@ -573,19 +579,18 @@
             const text = input.value.trim();
             if (!text) return;
 
-            // Tampilkan di Banner Dashboard
+            closeAnnouncementModal();
+
+            // Tampilkan Running Text Banner
             const banner = document.getElementById('announcementBanner');
             const bannerText = document.getElementById('announcementText');
             bannerText.innerText = "📢 PEMBERITAHUAN: " + text;
             banner.style.display = 'block';
 
-            // Bacakan pengumuman lewat audio & sembunyikan otomatis setelah selesai
+            // Bacakan Suara & Sembunyikan Banner Setelah Suara Selesai
             playVoiceAnnouncement("Mohon Perhatian, Pemberitahuan. " + text, false, () => {
                 clearAnnouncementBanner();
             });
-
-            input.value = '';
-            closeAnnouncementModal();
         }
 
         // --- MENCEGAH LAYAR TV MATI / STANDBY (WAKE LOCK API) ---
