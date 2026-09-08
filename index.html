@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TV LIVE DASHBOARD</title>
+    <title>Dashboard Live</title>
     
     <!-- Supabase & ResponsiveVoice CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -563,6 +563,7 @@
         let isScrolling = false;
         let scrollRequest = null;
         let wakeLock = null;
+        let announcementTimeout = null;
 
         /* --- FUNGSI PENGUMUMAN MANUAL FIX --- */
         function openAnnouncementModal() {
@@ -581,6 +582,7 @@
             const bannerText = document.getElementById('announcementText');
             banner.style.display = 'none';
             bannerText.innerText = '';
+            if (announcementTimeout) clearTimeout(announcementTimeout);
         }
 
         function submitAnnouncement() {
@@ -590,18 +592,23 @@
 
             closeAnnouncementModal();
 
-            // Reset Animasi Teks Marquee
+            // 1. TAMPILKAN BANNER DULUAN KANPA BANTUAN RESPONSIVE VOICE
             const banner = document.getElementById('announcementBanner');
             const bannerText = document.getElementById('announcementText');
             
             bannerText.style.animation = 'none';
-            bannerText.offsetHeight; // trigger reflow
+            bannerText.offsetHeight; // Reflow
             bannerText.innerText = "📢 PEMBERITAHUAN: " + text;
             bannerText.style.animation = 'marquee 18s linear infinite';
-            
             banner.style.display = 'block';
 
-            // Bacakan Suara & Sembunyikan Banner Setelah Suara Selesai
+            // Timer cadangan: Tutup banner otomatis setelah 30 detik jika pembacaan suara bermasalah/lama
+            if (announcementTimeout) clearTimeout(announcementTimeout);
+            announcementTimeout = setTimeout(() => {
+                clearAnnouncementBanner();
+            }, 30000);
+
+            // 2. JALANKAN SUARA SECARA ASYNCHRONOUS / INDEPENDEN
             playVoiceAnnouncement("Mohon Perhatian, Pemberitahuan. " + text, false, () => {
                 clearAnnouncementBanner();
             });
@@ -712,8 +719,9 @@
                 }
             };
 
-            if (window.responsiveVoice && typeof responsiveVoice.speak === 'function') {
-                try {
+            // Proteksi aman untuk responsiveVoice di Smart TV
+            try {
+                if (window.responsiveVoice && typeof responsiveVoice.speak === 'function') {
                     responsiveVoice.speak(fullText, "Indonesian Female", {
                         pitch: 1,
                         rate: 0.75,
@@ -721,10 +729,10 @@
                         onend: finishAnnouncement,
                         onerror: speakFallback
                     });
-                } catch (e) {
+                } else {
                     speakFallback();
                 }
-            } else {
+            } catch (e) {
                 speakFallback();
             }
         }
