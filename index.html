@@ -238,6 +238,8 @@
             flex: 1;
             overflow-y: auto;
             padding: 20px 25px;
+            will-change: scroll-position;
+            scroll-behavior: smooth;
         }
 
         #scrollContainer::-webkit-scrollbar {
@@ -816,7 +818,7 @@
             isScrolling = false;
         }
 
-        function smoothScrollToTop(duration = 2800) {
+        function smoothScrollToTop(duration = 4500) {
             return new Promise((resolve) => {
                 const startPos = scrollContainer.scrollTop;
                 const startTime = performance.now();
@@ -825,9 +827,8 @@
                     const elapsed = currentTime - startTime;
                     const progress = Math.min(elapsed / duration, 1);
                     
-                    const ease = progress < 0.5 
-                        ? 4 * progress * progress * progress 
-                        : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+                    // Smooth Ease Out Quintic
+                    const ease = 1 - Math.pow(1 - progress, 5);
 
                     scrollContainer.scrollTop = startPos * (1 - ease);
 
@@ -854,10 +855,15 @@
             }
 
             isScrolling = true;
-            const scrollSpeed = 0.4; 
+            const scrollSpeed = 0.15; // Dibuat jauh lebih pelan & halus
+
+            let preciseScrollTop = scrollContainer.scrollTop;
 
             function step() {
                 if (!isScrolling) return;
+
+                preciseScrollTop += scrollSpeed;
+                scrollContainer.scrollTop = preciseScrollTop;
 
                 const currentPos = scrollContainer.scrollTop + scrollContainer.clientHeight + 2;
                 const maxPos = scrollContainer.scrollHeight;
@@ -866,7 +872,7 @@
                     stopAutoScroll();
                     setTimeout(async () => {
                         await showQuote(); 
-                        await smoothScrollToTop(2800);
+                        await smoothScrollToTop(4500);
                         setTimeout(() => { 
                             loadDashboard(); 
                         }, 500); 
@@ -874,7 +880,6 @@
                     return; 
                 }
 
-                scrollContainer.scrollTop += scrollSpeed;
                 scrollRequest = requestAnimationFrame(step);
             }
 
